@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>New webpage</title>
-        <link href="https://fonts.googleapis.com/css?family=Diplomata+SC" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Diplomata+SC|Salsa" rel="stylesheet">
         <style>
             body{
                 margin: 0;
@@ -14,18 +14,50 @@
                 background-size: cover;
                 background-attachment: fixed;
                 background-position: center;
-                background-repeat: no-repeat;
                 color: white;
-                font: italic 30px "Diplomata SC";
+                font: italic 30px "Salsa";
                 text-align: CENTER;
                 padding: 50px;
+            }
+            label, input{
+                padding: 5px;
+                width: 150px;
+                font: 15px "Salsa";
             }
         </style>
     </head>
     <body>
 <header><span style ="
-font-size: 70px;
+font: 70px 'Diplomata SC';
 ">Your Own</span><br>Family Tree</header>
-
+<form id="add_name">
+<label for="name">Name: </label>
+<input id="name" required>
+<label for="born">Date of birth:</label>
+<input type="date" id="born" required>
+<label for="diary">Diary:</label>
+<textArea id="diary"></textArea>
+<button id="add">Add</button>
+</form>
     </body>
+    <script>
+        var name = document.getElementById("name");
+        var born = document.getElementById("born");
+        var diary = document.getElementById("diary");
+        var add_name = document.getElementById("add_name");
+        var add = document.getElementById("add");
+        function addName(e){
+            e.preventDefault();
+            var p = document.createElement("p")
+            p.innerHTML = name.value;
+            p.innerHTML += born.value;
+            p.innerHTML += diary.value;
+            add_name.remove();
+            document.body.appendChild(p);
+            add_name.add();
+            
+        }
+        
+        add.addEventListener("submit", addName);
+    </script>
 </html>
