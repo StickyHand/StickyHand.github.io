@@ -1,11 +1,51 @@
+<!-- templates/index.html -->
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>New webpage</title>
-    </head>
-    <body>
-<input placeholder="EAT"></input>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Tree</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .person { margin: 10px; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Family Tree</h1>
+    <div id="family-tree"></div>
+    <script>
+        async function fetchPeople() {
+            const response = await fetch('/api/people');
+            const people = await response.json();
+            const familyTreeDiv = document.getElementById('family-tree');
+            familyTreeDiv.innerHTML = '';
+            people.forEach(person => {
+                const personDiv = document.createElement('div');
+                personDiv.className = 'person';
+                personDiv.innerHTML = `<h2>${person.name}</h2>`;
+                const diaryButton = document.createElement('button');
+                diaryButton.innerText = 'Add Diary Entry';
+                diaryButton.onclick = () => addDiaryEntry(person.id);
+                personDiv.appendChild(diaryButton);
+                familyTreeDiv.appendChild(personDiv);
+            });
+        }
 
-    </body>
+        async function addDiaryEntry(personId) {
+            const content = prompt('Enter diary entry:');
+            if (content) {
+                await fetch('/api/diary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content, person_id: personId })
+                });
+                alert('Diary entry added!');
+            }
+        }
+
+        fetchPeople();
+    </script>
+</body>
 </html>
+
+
