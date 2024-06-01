@@ -48,10 +48,8 @@ font: 70px 'Diplomata SC';
         var add = document.getElementById("add");
         function addName(e){
             e.preventDefault();
-            var p = document.createElement("<p>")
-            p.innerHTML = name.value;
-            p.innerHTML += born.value;
-            p.innerHTML += diary.value;
+            var p = document.createElement("p");
+            p.textContent = name.value+" "+born.value+" "+diary.value;
             add_name.remove();
             document.body.appendChild(p);
             add_name.add();
