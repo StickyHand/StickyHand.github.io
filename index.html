@@ -6,7 +6,7 @@
         <link href="https://fonts.googleapis.com/css?family=Diplomata+SC|Salsa" rel="stylesheet">
         <style>
             body{
-                margin: 0;
+                margin: 20px;
             }
             header {
                 margin: 0;
@@ -47,7 +47,6 @@ font: 70px 'Diplomata SC';
         var add_name = document.getElementById("add_name");
         var add = document.getElementById("add");
         function addName(e){
-            e.preventDefault();
             var p = document.createElement("p");
             p.textContent = name.value+" "+born.value+" "+diary.value;
             document.body.appendChild(p);
