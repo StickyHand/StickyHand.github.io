@@ -50,9 +50,9 @@ font: 70px 'Diplomata SC';
             e.preventDefault();
             var p = document.createElement("p");
             p.textContent = name.value+" "+born.value+" "+diary.value;
-            add_name.remove();
             document.body.appendChild(p);
-            add_name.add();
+            add_name.remove();
+            document.body.appendChild(add_name);
             
         }
         
