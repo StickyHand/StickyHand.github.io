@@ -2,21 +2,55 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>New webpage</title>
+        <title>YOUR OWN FAMILY TREE</title>
+        <link href="https://fonts.googleapis.com/css?family=Diplomata+SC|Salsa" rel="stylesheet">
+        <style>
+            body{
+                margin: 0px;
+            }
+            header {
+                margin: 0;
+                background-image: url(https://www.khanacademy.org/computer-programming/spin-off-of-a-little-lava/6460969357852672/6593993420488704.png);
+                background-size: cover;
+                background-attachment: fixed;
+                background-position: center;
+                color: white;
+                font: italic 30px "Salsa";
+                text-align: CENTER;
+                padding: 50px;
+            }
+            label, input{
+                padding: 5px;
+                width: 150px;
+                font: 15px "Salsa";
+            }
+        </style>
     </head>
     <body>
-<input type="file" id="images">
-<button id="boo">CLICK</button>
-
+<header><span style ="
+font: 70px 'Diplomata SC';
+">Your Own</span><br>Family Tree</header>
+<form id="add_name">
+<label for="name">Name: </label>
+<input id="name" required>
+<label for="born">Date of birth:</label>
+<input type="date" id="born" required>
+<label for="diary">Diary:</label>
+<textArea id="diary"></textArea>
+<button id="add">Add</button>
+</form>
     </body>
     <script>
-    var Add = document.getElementById("boo")
-         var addName = function(e){
+        var born = document.getElementById("born");
+        var add_name = document.getElementById("add_name");
+        var Add = document.getElementById("add");
+        var addName = function(e){
             e.preventDefault();
-            var theImg = document.getElementById("images");
-            var img = document.createElement("img");
-            img.src=theImg.value;
-            document.body.append(img);
+            var name = document.getElementById("name");
+            var p = document.createElement("p");
+            var diary = document.getElementById("diary");
+            p.innerHTML = "Name: "+name.value+"<br>Date Of Birth: "+born.value+"<br>Diary: "+diary.value;
+            document.body.append(p);
             
         }
         
