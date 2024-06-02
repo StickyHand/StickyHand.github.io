@@ -41,18 +41,19 @@ font: 70px 'Diplomata SC';
 </form>
     </body>
     <script>
-        var name = document.getElementById("name");
         var born = document.getElementById("born");
-        var diary = document.getElementById("diary");
         var add_name = document.getElementById("add_name");
-        var add = document.getElementById("add");
-        function addName(e){
+        var Add = document.getElementById("add");
+        var addName = function(e){
+            e.preventDefault();
+            var name = document.getElementById("name");
             var p = document.createElement("p");
-            p.textContent = name.textContent+" "+born.textContent+" "+diary.textContent;
-            document.body.appendChild(p);
+            var diary = document.getElementById("diary");
+            p.innerHTML = "Name: "+name.value+"<br>Date Of Birth: "+born.value+"<br>Diary: "+diary.value;
+            document.body.append(p);
             
         }
         
-        add.addEventListener("click", addName);
+        Add.addEventListener("click", addName);
     </script>
 </html>
