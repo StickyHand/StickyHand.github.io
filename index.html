@@ -93,7 +93,7 @@
     const draw = () => {
         requestAnimationFrame(draw);
         ctx.fillStyle = "rgba(180, 140, 60, 0.5)"
-        ctx.fillRect(0, 0, 600, 400);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         player.draw();
         player.move();
     }
