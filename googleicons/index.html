@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>google icons</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&family=Mate"/>
+        <style>
+            *{
+                padding: 0;
+                margin: 0;
+                font-family: "Mate";
+            }
+            body{
+                padding: 2px;
+                overflow-x: hidden;
+            }
+            #imgs{
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-evenly;
+            }
+            .img{
+                background: rgb(230, 230, 230);
+                margin: 2px 2px 5px 2px;
+                width: 100px;
+                height: 130px;
+                padding: 5px;
+                color: rgb(100, 100, 100);
+                border: 2px solid rgb(100, 100, 100);
+                border-radius: 10px;
+            }
+            .material-symbols-outlined{
+                font-size: 40px;
+                width: 100px;
+                margin-top: 8px;
+                text-align: center;
+            }
+            .name{
+                text-align: center;
+                margin-top: 15px;
+            }
+            #full{
+                position: fixed;
+                top: -5px;
+                right: 5px;
+                font-size: 25px;
+                width: 50px;
+                height: 50px;
+                text-align: center;
+                background: rgba(0, 0, 0, 0.5);
+                border: none;
+                border-radius: 50%;
+                transition: 100ms;
+            }
+            #full:hover{
+                cursor: pointer;
+                transform: scale(0.9) rotate(180deg);
+            }
+        </style>
+    </head>
+    <body>
+<div id="imgs"></div>
+<button class="material-symbols-outlined" id="full">fullscreen</button>
+<script>
+    var imgs = document.getElementById("imgs");
+    var images = [
+        "search",
+        "home",
+        "menu",
+        "close",
+        "settings",
+        "check_circle",
+        "favorite",
+        "add",
+        "delete",
+        "arrow_back",
+        "star",
+        "chevron_right",
+        "logout",
+        "arrow_forward_ios",
+        "add_circle",
+        "cancel",
+        "arrow_back_ios",
+        "arrow_forward",
+        "arrow_drop_down",
+        "more_vert",
+        "check",
+        "check_box",
+        "open_in_new",
+        "toggle_on",
+        "grade",
+        "refresh",
+        "check_box_outline_blank",
+        "login",
+        "chevron_left",
+        "radio_button_unchecked",
+        "more_horiz",
+        "download",
+        "apps",
+        "arrow_right_alt",
+        "radio_button_checked",
+        "remove",
+        "bolt",
+        "arrow_upward",
+        "toggle_off",
+        "filter_list",
+        "delete_forever",
+        "autorenew",
+        "key",
+        "block",
+        "sync",
+        "arrow_downward",
+        "sort",
+        "add_box",
+        "arrow_back_ios_new",
+        "restart_alt",
+        "shopping_cart_checkout",
+        "menu_open",
+        "expand_circle_Down",
+        "undo",
+        "backspace",
+        "arrow_circle_right",
+        "done_all",
+        "arrow_right",
+        "do_not_disturb_on",
+        "open_in_full",
+        "manage_search",
+        "double_arrow",
+        "sync_alt",
+        "done_outline",
+        "zoom_in",
+        "drag_indicator",
+        "fullscreen",
+        "keyboard_double_arrow_right",
+        "star_half",
+        "ios_share",
+        "settings_accessibility",
+        "arrow_drop_up",
+        "reply",
+        "exit_to_app",
+        "unfold_more",
+        "library_add",
+        "cached",
+        "terminal",
+        "select_check_box",
+        "change_circle",
+        "disabled_by_default",
+        "swap_horiz",
+        "swap_vert",
+        "close_fullscreen",
+        "app_registration",
+        "download_for_offline",
+        "arrow_circle_up",
+        "dataset",
+        "arrow_circle_left",
+        "minimize",
+        "file_open",
+        "open_with",
+        "add_task",
+        "keyboard_double_arrow_left",
+        "start",
+        "keyboard_double_arrow_down",
+        "create_new_folder",
+        "upload",
+        "forward",
+        "downloading",
+        "compare_arrows",
+        "settings_applications",
+        "redo",
+        "publish",
+        "zoom_out",
+        "arrow_left",
+        "token",
+        "html",
+        "switch_access_shortcut",
+        "fullscreen_exit",
+        "arrow_circle_Down",
+        "sort_by_alpha",
+        "delete_sweep",
+        "indeterminate_check_box",
+        "first_page",
+        "view_timeline",
+        "keyboard_double_arrow_up",
+        "settings_buckup_restore",
+        "sync_problem",
+        "assistant_navigation",
+        "arrow_drop_down_circle",
+        "heart_plus",
+        "clear_all",
+        "destiny_medium",
+        "expand",
+        "subdirectory_arrow_right",
+    ];
+    images.sort();
+    for(var i = 0; i < images.length; i ++) {
+        var imgName = "";
+        for(var j = 0; j < images[i].length; j ++) {
+            if(images[i][j] === "_") {
+                imgName += " ";
+            }else{
+                if(j === 0 || images[i][j-1] === "_"){
+                    imgName += images[i][j].toUpperCase();
+                }else{
+                    imgName += images[i][j].toLowerCase();
+                }
+            }
+        }
+        imgs.innerHTML += "<div class='img'><span class=\"material-symbols-outlined\">"+images[i]+"</span>"+"<div class='name'>"+imgName+"</div></div>";
+    }
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type>
+    document.getElementById("full").addEventListener("click", function(){
+        var Window = window.open();
+        document.getElementById("full").remove();
+        Window.document.open();
+        Window.document.write(`<!DOCTYPE html>
+<html>`+
+$("html").html()+
+`</html>
+`
+);
+    });
+</script>
+    </body>
+</html>
