@@ -16,7 +16,7 @@
             height: 100vh;
             background-color: #f4f4f4; /* Light gray */
             color: #333;
-            padding-top: 200px; /* Canvas moved down 200px */
+            padding: 50px; /* Padding for layout */
         }
         h1 {
             margin: 20px 0;
@@ -25,7 +25,7 @@
         }
         canvas {
             border: 2px solid #ccc;
-            margin-bottom: 20px;
+            margin-top: 200px; /* Margin to move the canvas down */
             max-width: 100%;
             max-height: 100%;
         }
@@ -171,27 +171,27 @@
         <input type="file" id="upload" class="slider" accept="image/*">
         
         <label for="hue" class="slider-label">Hue</label>
-        <input type="range" id="hue" class="slider" min="0" max="360" value="0" disabled>
+        <input type="range" id="hue" class="slider" min="0" max="360" value="0">
         <span class="slider-value" id="hueValue">0</span>
 
         <label for="saturation" class="slider-label">Saturation</label>
-        <input type="range" id="saturation" class="slider" min="0" max="200" value="100" disabled>
+        <input type="range" id="saturation" class="slider" min="0" max="200" value="100">
         <span class="slider-value" id="saturationValue">100</span>
 
         <label for="brightness" class="slider-label">Brightness</label>
-        <input type="range" id="brightness" class="slider" min="0" max="200" value="100" disabled>
+        <input type="range" id="brightness" class="slider" min="0" max="200" value="100">
         <span class="slider-value" id="brightnessValue">100</span>
 
         <label for="contrast" class="slider-label">Contrast</label>
-        <input type="range" id="contrast" class="slider" min="0" max="200" value="100" disabled>
+        <input type="range" id="contrast" class="slider" min="0" max="200" value="100">
         <span class="slider-value" id="contrastValue">100</span>
 
         <label for="grayscale" class="slider-label">Grayscale</label>
-        <input type="range" id="grayscale" class="slider" min="0" max="100" value="0" disabled>
+        <input type="range" id="grayscale" class="slider" min="0" max="100" value="0">
         <span class="slider-value" id="grayscaleValue">0</span>
 
         <label for="invert" class="slider-label">Invert</label>
-        <input type="range" id="invert" class="slider" min="0" max="100" value="0" disabled>
+        <input type="range" id="invert" class="slider" min="0" max="100" value="0">
         <span class="slider-value" id="invertValue">0</span>
 
         <button id="resetBtn">Reset</button>
@@ -254,19 +254,12 @@
                         uploadedImagePreview.style.display = 'inline-block';
                         imageName.textContent = file.name;
                         uploadedImage.style.display = 'block';
-                        enableSliders();
                     }
                     img.src = e.target.result;
                 }
                 reader.readAsDataURL(file);
             }
         });
-
-        function enableSliders() {
-            [hueSlider, saturationSlider, brightnessSlider, contrastSlider, invertSlider, grayscaleSlider].forEach(slider => {
-                slider.disabled = false;
-            });
-        }
 
         function drawImage() {
             if (!currentImage) return;
@@ -303,8 +296,7 @@
                 }
             }
 
-            // Adjust hue, saturation, brightness, contrast, invert here...
-            // Add your color adjustment logic here.
+            // Apply other transformations...
 
             ctx.putImageData(imageData, 0, 0);
         }
