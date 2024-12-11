@@ -14,17 +14,11 @@
             justify-content: center;
             margin: 0;
             height: 100vh;
-            background-color: #f4f4f4; /* Light gray */
-            color: #333;
-            padding-top: 50px; /* Adjusted to bring canvas down about an inch */
-        }
-        h1 {
-            margin: 20px 0;
-            font-size: 2em;
-            color: #333;
+            background-color: #228B22; /* Forest green */
+            color: white;
         }
         canvas {
-            border: 2px solid #ccc;
+            border: 2px solid white;
             margin-bottom: 20px;
             max-width: 100%;
             max-height: 100%;
@@ -38,23 +32,7 @@
         }
         .slider {
             margin: 5px;
-            width: 250px;
-        }
-        .slider-label {
-            font-size: 16px;
-            margin-top: 5px;
-            color: #333;
-        }
-        #upload {
-            padding: 10px;
-            border-radius: 5px;
-            border: 2px solid #ccc;
-            background-color: #fff;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        #upload:hover {
-            background-color: #f0f0f0;
+            width: 200px;
         }
         button {
             background-color: #4CAF50;
@@ -69,105 +47,44 @@
         button:hover {
             background-color: #45a049;
         }
+        label {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        #downloadBtn {
+            margin-top: 20px;
+        }
         #resetBtn {
             background-color: #FF5733;
         }
         #resetBtn:hover {
             background-color: #e14d2a;
         }
-        #downloadBtn {
-            margin-top: 20px;
-        }
-        .popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0s, opacity 0.3s ease;
-        }
-        .popup-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            font-size: 18px;
-            color: #333;
-        }
-        .popup button {
-            margin: 10px;
-            font-size: 16px;
-            padding: 8px 16px;
-        }
-        .popup button.cancel {
-            background-color: #ddd;
-        }
-        .popup button.confirm {
-            background-color: #4CAF50;
-        }
-        .popup.visible {
-            visibility: visible;
-            opacity: 1;
-        }
-        #canvasWrapper {
-            position: relative;
-        }
-        #canvasMessage {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 24px;
-            color: #888;
-        }
     </style>
 </head>
 <body>
     <h1>Image Editor</h1>
-    <div id="canvasWrapper">
-        <canvas id="canvas" width="400" height="400"></canvas>
-        <div id="canvasMessage">Please upload an image</div>
-    </div>
+    <canvas id="canvas" width="400" height="400"></canvas>
     <div class="controls">
         <input type="file" id="upload" class="slider" accept="image/*">
         
-        <label for="hue" class="slider-label">Hue</label>
-        <input type="range" id="hue" class="slider" min="0" max="360" value="0" disabled>
-        <span id="hueValue">0</span>
+        <label for="hue">Hue</label>
+        <input type="range" id="hue" class="slider" min="0" max="360" value="0">
 
-        <label for="saturation" class="slider-label">Saturation</label>
-        <input type="range" id="saturation" class="slider" min="0" max="200" value="100" disabled>
-        <span id="saturationValue">100</span>
+        <label for="saturation">Saturation</label>
+        <input type="range" id="saturation" class="slider" min="0" max="200" value="100">
 
-        <label for="brightness" class="slider-label">Brightness</label>
-        <input type="range" id="brightness" class="slider" min="0" max="200" value="100" disabled>
-        <span id="brightnessValue">100</span>
+        <label for="brightness">Brightness</label>
+        <input type="range" id="brightness" class="slider" min="0" max="200" value="100">
 
-        <label for="contrast" class="slider-label">Contrast</label>
-        <input type="range" id="contrast" class="slider" min="0" max="200" value="100" disabled>
-        <span id="contrastValue">100</span>
+        <label for="contrast">Contrast</label>
+        <input type="range" id="contrast" class="slider" min="0" max="200" value="100">
         
-        <label for="invert" class="slider-label">Invert</label>
-        <input type="range" id="invert" class="slider" min="0" max="100" value="0" disabled>
-        <span id="invertValue">0</span>
+        <label for="invert">Invert</label>
+        <input type="range" id="invert" class="slider" min="0" max="100" value="0">
         
         <button id="resetBtn">Reset</button>
         <button id="downloadBtn">Download Image</button>
-    </div>
-
-    <div id="resetPopup" class="popup">
-        <div class="popup-content">
-            <p>Are you sure you want to reset your edited image?</p>
-            <button class="cancel">Cancel</button>
-            <button class="confirm">Continue</button>
-        </div>
     </div>
 
     <script>
@@ -181,17 +98,9 @@
         const invertSlider = document.getElementById('invert');
         const downloadBtn = document.getElementById('downloadBtn');
         const resetBtn = document.getElementById('resetBtn');
-        const resetPopup = document.getElementById('resetPopup');
-        const cancelBtn = resetPopup.querySelector('.cancel');
-        const continueBtn = resetPopup.querySelector('.confirm');
-        const canvasMessage = document.getElementById('canvasMessage');
         
         let img = new Image();
         let imageLoaded = false;
-
-        function updateSliderValue(slider, valueElement) {
-            valueElement.textContent = slider.value;
-        }
 
         // Load the uploaded image onto the canvas
         upload.addEventListener('change', function(e) {
@@ -199,41 +108,38 @@
             reader.onload = function(event) {
                 img.onload = function() {
                     imageLoaded = true;
-                    canvasMessage.style.display = 'none'; // Hide the "Please upload an image" message
                     drawImage();
-                    enableSliders();
                 };
                 img.src = event.target.result;
             };
             reader.readAsDataURL(e.target.files[0]);
         });
 
-        // Enable sliders after an image is uploaded
-        function enableSliders() {
-            hueSlider.disabled = false;
-            saturationSlider.disabled = false;
-            brightnessSlider.disabled = false;
-            contrastSlider.disabled = false;
-            invertSlider.disabled = false;
-        }
-
         // Function to draw the image with current transformations
         function drawImage() {
             if (imageLoaded) {
+                // Clear the canvas before redrawing the image
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+                
+                // Set up the canvas transformation
                 const hue = hueSlider.value;
                 const saturation = saturationSlider.value / 100;
                 const brightness = brightnessSlider.value / 100;
                 const contrast = contrastSlider.value / 100;
                 const invert = invertSlider.value / 100;
 
+                // Create an offscreen canvas to apply filters
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
                 const imgWidth = img.width;
                 const imgHeight = img.height;
 
-                const scale = Math.min(canvas.width / imgWidth, canvas.height / imgHeight);
+                // Set canvas size based on image aspect ratio
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
+
+                // Calculate the scale to fit image without stretching
+                const scale = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
                 const scaledWidth = imgWidth * scale;
                 const scaledHeight = imgHeight * scale;
 
@@ -241,51 +147,41 @@
                 tempCanvas.height = scaledHeight;
 
                 tempCtx.drawImage(img, 0, 0, imgWidth, imgHeight, 0, 0, scaledWidth, scaledHeight);
+
+                // Apply hue, saturation, brightness, contrast, and invert filters
                 tempCtx.filter = `hue-rotate(${hue}deg) saturate(${saturation}) brightness(${brightness}) contrast(${contrast}) invert(${invert})`;
                 tempCtx.drawImage(tempCanvas, 0, 0);
 
+                // Draw the manipulated image back to the main canvas
                 ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
             }
         }
 
-        // Update slider values dynamically
-        hueSlider.addEventListener('input', () => updateSliderValue(hueSlider, document.getElementById('hueValue')));
-        saturationSlider.addEventListener('input', () => updateSliderValue(saturationSlider, document.getElementById('saturationValue')));
-        brightnessSlider.addEventListener('input', () => updateSliderValue(brightnessSlider, document.getElementById('brightnessValue')));
-        contrastSlider.addEventListener('input', () => updateSliderValue(contrastSlider, document.getElementById('contrastValue')));
-        invertSlider.addEventListener('input', () => updateSliderValue(invertSlider, document.getElementById('invertValue')));
+        // Update image when sliders change
+        hueSlider.addEventListener('input', drawImage);
+        saturationSlider.addEventListener('input', drawImage);
+        brightnessSlider.addEventListener('input', drawImage);
+        contrastSlider.addEventListener('input', drawImage);
+        invertSlider.addEventListener('input', drawImage);
 
-        // Reset the image with confirmation
+        // Reset all sliders and the canvas
         resetBtn.addEventListener('click', function() {
-            resetPopup.classList.add('visible');
-        });
-
-        cancelBtn.addEventListener('click', function() {
-            resetPopup.classList.remove('visible');
-        });
-
-        continueBtn.addEventListener('click', function() {
             hueSlider.value = 0;
             saturationSlider.value = 100;
             brightnessSlider.value = 100;
             contrastSlider.value = 100;
             invertSlider.value = 0;
-            updateSliderValue(hueSlider, document.getElementById('hueValue'));
-            updateSliderValue(saturationSlider, document.getElementById('saturationValue'));
-            updateSliderValue(brightnessSlider, document.getElementById('brightnessValue'));
-            updateSliderValue(contrastSlider, document.getElementById('contrastValue'));
-            updateSliderValue(invertSlider, document.getElementById('invertValue'));
             drawImage();
-            resetPopup.classList.remove('visible');
         });
 
-        // Download the edited image with a random filename
+        // Download the canvas content as a PNG image
         downloadBtn.addEventListener('click', function() {
-            const randomId = Math.random().toString(36).substring(2, 22); // 20-character random string
-            const link = document.createElement('a');
-            link.href = canvas.toDataURL();
-            link.download = `image_${randomId}.png`;
-            link.click();
+            const randomId = Math.random().toString(36).substring(2, 22); // Generate random 20-character string
+            const imageUrl = canvas.toDataURL("image/png"); // Convert canvas to PNG image
+            const link = document.createElement('a'); // Create a temporary link element
+            link.href = imageUrl; // Set the link to the image data
+            link.download = `edited_image_${randomId}.png`; // Set the download file name
+            link.click(); // Simulate a click to trigger the download
         });
     </script>
 </body>
