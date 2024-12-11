@@ -162,31 +162,36 @@
             height: 100%;
             z-index: 999;
         }
+        .content-wrapper {
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
     <h1>Image Editor</h1>
-    <canvas id="canvas" width="400" height="400"></canvas>
-    <div class="controls">
-        <input type="file" id="upload" class="file-input" accept="image/*">
-        
-        <label for="hue">Hue</label>
-        <input type="range" id="hue" class="slider" min="0" max="360" value="0">
+    <div class="content-wrapper">
+        <canvas id="canvas" width="400" height="400"></canvas>
+        <div class="controls">
+            <input type="file" id="upload" class="file-input" accept="image/*">
+            
+            <label for="hue">Hue</label>
+            <input type="range" id="hue" class="slider" min="0" max="360" value="0">
 
-        <label for="saturation">Saturation</label>
-        <input type="range" id="saturation" class="slider" min="0" max="200" value="100">
+            <label for="saturation">Saturation</label>
+            <input type="range" id="saturation" class="slider" min="0" max="200" value="100">
 
-        <label for="brightness">Brightness</label>
-        <input type="range" id="brightness" class="slider" min="0" max="200" value="100">
+            <label for="brightness">Brightness</label>
+            <input type="range" id="brightness" class="slider" min="0" max="200" value="100">
 
-        <label for="contrast">Contrast</label>
-        <input type="range" id="contrast" class="slider" min="0" max="200" value="100">
-        
-        <label for="invert">Invert</label>
-        <input type="range" id="invert" class="slider" min="0" max="100" value="0">
-        
-        <button id="resetBtn">Reset</button>
-        <button id="downloadBtn">Download Image</button>
+            <label for="contrast">Contrast</label>
+            <input type="range" id="contrast" class="slider" min="0" max="200" value="100">
+            
+            <label for="invert">Invert</label>
+            <input type="range" id="invert" class="slider" min="0" max="100" value="0">
+            
+            <button id="resetBtn">Reset</button>
+            <button id="downloadBtn">Download Image</button>
+        </div>
     </div>
 
     <!-- Modal for confirmation -->
