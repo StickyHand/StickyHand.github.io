@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="shortcut icon" type="image/png" href="https://stickyhand.github.io/imageedit_74_4611568328.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Editor</title>
+    <title>Image Editor -- Edit your image for free!</title>
+    <link rel="shortcut icon" type="image/png" href="https://stickyhand.github.io/imageedit_74_4611568328.ico">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,34 +14,77 @@
             justify-content: center;
             margin: 0;
             height: 100vh;
-            background-color: #f5f5f5;
+            background-color: #228B22; /* Forest green */
+            color: white;
         }
         canvas {
-            border: 1px solid #000;
+            border: 2px solid white;
             margin-bottom: 20px;
+            max-width: 100%;
+            max-height: 100%;
         }
         .controls {
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
         }
         .slider {
-            margin: 10px;
+            margin: 5px;
+            width: 200px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        #downloadBtn {
+            margin-top: 20px;
+        }
+        #resetBtn {
+            background-color: #FF5733;
+        }
+        #resetBtn:hover {
+            background-color: #e14d2a;
         }
     </style>
 </head>
 <body>
+    <h1>Image Editor</h1>
     <canvas id="canvas" width="400" height="400"></canvas>
     <div class="controls">
         <input type="file" id="upload" class="slider" accept="image/*">
+        
         <label for="hue">Hue</label>
         <input type="range" id="hue" class="slider" min="0" max="360" value="0">
+
         <label for="saturation">Saturation</label>
         <input type="range" id="saturation" class="slider" min="0" max="200" value="100">
+
         <label for="brightness">Brightness</label>
         <input type="range" id="brightness" class="slider" min="0" max="200" value="100">
+
         <label for="contrast">Contrast</label>
         <input type="range" id="contrast" class="slider" min="0" max="200" value="100">
+        
+        <label for="invert">Invert</label>
+        <input type="range" id="invert" class="slider" min="0" max="100" value="0">
+        
+        <button id="resetBtn">Reset</button>
+        <button id="downloadBtn">Download Image</button>
     </div>
 
     <script>
@@ -52,6 +95,9 @@
         const saturationSlider = document.getElementById('saturation');
         const brightnessSlider = document.getElementById('brightness');
         const contrastSlider = document.getElementById('contrast');
+        const invertSlider = document.getElementById('invert');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resetBtn = document.getElementById('resetBtn');
         
         let img = new Image();
         let imageLoaded = false;
@@ -80,16 +126,30 @@
                 const saturation = saturationSlider.value / 100;
                 const brightness = brightnessSlider.value / 100;
                 const contrast = contrastSlider.value / 100;
+                const invert = invertSlider.value / 100;
 
                 // Create an offscreen canvas to apply filters
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = img.width;
-                tempCanvas.height = img.height;
-                tempCtx.drawImage(img, 0, 0);
+                const imgWidth = img.width;
+                const imgHeight = img.height;
 
-                // Apply hue, saturation, brightness, and contrast filters
-                tempCtx.filter = `hue-rotate(${hue}deg) saturate(${saturation}) brightness(${brightness}) contrast(${contrast})`;
+                // Set canvas size based on image aspect ratio
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
+
+                // Calculate the scale to fit image without stretching
+                const scale = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
+                const scaledWidth = imgWidth * scale;
+                const scaledHeight = imgHeight * scale;
+
+                tempCanvas.width = scaledWidth;
+                tempCanvas.height = scaledHeight;
+
+                tempCtx.drawImage(img, 0, 0, imgWidth, imgHeight, 0, 0, scaledWidth, scaledHeight);
+
+                // Apply hue, saturation, brightness, contrast, and invert filters
+                tempCtx.filter = `hue-rotate(${hue}deg) saturate(${saturation}) brightness(${brightness}) contrast(${contrast}) invert(${invert})`;
                 tempCtx.drawImage(tempCanvas, 0, 0);
 
                 // Draw the manipulated image back to the main canvas
@@ -102,6 +162,27 @@
         saturationSlider.addEventListener('input', drawImage);
         brightnessSlider.addEventListener('input', drawImage);
         contrastSlider.addEventListener('input', drawImage);
+        invertSlider.addEventListener('input', drawImage);
+
+        // Reset all sliders and the canvas
+        resetBtn.addEventListener('click', function() {
+            hueSlider.value = 0;
+            saturationSlider.value = 100;
+            brightnessSlider.value = 100;
+            contrastSlider.value = 100;
+            invertSlider.value = 0;
+            drawImage();
+        });
+
+        // Download the canvas content as a PNG image
+        downloadBtn.addEventListener('click', function() {
+            const randomId = Math.random().toString(36).substring(2, 22); // Generate random 20-character string
+            const imageUrl = canvas.toDataURL("image/png"); // Convert canvas to PNG image
+            const link = document.createElement('a'); // Create a temporary link element
+            link.href = imageUrl; // Set the link to the image data
+            link.download = `edited_image_${randomId}.png`; // Set the download file name
+            link.click(); // Simulate a click to trigger the download
+        });
     </script>
 </body>
 </html>
