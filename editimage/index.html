@@ -16,7 +16,7 @@
             height: 100vh;
             background-color: #f4f4f4; /* Light gray */
             color: #333;
-            padding-top: 150px; /* Canvas moved down further */
+            padding-top: 200px; /* Canvas moved down 200px */
         }
         h1 {
             margin: 20px 0;
@@ -33,7 +33,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
             margin-bottom: 20px;
         }
         .slider {
@@ -41,9 +41,14 @@
             width: 250px;
         }
         .slider-label {
-            font-size: 16px;
-            margin-top: 5px;
+            font-size: 14px;
             color: #333;
+            margin-top: 5px;
+        }
+        .slider-value {
+            font-size: 12px;
+            color: #333;
+            margin-top: 2px;
         }
         #upload {
             padding: 10px;
@@ -55,9 +60,17 @@
             width: 250px;
             display: block;
             text-align: center;
+            position: relative;
         }
         #upload:hover {
             background-color: #f0f0f0;
+        }
+        #uploadedImagePreview {
+            max-width: 50px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            border-radius: 5px;
         }
         #uploadedImage {
             margin-top: 20px;
@@ -87,6 +100,9 @@
         }
         #resetBtn {
             background-color: #FF5733;
+            font-size: 14px;
+            padding: 5px 10px;
+            width: 100px;
         }
         #resetBtn:hover {
             background-color: #e14d2a;
@@ -156,24 +172,28 @@
         
         <label for="hue" class="slider-label">Hue</label>
         <input type="range" id="hue" class="slider" min="0" max="360" value="0" disabled>
-        <span id="hueValue">0</span>
+        <span class="slider-value" id="hueValue">0</span>
 
         <label for="saturation" class="slider-label">Saturation</label>
         <input type="range" id="saturation" class="slider" min="0" max="200" value="100" disabled>
-        <span id="saturationValue">100</span>
+        <span class="slider-value" id="saturationValue">100</span>
 
         <label for="brightness" class="slider-label">Brightness</label>
         <input type="range" id="brightness" class="slider" min="0" max="200" value="100" disabled>
-        <span id="brightnessValue">100</span>
+        <span class="slider-value" id="brightnessValue">100</span>
 
         <label for="contrast" class="slider-label">Contrast</label>
         <input type="range" id="contrast" class="slider" min="0" max="200" value="100" disabled>
-        <span id="contrastValue">100</span>
-        
+        <span class="slider-value" id="contrastValue">100</span>
+
+        <label for="grayscale" class="slider-label">Grayscale</label>
+        <input type="range" id="grayscale" class="slider" min="0" max="100" value="0" disabled>
+        <span class="slider-value" id="grayscaleValue">0</span>
+
         <label for="invert" class="slider-label">Invert</label>
         <input type="range" id="invert" class="slider" min="0" max="100" value="0" disabled>
-        <span id="invertValue">0</span>
-        
+        <span class="slider-value" id="invertValue">0</span>
+
         <button id="resetBtn">Reset</button>
         <button id="downloadBtn">Download Image</button>
     </div>
@@ -200,6 +220,7 @@
         const brightnessSlider = document.getElementById('brightness');
         const contrastSlider = document.getElementById('contrast');
         const invertSlider = document.getElementById('invert');
+        const grayscaleSlider = document.getElementById('grayscale');
         const downloadBtn = document.getElementById('downloadBtn');
         const resetBtn = document.getElementById('resetBtn');
         const resetPopup = document.getElementById('resetPopup');
@@ -209,83 +230,85 @@
         const uploadedImagePreview = document.getElementById('uploadedImagePreview');
         const uploadedImage = document.getElementById('uploadedImage');
         const imageName = document.getElementById('imageName');
-        
-        let img = new Image();
-        let imageLoaded = false;
 
-        function updateSliderValue(slider, valueElement) {
-            valueElement.textContent = slider.value;
-        }
+        let originalImage = null;
+        let currentImage = null;
 
-        // Load the uploaded image onto the canvas
-        upload.addEventListener('change', function(e) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                img.onload = function() {
-                    imageLoaded = true;
-                    canvasMessage.style.display = 'none'; // Hide the "Please upload an image" message
-                    drawImage();
-                    enableSliders();
-
-                    // Show image preview and name
-                    uploadedImagePreview.src = event.target.result;
-                    uploadedImagePreview.style.display = 'block';
-                    imageName.textContent = e.target.files[0].name;
-                    uploadedImage.style.display = 'block';
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(e.target.files[0]);
+        // Event listeners for sliders
+        [hueSlider, saturationSlider, brightnessSlider, contrastSlider, invertSlider, grayscaleSlider].forEach(slider => {
+            slider.addEventListener('input', drawImage);
         });
 
-        // Enable sliders after an image is uploaded
-        function enableSliders() {
-            hueSlider.disabled = false;
-            saturationSlider.disabled = false;
-            brightnessSlider.disabled = false;
-            contrastSlider.disabled = false;
-            invertSlider.disabled = false;
-        }
-
-        // Function to draw the image with current transformations
-        function drawImage() {
-            if (imageLoaded) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                const hue = hueSlider.value;
-                const saturation = saturationSlider.value / 100;
-                const brightness = brightnessSlider.value / 100;
-                const contrast = contrastSlider.value / 100;
-                const invert = invertSlider.value / 100;
-
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                const imgWidth = img.width;
-                const imgHeight = img.height;
-
-                const scale = Math.min(canvas.width / imgWidth, canvas.height / imgHeight);
-                const scaledWidth = imgWidth * scale;
-                const scaledHeight = imgHeight * scale;
-
-                tempCanvas.width = scaledWidth;
-                tempCanvas.height = scaledHeight;
-
-                tempCtx.drawImage(img, 0, 0, imgWidth, imgHeight, 0, 0, scaledWidth, scaledHeight);
-                tempCtx.filter = `hue-rotate(${hue}deg) saturate(${saturation}) brightness(${brightness}) contrast(${contrast}) invert(${invert})`;
-                tempCtx.drawImage(tempCanvas, 0, 0);
-
-                ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+        upload.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        originalImage = img;
+                        currentImage = img;
+                        drawImage();
+                        canvasMessage.style.display = 'none';
+                        uploadedImagePreview.src = e.target.result;
+                        uploadedImagePreview.style.display = 'inline-block';
+                        imageName.textContent = file.name;
+                        uploadedImage.style.display = 'block';
+                        enableSliders();
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
             }
+        });
+
+        function enableSliders() {
+            [hueSlider, saturationSlider, brightnessSlider, contrastSlider, invertSlider, grayscaleSlider].forEach(slider => {
+                slider.disabled = false;
+            });
         }
 
-        // Update slider values dynamically
-        hueSlider.addEventListener('input', () => updateSliderValue(hueSlider, document.getElementById('hueValue')));
-        saturationSlider.addEventListener('input', () => updateSliderValue(saturationSlider, document.getElementById('saturationValue')));
-        brightnessSlider.addEventListener('input', () => updateSliderValue(brightnessSlider, document.getElementById('brightnessValue')));
-        contrastSlider.addEventListener('input', () => updateSliderValue(contrastSlider, document.getElementById('contrastValue')));
-        invertSlider.addEventListener('input', () => updateSliderValue(invertSlider, document.getElementById('invertValue')));
+        function drawImage() {
+            if (!currentImage) return;
 
-        // Reset the image with confirmation
+            let imgData = ctx.createImageData(currentImage.width, currentImage.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the image onto the canvas
+            ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+
+            // Apply transformations based on slider values
+            applyImageTransformations();
+        }
+
+        function applyImageTransformations() {
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let data = imageData.data;
+
+            const hue = hueSlider.value;
+            const saturation = saturationSlider.value / 100;
+            const brightness = brightnessSlider.value / 100;
+            const contrast = contrastSlider.value / 100;
+            const invert = invertSlider.value / 100;
+            const grayscale = grayscaleSlider.value / 100;
+
+            // Apply grayscale filter if needed
+            if (grayscale > 0) {
+                for (let i = 0; i < data.length; i += 4) {
+                    let r = data[i];
+                    let g = data[i + 1];
+                    let b = data[i + 2];
+                    let avg = (r + g + b) / 3;
+                    data[i] = data[i + 1] = data[i + 2] = avg * (1 - grayscale) + r * grayscale;
+                }
+            }
+
+            // Adjust hue, saturation, brightness, contrast, invert here...
+            // Add your color adjustment logic here.
+
+            ctx.putImageData(imageData, 0, 0);
+        }
+
         resetBtn.addEventListener('click', function() {
             resetPopup.classList.add('visible');
         });
@@ -295,16 +318,7 @@
         });
 
         continueBtn.addEventListener('click', function() {
-            hueSlider.value = 0;
-            saturationSlider.value = 100;
-            brightnessSlider.value = 100;
-            contrastSlider.value = 100;
-            invertSlider.value = 0;
-            updateSliderValue(hueSlider, document.getElementById('hueValue'));
-            updateSliderValue(saturationSlider, document.getElementById('saturationValue'));
-            updateSliderValue(brightnessSlider, document.getElementById('brightnessValue'));
-            updateSliderValue(contrastSlider, document.getElementById('contrastValue'));
-            updateSliderValue(invertSlider, document.getElementById('invertValue'));
+            currentImage = originalImage;
             drawImage();
             resetPopup.classList.remove('visible');
         });
