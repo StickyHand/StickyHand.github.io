@@ -16,7 +16,7 @@
             height: 100vh;
             background-color: #f4f4f4; /* Light gray */
             color: #333;
-            padding-top: 50px; /* Adjusted to bring canvas down about an inch */
+            padding-top: 150px; /* Canvas moved down further */
         }
         h1 {
             margin: 20px 0;
@@ -52,9 +52,25 @@
             background-color: #fff;
             cursor: pointer;
             font-size: 16px;
+            width: 250px;
+            display: block;
+            text-align: center;
         }
         #upload:hover {
             background-color: #f0f0f0;
+        }
+        #uploadedImage {
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+        }
+        #uploadedImage img {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+        #uploadedImage span {
+            font-size: 14px;
+            color: #777;
         }
         button {
             background-color: #4CAF50;
@@ -162,6 +178,11 @@
         <button id="downloadBtn">Download Image</button>
     </div>
 
+    <div id="uploadedImage">
+        <img id="uploadedImagePreview" src="" alt="Uploaded Image">
+        <span id="imageName"></span>
+    </div>
+
     <div id="resetPopup" class="popup">
         <div class="popup-content">
             <p>Are you sure you want to reset your edited image?</p>
@@ -185,6 +206,9 @@
         const cancelBtn = resetPopup.querySelector('.cancel');
         const continueBtn = resetPopup.querySelector('.confirm');
         const canvasMessage = document.getElementById('canvasMessage');
+        const uploadedImagePreview = document.getElementById('uploadedImagePreview');
+        const uploadedImage = document.getElementById('uploadedImage');
+        const imageName = document.getElementById('imageName');
         
         let img = new Image();
         let imageLoaded = false;
@@ -202,6 +226,12 @@
                     canvasMessage.style.display = 'none'; // Hide the "Please upload an image" message
                     drawImage();
                     enableSliders();
+
+                    // Show image preview and name
+                    uploadedImagePreview.src = event.target.result;
+                    uploadedImagePreview.style.display = 'block';
+                    imageName.textContent = e.target.files[0].name;
+                    uploadedImage.style.display = 'block';
                 };
                 img.src = event.target.result;
             };
@@ -279,12 +309,12 @@
             resetPopup.classList.remove('visible');
         });
 
-        // Download the edited image with a random filename
+        // Download the image with a random filename
         downloadBtn.addEventListener('click', function() {
             const randomId = Math.random().toString(36).substring(2, 22); // 20-character random string
             const link = document.createElement('a');
             link.href = canvas.toDataURL();
-            link.download = `image_${randomId}.png`;
+            link.download = `edited_image_${randomId}.png`;
             link.click();
         });
     </script>
