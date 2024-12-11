@@ -16,6 +16,7 @@
             height: 100vh;
             background-color: #f4f4f4; /* Light gray */
             color: #333;
+            padding-top: 50px; /* Adjusted to bring canvas down about an inch */
         }
         h1 {
             margin: 20px 0;
@@ -135,7 +136,7 @@
         <div id="canvasMessage">Please upload an image</div>
     </div>
     <div class="controls">
-        <input type="file" id="upload" class="slider" accept="image/*" disabled>
+        <input type="file" id="upload" class="slider" accept="image/*">
         
         <label for="hue" class="slider-label">Hue</label>
         <input type="range" id="hue" class="slider" min="0" max="360" value="0" disabled>
@@ -280,11 +281,10 @@
 
         // Download the edited image with a random filename
         downloadBtn.addEventListener('click', function() {
-            const randomId = Math.random().toString(36).substring(2, 22); // Generate random 20-character string
-            const imageUrl = canvas.toDataURL("image/png");
+            const randomId = Math.random().toString(36).substring(2, 22); // 20-character random string
             const link = document.createElement('a');
-            link.href = imageUrl;
-            link.download = `edited_image_${randomId}.png`;
+            link.href = canvas.toDataURL();
+            link.download = `image_${randomId}.png`;
             link.click();
         });
     </script>
