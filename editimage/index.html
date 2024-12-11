@@ -3,277 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Editor -- Edit your image for free!</title>
+    <title>Image Editor —— Edit your image for free!</title>
     <link rel="shortcut icon" type="image/png" href="https://stickyhand.github.io/imageedit_74_4611568328.ico">
     <style>
         body {
+            background-color: #f4f4f4;
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            text-align: center;
+            color: #333;
+            padding: 200px;
             margin: 0;
-            height: 100vh;
-            background-color: #f4f4f4; /* Light gray */
-            color: #333;
-            padding: 50px; /* Padding for layout */
         }
-        h1 {
-            margin: 20px 0;
-            font-size: 2em;
-            color: #333;
-        }
+
         canvas {
             border: 2px solid #ccc;
-            margin-top: 200px; /* Margin to move the canvas down */
-            max-width: 100%;
-            max-height: 100%;
-        }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .slider {
-            margin: 5px;
-            width: 250px;
-        }
-        .slider-label {
-            font-size: 14px;
-            color: #333;
-            margin-top: 5px;
-        }
-        .slider-value {
-            font-size: 12px;
-            color: #333;
-            margin-top: 2px;
-        }
-        #upload {
-            padding: 10px;
-            border-radius: 5px;
-            border: 2px solid #ccc;
-            background-color: #fff;
-            cursor: pointer;
-            font-size: 16px;
-            width: 250px;
+            margin-top: 50px;
             display: block;
-            text-align: center;
-            position: relative;
+            margin-left: auto;
+            margin-right: auto;
         }
-        #upload:hover {
-            background-color: #f0f0f0;
-        }
-        #uploadedImagePreview {
-            max-width: 50px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            border-radius: 5px;
-        }
-        #uploadedImage {
+
+        .controls {
             margin-top: 20px;
-            display: none;
-            text-align: center;
         }
-        #uploadedImage img {
-            max-width: 150px;
-            margin-bottom: 10px;
-        }
-        #uploadedImage span {
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
             font-size: 14px;
-            color: #777;
         }
+
+        .slider {
+            width: 80%;
+            margin: 5px auto;
+        }
+
+        .slider-container {
+            display: inline-block;
+            margin: 5px;
+        }
+
         button {
-            background-color: #4CAF50;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #resetBtn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .upload-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            background-color: #007bff;
             color: white;
             padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
             border-radius: 5px;
-            transition: background-color 0.3s ease;
+            margin-bottom: 20px;
         }
-        button:hover {
-            background-color: #45a049;
+
+        #uploadBtn {
+            display: none;
         }
-        #resetBtn {
-            background-color: #FF5733;
-            font-size: 14px;
-            padding: 5px 10px;
-            width: 100px;
-        }
-        #resetBtn:hover {
-            background-color: #e14d2a;
-        }
-        #downloadBtn {
-            margin-top: 20px;
-        }
-        .popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0s, opacity 0.3s ease;
-        }
-        .popup-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            font-size: 18px;
-            color: #333;
-        }
-        .popup button {
-            margin: 10px;
-            font-size: 16px;
-            padding: 8px 16px;
-        }
-        .popup button.cancel {
-            background-color: #ddd;
-        }
-        .popup button.confirm {
-            background-color: #4CAF50;
-        }
-        .popup.visible {
-            visibility: visible;
-            opacity: 1;
-        }
-        #canvasWrapper {
-            position: relative;
-        }
-        #canvasMessage {
+
+        #uploadedImagePreview {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 24px;
-            color: #888;
+            width: 100px;
+            height: 100px;
+            border-radius: 5px;
+            display: none;
         }
+
+        #imageName {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup.visible {
+            display: flex;
+        }
+
+        .popup-inner {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .popup button {
+            margin-top: 10px;
+            width: 100px;
+        }
+
+        .slider-label {
+            font-size: 12px;
+        }
+
+        .slider-value {
+            font-size: 12px;
+        }
+
     </style>
 </head>
 <body>
     <h1>Image Editor</h1>
-    <div id="canvasWrapper">
-        <canvas id="canvas" width="400" height="400"></canvas>
-        <div id="canvasMessage">Please upload an image</div>
+
+    <div class="upload-container">
+        <input type="file" id="uploadBtn">
+        <button onclick="document.getElementById('uploadBtn').click()">Upload Image</button>
+        <img id="uploadedImagePreview" />
+        <div id="imageName"></div>
     </div>
+
+    <canvas id="canvas" width="600" height="400"></canvas>
+
     <div class="controls">
-        <input type="file" id="upload" class="slider" accept="image/*">
-        
-        <label for="hue" class="slider-label">Hue</label>
-        <input type="range" id="hue" class="slider" min="0" max="360" value="0">
-        <span class="slider-value" id="hueValue">0</span>
-
-        <label for="saturation" class="slider-label">Saturation</label>
-        <input type="range" id="saturation" class="slider" min="0" max="200" value="100">
-        <span class="slider-value" id="saturationValue">100</span>
-
-        <label for="brightness" class="slider-label">Brightness</label>
-        <input type="range" id="brightness" class="slider" min="0" max="200" value="100">
-        <span class="slider-value" id="brightnessValue">100</span>
-
-        <label for="contrast" class="slider-label">Contrast</label>
-        <input type="range" id="contrast" class="slider" min="0" max="200" value="100">
-        <span class="slider-value" id="contrastValue">100</span>
-
-        <label for="grayscale" class="slider-label">Grayscale</label>
-        <input type="range" id="grayscale" class="slider" min="0" max="100" value="0">
-        <span class="slider-value" id="grayscaleValue">0</span>
-
-        <label for="invert" class="slider-label">Invert</label>
-        <input type="range" id="invert" class="slider" min="0" max="100" value="0">
-        <span class="slider-value" id="invertValue">0</span>
-
-        <button id="resetBtn">Reset</button>
-        <button id="downloadBtn">Download Image</button>
+        <div class="slider-container">
+            <label for="hueSlider">Hue</label>
+            <input type="range" id="hueSlider" class="slider" min="0" max="360" value="0">
+            <span id="hueValue" class="slider-value">0</span>
+        </div>
+        <div class="slider-container">
+            <label for="saturationSlider">Saturation</label>
+            <input type="range" id="saturationSlider" class="slider" min="0" max="200" value="100">
+            <span id="saturationValue" class="slider-value">100</span>
+        </div>
+        <div class="slider-container">
+            <label for="brightnessSlider">Brightness</label>
+            <input type="range" id="brightnessSlider" class="slider" min="0" max="200" value="100">
+            <span id="brightnessValue" class="slider-value">100</span>
+        </div>
+        <div class="slider-container">
+            <label for="contrastSlider">Contrast</label>
+            <input type="range" id="contrastSlider" class="slider" min="0" max="200" value="100">
+            <span id="contrastValue" class="slider-value">100</span>
+        </div>
+        <div class="slider-container">
+            <label for="invertSlider">Invert</label>
+            <input type="range" id="invertSlider" class="slider" min="0" max="100" value="0">
+            <span id="invertValue" class="slider-value">0</span>
+        </div>
+        <div class="slider-container">
+            <label for="grayscaleSlider">Grayscale</label>
+            <input type="range" id="grayscaleSlider" class="slider" min="0" max="100" value="0">
+            <span id="grayscaleValue" class="slider-value">0</span>
+        </div>
     </div>
 
-    <div id="uploadedImage">
-        <img id="uploadedImagePreview" src="" alt="Uploaded Image">
-        <span id="imageName"></span>
-    </div>
+    <button id="resetBtn">Reset</button>
+    <button id="downloadBtn">Download Image</button>
 
     <div id="resetPopup" class="popup">
-        <div class="popup-content">
+        <div class="popup-inner">
             <p>Are you sure you want to reset your edited image?</p>
-            <button class="cancel">Cancel</button>
-            <button class="confirm">Continue</button>
+            <button id="cancelBtn">Cancel</button>
+            <button id="continueBtn">Continue</button>
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        const upload = document.getElementById('upload');
-        const hueSlider = document.getElementById('hue');
-        const saturationSlider = document.getElementById('saturation');
-        const brightnessSlider = document.getElementById('brightness');
-        const contrastSlider = document.getElementById('contrast');
-        const invertSlider = document.getElementById('invert');
-        const grayscaleSlider = document.getElementById('grayscale');
-        const downloadBtn = document.getElementById('downloadBtn');
+        const uploadBtn = document.getElementById('uploadBtn');
         const resetBtn = document.getElementById('resetBtn');
-        const resetPopup = document.getElementById('resetPopup');
-        const cancelBtn = resetPopup.querySelector('.cancel');
-        const continueBtn = resetPopup.querySelector('.confirm');
-        const canvasMessage = document.getElementById('canvasMessage');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const hueSlider = document.getElementById('hueSlider');
+        const saturationSlider = document.getElementById('saturationSlider');
+        const brightnessSlider = document.getElementById('brightnessSlider');
+        const contrastSlider = document.getElementById('contrastSlider');
+        const invertSlider = document.getElementById('invertSlider');
+        const grayscaleSlider = document.getElementById('grayscaleSlider');
+        const hueValue = document.getElementById('hueValue');
+        const saturationValue = document.getElementById('saturationValue');
+        const brightnessValue = document.getElementById('brightnessValue');
+        const contrastValue = document.getElementById('contrastValue');
+        const invertValue = document.getElementById('invertValue');
+        const grayscaleValue = document.getElementById('grayscaleValue');
         const uploadedImagePreview = document.getElementById('uploadedImagePreview');
-        const uploadedImage = document.getElementById('uploadedImage');
         const imageName = document.getElementById('imageName');
+        const resetPopup = document.getElementById('resetPopup');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const continueBtn = document.getElementById('continueBtn');
 
         let originalImage = null;
         let currentImage = null;
 
-        // Event listeners for sliders
-        [hueSlider, saturationSlider, brightnessSlider, contrastSlider, invertSlider, grayscaleSlider].forEach(slider => {
-            slider.addEventListener('input', drawImage);
-        });
+        // Update slider value text as user moves the slider
+        function updateSliderValue(slider, valueTextElement) {
+            slider.addEventListener('input', function () {
+                valueTextElement.textContent = slider.value;
+                drawImage(); // Redraw image with updated settings
+            });
+        }
 
-        upload.addEventListener('change', function(event) {
+        // Initialize sliders
+        updateSliderValue(hueSlider, hueValue);
+        updateSliderValue(saturationSlider, saturationValue);
+        updateSliderValue(brightnessSlider, brightnessValue);
+        updateSliderValue(contrastSlider, contrastValue);
+        updateSliderValue(invertSlider, invertValue);
+        updateSliderValue(grayscaleSlider, grayscaleValue);
+
+        // Upload image
+        uploadBtn.addEventListener('change', function (event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     const img = new Image();
-                    img.onload = function() {
+                    img.onload = function () {
                         originalImage = img;
                         currentImage = img;
                         drawImage();
-                        canvasMessage.style.display = 'none';
                         uploadedImagePreview.src = e.target.result;
                         uploadedImagePreview.style.display = 'inline-block';
                         imageName.textContent = file.name;
-                        uploadedImage.style.display = 'block';
-                    }
+                    };
                     img.src = e.target.result;
-                }
+                };
                 reader.readAsDataURL(file);
             }
         });
 
+        // Draw image
         function drawImage() {
             if (!currentImage) return;
-
-            let imgData = ctx.createImageData(currentImage.width, currentImage.height);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw the image onto the canvas
             ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
-
-            // Apply transformations based on slider values
             applyImageTransformations();
         }
 
+        // Apply transformations based on slider values
         function applyImageTransformations() {
             let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             let data = imageData.data;
@@ -285,7 +266,7 @@
             const invert = invertSlider.value / 100;
             const grayscale = grayscaleSlider.value / 100;
 
-            // Apply grayscale filter if needed
+            // Apply grayscale filter
             if (grayscale > 0) {
                 for (let i = 0; i < data.length; i += 4) {
                     let r = data[i];
@@ -301,22 +282,23 @@
             ctx.putImageData(imageData, 0, 0);
         }
 
-        resetBtn.addEventListener('click', function() {
+        // Reset button and confirmation popup
+        resetBtn.addEventListener('click', function () {
             resetPopup.classList.add('visible');
         });
 
-        cancelBtn.addEventListener('click', function() {
+        cancelBtn.addEventListener('click', function () {
             resetPopup.classList.remove('visible');
         });
 
-        continueBtn.addEventListener('click', function() {
+        continueBtn.addEventListener('click', function () {
             currentImage = originalImage;
             drawImage();
             resetPopup.classList.remove('visible');
         });
 
         // Download the image with a random filename
-        downloadBtn.addEventListener('click', function() {
+        downloadBtn.addEventListener('click', function () {
             const randomId = Math.random().toString(36).substring(2, 22); // 20-character random string
             const link = document.createElement('a');
             link.href = canvas.toDataURL();
