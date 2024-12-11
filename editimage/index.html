@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Manipulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        canvas {
+            border: 1px solid #000;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .slider {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <div class="controls">
+        <input type="file" id="upload" class="slider" accept="image/*">
+        <label for="hue">Hue</label>
+        <input type="range" id="hue" class="slider" min="0" max="360" value="0">
+        <label for="saturation">Saturation</label>
+        <input type="range" id="saturation" class="slider" min="0" max="200" value="100">
+        <label for="brightness">Brightness</label>
+        <input type="range" id="brightness" class="slider" min="0" max="200" value="100">
+        <label for="contrast">Contrast</label>
+        <input type="range" id="contrast" class="slider" min="0" max="200" value="100">
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const upload = document.getElementById('upload');
+        const hueSlider = document.getElementById('hue');
+        const saturationSlider = document.getElementById('saturation');
+        const brightnessSlider = document.getElementById('brightness');
+        const contrastSlider = document.getElementById('contrast');
+        
+        let img = new Image();
+        let imageLoaded = false;
+
+        // Load the uploaded image onto the canvas
+        upload.addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                img.onload = function() {
+                    imageLoaded = true;
+                    drawImage();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        // Function to draw the image with current transformations
+        function drawImage() {
+            if (imageLoaded) {
+                // Clear the canvas before redrawing the image
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Set up the canvas transformation
+                const hue = hueSlider.value;
+                const saturation = saturationSlider.value / 100;
+                const brightness = brightnessSlider.value / 100;
+                const contrast = contrastSlider.value / 100;
+
+                // Create an offscreen canvas to apply filters
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = img.width;
+                tempCanvas.height = img.height;
+                tempCtx.drawImage(img, 0, 0);
+
+                // Apply hue, saturation, brightness, and contrast filters
+                tempCtx.filter = `hue-rotate(${hue}deg) saturate(${saturation}) brightness(${brightness}) contrast(${contrast})`;
+                tempCtx.drawImage(tempCanvas, 0, 0);
+
+                // Draw the manipulated image back to the main canvas
+                ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Update image when sliders change
+        hueSlider.addEventListener('input', drawImage);
+        saturationSlider.addEventListener('input', drawImage);
+        brightnessSlider.addEventListener('input', drawImage);
+        contrastSlider.addEventListener('input', drawImage);
+    </script>
+</body>
+</html>
