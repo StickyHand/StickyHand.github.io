@@ -15,7 +15,7 @@
             align-items: center;
             justify-content: center;
             margin: 0;
-            margin-top: 200px;
+            margin-top: 150px;
             height: 100vh;
             background-color: #f4f4f4;
             color: #333;
@@ -242,33 +242,32 @@
 
         // Function to draw the image with current transformations
         function drawImage() {
-            if (imageLoaded) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                const hue = hueSlider.value;
-                const saturation = saturationSlider.value / 100;
-                const brightness = brightnessSlider.value / 100;
-                const contrast = contrastSlider.value / 100;
-                const invert = invertSlider.value / 100;
+    if (imageLoaded) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                const imgWidth = img.width;
-                const imgHeight = img.height;
-                const scale = Math.min(canvas.width / imgWidth, canvas.height / imgHeight);
-                const scaledWidth = imgWidth * scale;
-                const scaledHeight = imgHeight * scale;
+        const hue = hueSlider.value;
+        const saturation = saturationSlider.value / 100;
+        const brightness = brightnessSlider.value / 100;
+        const contrast = contrastSlider.value / 100;
+        const invert = invertSlider.value / 100;
 
-                tempCanvas.width = scaledWidth;
-                tempCanvas.height = scaledHeight;
+        const imgWidth = img.width;
+        const imgHeight = img.height;
+        const scale = Math.min(canvas.width / imgWidth, canvas.height / imgHeight);
+        const scaledWidth = imgWidth * scale;
+        const scaledHeight = imgHeight * scale;
 
-                tempCtx.drawImage(img, 0, 0, imgWidth, imgHeight, 0, 0, scaledWidth, scaledHeight);
+        // Apply filter effects to the main canvas context
+        ctx.filter = `hue-rotate(${hue}deg) saturate(${saturation}) brightness(${brightness}) contrast(${contrast}) invert(${invert})`;
 
-                // Apply filter effects
-                tempCtx.filter = `hue-rotate(${hue}deg) saturate(${saturation}) brightness(${brightness}) contrast(${contrast}) invert(${invert})`;
-                ctx.drawImage(tempCanvas, (canvas.width - scaledWidth) / 2, (canvas.height - scaledHeight) / 2);
-            }
-        }
+        // Draw the scaled image
+        ctx.drawImage(img, (canvas.width - scaledWidth) / 2, (canvas.height - scaledHeight) / 2, scaledWidth, scaledHeight);
+
+        // Reset filter after drawing to avoid affecting future drawings
+        ctx.filter = 'none';
+    }
+}
+
 
         // Update when sliders change
         hueSlider.addEventListener('input', drawImage);
