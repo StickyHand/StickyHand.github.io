@@ -309,11 +309,11 @@
 
         // Download button event
         downloadBtn.addEventListener('click', function() {
-            const randomId = Math.random().toString(36).substring(2, 7); // Generate random 5-character string
+            const randomId = Math.random().toString(36).substring(2, 10); // Generate random 8-character string
             const imageUrl = canvas.toDataURL("image/png"); // Convert canvas to PNG image
             const link = document.createElement('a'); // Create a temporary link element
             link.href = imageUrl; // Set the link to the image data
-            link.download = `edited_image_${randomId}.png`; // Set the download file name
+            link.download = `${randomId}.png`; // Set the download file name
             link.click(); // Simulate a click to trigger the download
         });
         
