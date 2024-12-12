@@ -313,7 +313,7 @@
             const imageUrl = canvas.toDataURL("image/png"); // Convert canvas to PNG image
             const link = document.createElement('a'); // Create a temporary link element
             link.href = imageUrl; // Set the link to the image data
-            link.download = edited_image_${randomId}.png; // Set the download file name
+            link.download = `edited_image_${randomId}.png`; // Set the download file name
             link.click(); // Simulate a click to trigger the download
         });
         
