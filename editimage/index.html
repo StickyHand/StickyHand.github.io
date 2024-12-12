@@ -270,6 +270,13 @@
             }
         }
 
+        // Update when sliders change
+        hueSlider.addEventListener('input', drawImage);
+        saturationSlider.addEventListener('input', drawImage);
+        brightnessSlider.addEventListener('input', drawImage);
+        contrastSlider.addEventListener('input', drawImage);
+        invertSlider.addEventListener('input', drawImage);
+
         // Reset button event
         resetBtn.addEventListener('click', function() {
             modalBackground.classList.add('blurred-background');
@@ -309,13 +316,7 @@
             link.download = 'edited-image.png';
             link.click();
         });
-
-        const draw = function() {
-            requestAnimationFrame(draw);
-            drawImage();
-        }
         
-
         // Initial canvas draw
         drawImage();
     </script>
