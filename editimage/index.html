@@ -311,6 +311,12 @@
             link.click();
         });
 
+        const draw = function() {
+            requestAnimationFrame(draw);
+            drawImage();
+        }
+        
+
         // Initial canvas draw
         drawImage();
     </script>
