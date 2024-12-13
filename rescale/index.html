@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer</title>
+</head>
+<body>
+    <h1>Image Resizer</h1>
+    <input type="file" id="imageUpload" accept="image/*">
+    <button id="downloadButton" disabled>Download Resized Image</button>
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+        const imageUpload = document.getElementById('imageUpload');
+        const downloadButton = document.getElementById('downloadButton');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let image = new Image();
+
+        imageUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    image.onload = () => {
+                        const aspectRatio = image.width / image.height;
+                        if (image.width > image.height) {
+                            canvas.width = 10000;
+                            canvas.height = 10000 / aspectRatio;
+                        } else {
+                            canvas.height = 10000;
+                            canvas.width = 10000 * aspectRatio;
+                        }
+
+                        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                        downloadButton.disabled = false;
+                    };
+                    image.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        downloadButton.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'resized-image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    </script>
+</body>
+</html>
