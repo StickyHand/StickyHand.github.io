@@ -33,7 +33,7 @@
     const gridSize = 30;
     const canvasSize = 1920;
     const tileSize = canvasSize / gridSize;
-    const groutWidth = 2; // Width of the border around each tile
+    const groutWidth = 1; // Width of the border around each tile
 
     const img = new Image();
     img.src = imageSrc;
@@ -45,7 +45,7 @@
           const y = row * tileSize;
 
           // Draw grout line (background)
-          ctx.fillStyle = 'white'; // Change grout color if needed
+          ctx.fillStyle = 'rgb(214, 199, 184)'; // Change grout color if needed
           ctx.fillRect(x, y, tileSize, tileSize);
 
           // Draw the image tile
