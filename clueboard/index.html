@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Grid</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      border: 1px solid black;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gridCanvas" width="1920" height="1920"></canvas>
+  <button id="downloadBtn">Download as JPG</button>
+
+  <script>
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
+    const imageSrc = 'tiles.jpg'; // Replace with the correct path if necessary
+    const gridSize = 30;
+    const canvasSize = 1920;
+    const tileSize = canvasSize / gridSize;
+    const groutWidth = 2; // Width of the border around each tile
+
+    const img = new Image();
+    img.src = imageSrc;
+    img.onload = function() {
+      // Draw the grid with tiles and grout lines
+      for (let row = 0; row < gridSize; row++) {
+        for (let col = 0; col < gridSize; col++) {
+          const x = col * tileSize;
+          const y = row * tileSize;
+
+          // Draw grout line (background)
+          ctx.fillStyle = 'white'; // Change grout color if needed
+          ctx.fillRect(x, y, tileSize, tileSize);
+
+          // Draw the image tile
+          ctx.drawImage(
+            img,
+            x + groutWidth, 
+            y + groutWidth, 
+            tileSize - groutWidth * 2, 
+            tileSize - groutWidth * 2
+          );
+        }
+      }
+    };
+
+    // Download the canvas as a JPG image
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'grid-image.jpg';
+      link.href = canvas.toDataURL('image/jpeg', 1.0);
+      link.click();
+    });
+  </script>
+</body>
+</html>
