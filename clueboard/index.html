@@ -68,13 +68,22 @@
 
           // Draw the image tile
           const randomImage = images[Math.floor(Math.random() * images.length)];
+          const rotation = [0, 90, 180, 270][Math.floor(Math.random() * 4)];
+          const flipVertical = Math.random() < 0.5;
+          const flipHorizontal = Math.random() < 0.5;
+
+          ctx.save();
+          ctx.translate(x + tileSize / 2, y + tileSize / 2);
+          ctx.rotate((rotation * Math.PI) / 180);
+          ctx.scale(flipHorizontal ? -1 : 1, flipVertical ? -1 : 1);
           ctx.drawImage(
             randomImage,
-            x + groutWidth, 
-            y + groutWidth, 
+            -tileSize / 2 + groutWidth, 
+            -tileSize / 2 + groutWidth, 
             tileSize - groutWidth * 2, 
             tileSize - groutWidth * 2
           );
+          ctx.restore();
         }
       }
     }
