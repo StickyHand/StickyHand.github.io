@@ -29,16 +29,34 @@
   <script>
     const canvas = document.getElementById('gridCanvas');
     const ctx = canvas.getContext('2d');
-    const imageSrc = 'https://stickyhand.github.io/tiles.jpg'; // Replace with the correct path if necessary
+    const imageSources = [
+      'https://stickyhand.github.io/tiles.jpg',
+      'https://stickyhand.github.io/tiles1.jpg',
+      'https://stickyhand.github.io/tiles2.jpg',
+      'https://stickyhand.github.io/tiles3.jpg'
+    ];
     const gridSize = 30;
     const canvasSize = 1920;
     const tileSize = canvasSize / gridSize;
     const groutWidth = 1; // Width of the border around each tile
 
-    const img = new Image();
-    img.src = imageSrc;
-    img.onload = function() {
-      // Draw the grid with tiles and grout lines
+    const images = imageSources.map(src => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    });
+
+    let imagesLoaded = 0;
+    images.forEach(img => {
+      img.onload = () => {
+        imagesLoaded++;
+        if (imagesLoaded === images.length) {
+          drawGrid();
+        }
+      };
+    });
+
+    function drawGrid() {
       for (let row = 0; row < gridSize; row++) {
         for (let col = 0; col < gridSize; col++) {
           const x = col * tileSize;
@@ -49,8 +67,9 @@
           ctx.fillRect(x, y, tileSize, tileSize);
 
           // Draw the image tile
+          const randomImage = images[Math.floor(Math.random() * images.length)];
           ctx.drawImage(
-            img,
+            randomImage,
             x + groutWidth, 
             y + groutWidth, 
             tileSize - groutWidth * 2, 
@@ -58,7 +77,7 @@
           );
         }
       }
-    };
+    }
 
     // Download the canvas as a JPG image
     document.getElementById('downloadBtn').addEventListener('click', () => {
