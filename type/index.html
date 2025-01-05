@@ -49,6 +49,14 @@
             margin-top: 20px;
             cursor: pointer;
         }
+        #start-pause-button {
+            background-color: green;
+            color: white;
+        }
+        #reset-button {
+            background-color: red;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -61,10 +69,12 @@
         </select>
         <div id="progress-bar"></div>
         <div id="word-display">Ready?</div>
-        <input type="text" id="user-input" placeholder="Type the word here" autofocus>
+        <input type="text" id="user-input" placeholder="Type the word here" autofocus disabled>
         <div id="score">Score: 0</div>
         <div id="timer">Time: 30s</div>
         <div id="high-score">High Score: 0</div>
+        <button id="start-pause-button">Start</button>
+        <button id="reset-button">Reset High Score</button>
     </div>
 
     <audio id="correct-sound" src="correct.mp3"></audio>
@@ -72,21 +82,26 @@
     <audio id="game-over-sound" src="game-over.mp3"></audio>
 
     <script>
-        var easyWords = ["cat", "dog", "bat", "sun", "moon"];
-        var mediumWords = ["coding", "javascript", "object", "variable", "function"];
-        var hardWords = ["asynchronous", "synchronization", "encapsulation", "inheritance", "polymorphism"];
+        var easyWords = ["cat", "dog", "bat", "sun", "moon", "apple", "tree", "book", "car", "ball"];
+        var mediumWords = ["coding", "javascript", "object", "variable", "function", "syntax", "debug", "browser", "array", "loop"];
+        var hardWords = ["asynchronous", "synchronization", "encapsulation", "inheritance", "polymorphism", "callback", "promise", "algorithm", "recursion", "closure"];
 
         var currentWord = "";
         var score = 0;
         var timeLeft = 30;
         var highScore = localStorage.getItem("highScore") || 0;
         var wordTimeout;
+        var gameInterval;
+        var gameStarted = false;
+        var difficulty = document.getElementById("difficulty").value;
 
         var wordDisplay = document.getElementById("word-display");
         var userInput = document.getElementById("user-input");
         var scoreDisplay = document.getElementById("score");
         var timerDisplay = document.getElementById("timer");
-        var difficulty = document.getElementById("difficulty").value;
+        var startPauseButton = document.getElementById("start-pause-button");
+        var resetButton = document.getElementById("reset-button");
+        var progressBar = document.getElementById("progress-bar");
 
         document.getElementById("difficulty").addEventListener("change", function() {
             difficulty = this.value;
@@ -102,8 +117,6 @@
 
         function startWordTimer() {
             var wordTime = difficulty === "easy" ? 5000 : difficulty === "medium" ? 3000 : 2000;
-
-            var progressBar = document.getElementById("progress-bar");
             progressBar.style.width = "100%";
 
             var startTime = Date.now();
@@ -114,9 +127,25 @@
 
                 if (progress <= 0) {
                     clearInterval(wordTimeout);
-                    displayRandomWord();
+                    if (timeLeft > 0) {
+                        displayRandomWord();
+                    } else {
+                        endGame();
+                    }
                 }
             }, 50);
+        }
+
+        function startTimer() {
+            gameInterval = setInterval(function() {
+                timeLeft--;
+                timerDisplay.textContent = "Time: " + timeLeft + "s";
+
+                if (timeLeft <= 0) {
+                    clearInterval(gameInterval);
+                    endGame();
+                }
+            }, 1000);
         }
 
         userInput.addEventListener("input", function() {
@@ -126,20 +155,9 @@
                 scoreDisplay.textContent = "Score: " + score;
                 userInput.value = "";
                 displayRandomWord();
+                timeLeft += Math.max(0, 5 - difficulty.length); // Time increases based on difficulty
             }
         });
-
-        function startTimer() {
-            var timerInterval = setInterval(function() {
-                timeLeft--;
-                timerDisplay.textContent = "Time: " + timeLeft + "s";
-
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    endGame();
-                }
-            }, 1000);
-        }
 
         function playSound(soundId) {
             var sound = document.getElementById(soundId);
@@ -172,8 +190,31 @@
             document.getElementById("game-container").appendChild(replayButton);
         }
 
-        displayRandomWord();
-        startTimer();
+        function resetHighScore() {
+            localStorage.setItem("highScore", 0);
+            document.getElementById("high-score").textContent = "High Score: 0";
+        }
+
+        startPauseButton.addEventListener("click", function() {
+            if (gameStarted) {
+                clearInterval(gameInterval);
+                gameStarted = false;
+                startPauseButton.textContent = "Start";
+                userInput.disabled = true;
+            } else {
+                score = 0;
+                timeLeft = 30;
+                scoreDisplay.textContent = "Score: " + score;
+                timerDisplay.textContent = "Time: 30s";
+                gameStarted = true;
+                startPauseButton.textContent = "Pause";
+                userInput.disabled = false;
+                displayRandomWord();
+                startTimer();
+            }
+        });
+
+        resetButton.addEventListener("click", resetHighScore);
     </script>
 </body>
 </html>
