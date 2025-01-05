@@ -66,6 +66,7 @@
             <option value="easy">Easy</option>
             <option value="medium">Medium</option>
             <option value="hard">Hard</option>
+            <option value="impossible">Impossible</option> <!-- Added Impossible Difficulty -->
         </select>
         <div id="progress-bar"></div>
         <div id="word-display">Ready?</div>
@@ -82,10 +83,11 @@
     <audio id="game-over-sound" src="game-over.mp3"></audio>
 
     <script>
-        var easyWords = ["cat", "dog", "bat", "sun", "moon", "apple", "tree", "book", "car", "ball"];
-        var mediumWords = ["coding", "javascript", "object", "variable", "function", "syntax", "debug", "browser", "array", "loop"];
-        var hardWords = ["asynchronous", "synchronization", "encapsulation", "inheritance", "polymorphism", "callback", "promise", "algorithm", "recursion", "closure"];
-
+        var easyWords = ["apple", "ball", "car", "fish", "book", "star", "tree", "chair", "table", "door", "sun", "rain", "pencil", "bed", "hat", "cup", "shoe", "bird", "cow", "frog", "lamp", "leaf", "snow", "shirt", "phone", "clock", "bike", "duck", "wolf", "cloud", "guitar", "moon", "cake", "ball", "coin", "paint", "mouse", "leaf", "apple", "bread", "hand", "nose", "ear", "key", "wheel", "jump", "zip", "smile", "laugh"];
+        var mediumWords = ["elephant", "computer", "guitar", "chocolate", "bicycle", "magazine", "candle", "mountain", "dolphin", "jungle", "penguin", "sunshine", "castle", "dragon", "ocean", "rainbow", "universe", "turtle", "strawberry", "skyscraper", "pyramid", "avocado", "horizon", "robot", "mountain", "dinosaur", "vacuum", "skateboard", "computer", "airplane", "parrot", "island", "spaghetti", "adventure", "hurricane", "octopus", "carousel", "butterfly", "elephant", "kitchen", "camera", "javascript", "volcano", "giraffe", "skull", "marshmallow", "lighthouse", "vampire", "detective", "spoon", "cactus"];
+        var hardWords = ["circumference", "synchronization", "encapsulation", "incompatibility", "indivisibility", "discombobulated", "counterproductive", "unconstitutional", "epistemological", "unbelievably", "microarchitecture", "triskaidekaphobia", "unfathomable", "photosynthesis", "extrapolate", "prestidigitation", "transcendental", "onomatopoeia", "misunderstanding", "chiaroscuro", "metamorphosis", "gastroenterologist", "disenfranchisement", "conscientious", "intercontinental", "polysyllabic", "parliamentarian", "infrastructure", "unpredictable", "antagonistic", "rejuvenation", "exaggeration", "cosmopolitan", "malfunction", "reconciliation", "heterogeneous", "socioeconomic", "contemplation", "reprehensible", "archeological", "unquestionable", "misinterpretation", "accommodation", "differentiation", "conglomerate", "manipulation", "acceleration", "revolutionary", "innovative", "appreciation", "accumulation"];
+        var impossibleWords = ["pneumonoultramicroscopicsilicovolcanoconiosis", "hippopotomonstrosesquipedaliophobia", "antidisestablishmentarianism", "floccinaucinihilipilification", "supercalifragilisticexpialidocious", "electroencephalographically", "psychoneuroendocrinological", "otorhinolaryngological", "hepaticocholangiogastrostomy", "subcompartmentalization", "pseudopseudohypoparathyroidism", "radioimmunoelectrophoresis", "disproportionableness", "uncharacteristically", "counterdemonstrations"];
+        
         var currentWord = "";
         var score = 0;
         var timeLeft = 30;
@@ -109,14 +111,26 @@
 
         function displayRandomWord() {
             clearTimeout(wordTimeout);
-            var wordPool = difficulty === "easy" ? easyWords : difficulty === "medium" ? mediumWords : hardWords;
+            var wordPool;
+
+            // Adjusted for "impossible" difficulty
+            if (difficulty === "easy") {
+                wordPool = easyWords;
+            } else if (difficulty === "medium") {
+                wordPool = mediumWords;
+            } else if (difficulty === "hard") {
+                wordPool = hardWords;
+            } else if (difficulty === "impossible") {
+                wordPool = impossibleWords; // Choose impossible words for impossible difficulty
+            }
+
             currentWord = wordPool[Math.floor(Math.random() * wordPool.length)];
             wordDisplay.textContent = currentWord;
             startWordTimer();
         }
 
         function startWordTimer() {
-            var wordTime = difficulty === "easy" ? 5000 : difficulty === "medium" ? 3000 : 2000;
+            var wordTime = difficulty === "easy" ? 5000 : difficulty === "medium" ? 3000 : difficulty === "hard" ? 2000 : 1000; // Faster time for impossible difficulty
             progressBar.style.width = "100%";
 
             var startTime = Date.now();
