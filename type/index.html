@@ -88,9 +88,9 @@
         var mediumWords = ["elephant", "computer", "guitar", "chocolate", "bicycle", "magazine", "candle", "mountain", "dolphin", "jungle", "penguin", "sunshine", "castle", "dragon", "ocean", "rainbow", "universe", "turtle", "strawberry", "skyscraper", "pyramid", "avocado", "horizon", "robot", "mountain", "dinosaur", "vacuum", "skateboard", "computer", "airplane", "parrot", "island", "spaghetti", "adventure", "hurricane", "octopus", "carousel", "butterfly", "elephant", "kitchen", "camera", "javascript", "volcano", "giraffe", "skull", "marshmallow", "lighthouse", "vampire", "detective", "spoon", "cactus"];
         var hardWords = ["circumference", "synchronization", "encapsulation", "incompatibility", "indivisibility", "discombobulated", "counterproductive", "unconstitutional", "epistemological", "unbelievably", "microarchitecture", "triskaidekaphobia", "unfathomable", "photosynthesis", "extrapolate", "prestidigitation", "transcendental", "onomatopoeia", "misunderstanding", "chiaroscuro", "metamorphosis", "gastroenterologist", "disenfranchisement", "conscientious", "intercontinental", "polysyllabic", "parliamentarian", "infrastructure", "unpredictable", "antagonistic", "rejuvenation", "exaggeration", "cosmopolitan", "malfunction", "reconciliation", "heterogeneous", "socioeconomic", "contemplation", "reprehensible", "archeological", "unquestionable", "misinterpretation", "accommodation", "differentiation", "conglomerate", "manipulation", "acceleration", "revolutionary", "innovative", "appreciation", "accumulation"];
         var impossibleWords = ["pneumonoultramicroscopicsilicovolcanoconiosis", "hippopotomonstrosesquipedaliophobia", "antidisestablishmentarianism", "floccinaucinihilipilification", "supercalifragilisticexpialidocious", "electroencephalographically", "psychoneuroendocrinological", "otorhinolaryngological", "hepaticocholangiogastrostomy", "subcompartmentalization", "pseudopseudohypoparathyroidism", "radioimmunoelectrophoresis", "disproportionableness", "uncharacteristically", "counterdemonstrations"];
-        
+
         var currentWord = "";
-        var score = 0;
+        var score = parseInt(localStorage.getItem("score")) || 0;
         var timeLeft = 30;
         var highScore = localStorage.getItem("highScore") || 0;
         var wordTimeout;
@@ -119,7 +119,7 @@
         }
 
         function startWordTimer() {
-            var wordTime = 2500; // Timer is fixed at 2 seconds for all levels
+            var wordTime = 2000; // Timer is fixed at 2 seconds for all levels
             progressBar.style.width = "100%";
 
             var startTime = Date.now();
@@ -141,18 +141,20 @@
 
         function startTimer() {
             gameInterval = setInterval(function() {
-                timeLeft--;
-                timerDisplay.textContent = "Time: " + timeLeft + "s";
+                if (gameStarted) {
+                    timeLeft--;
+                    timerDisplay.textContent = "Time: " + timeLeft + "s";
 
-                if (timeLeft <= 0) {
-                    clearInterval(gameInterval);
-                    endGame();
+                    if (timeLeft <= 0) {
+                        clearInterval(gameInterval);
+                        endGame();
+                    }
                 }
             }, 1000);
         }
 
         userInput.addEventListener("input", function() {
-            if (userInput.value.trim() === currentWord) {
+            if (userInput.value.trim().toLowerCase() === currentWord.toLowerCase()) {
                 score++;
                 playSound("correct-sound");
                 scoreDisplay.textContent = "Score: " + score;
@@ -180,6 +182,7 @@
             wordDisplay.textContent = "Game Over!";
             userInput.disabled = true;
             updateHighScore();
+            localStorage.setItem("score", score);  // Save the score to localStorage
             document.getElementById("high-score").textContent = "High Score: " + highScore;
             addReplayButton();
         }
