@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Typing Game! Type Your Fastest and Still Loose</title>
+    <title>Typing Game! Type Your Fastest on the Hardest Words</title> 
     <link rel="shortcut icon" type="image/png" href="https://stickyhand.github.io/imageedit_74_4611568328.ico">
     <style>
         body {
@@ -67,7 +67,6 @@
             <option value="easy">Easy</option>
             <option value="medium">Medium</option>
             <option value="hard">Hard</option>
-            <option value="impossible">Impossible</option> <!-- Added Impossible Difficulty -->
         </select>
         <div id="progress-bar"></div>
         <div id="word-display">Ready?</div>
@@ -112,26 +111,14 @@
 
         function displayRandomWord() {
             clearTimeout(wordTimeout);
-            var wordPool;
-
-            // Adjusted for "impossible" difficulty
-            if (difficulty === "easy") {
-                wordPool = easyWords;
-            } else if (difficulty === "medium") {
-                wordPool = mediumWords;
-            } else if (difficulty === "hard") {
-                wordPool = hardWords;
-            } else if (difficulty === "impossible") {
-                wordPool = impossibleWords; // Choose impossible words for impossible difficulty
-            }
-
+            var wordPool = difficulty === "easy" ? easyWords : difficulty === "medium" ? mediumWords : hardWords;
             currentWord = wordPool[Math.floor(Math.random() * wordPool.length)];
             wordDisplay.textContent = currentWord;
             startWordTimer();
         }
 
         function startWordTimer() {
-            var wordTime = difficulty === "easy" ? 5000 : difficulty === "medium" ? 3000 : difficulty === "hard" ? 2000 : 1000; // Faster time for impossible difficulty
+            var wordTime = 2000; // Timer is fixed at 2 seconds for all levels
             progressBar.style.width = "100%";
 
             var startTime = Date.now();
@@ -197,12 +184,15 @@
         }
 
         function addReplayButton() {
-            var replayButton = document.createElement("button");
-            replayButton.textContent = "Play Again";
-            replayButton.addEventListener("click", function() {
-                location.reload();
-            });
-            document.getElementById("game-container").appendChild(replayButton);
+            if (!document.querySelector("#game-container button.play-again")) {
+                var replayButton = document.createElement("button");
+                replayButton.textContent = "Play Again";
+                replayButton.classList.add("play-again");
+                replayButton.addEventListener("click", function() {
+                    location.reload();
+                });
+                document.getElementById("game-container").appendChild(replayButton);
+            }
         }
 
         function resetHighScore() {
