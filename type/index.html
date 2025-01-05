@@ -67,6 +67,7 @@
             <option value="easy">Easy</option>
             <option value="medium">Medium</option>
             <option value="hard">Hard</option>
+            <option value="impossible">Impossible</option>
         </select>
         <div id="progress-bar"></div>
         <div id="word-display">Ready?</div>
@@ -111,14 +112,14 @@
 
         function displayRandomWord() {
             clearTimeout(wordTimeout);
-            var wordPool = difficulty === "easy" ? easyWords : difficulty === "medium" ? mediumWords : hardWords;
+            var wordPool = difficulty === "easy" ? easyWords : difficulty === "medium" ? mediumWords : difficulty === "hard" ? hardWords : impossibleWords;
             currentWord = wordPool[Math.floor(Math.random() * wordPool.length)];
             wordDisplay.textContent = currentWord;
             startWordTimer();
         }
 
         function startWordTimer() {
-            var wordTime = 2000; // Timer is fixed at 2 seconds for all levels
+            var wordTime = 2500; // Timer is fixed at 2 seconds for all levels
             progressBar.style.width = "100%";
 
             var startTime = Date.now();
