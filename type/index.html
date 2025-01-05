@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Typing Game! Type Your Fastest On the Hardest Words</title> 
+    <title>Typing Game! Type Your Fastest on the Hardest Words</title> 
     <link rel="shortcut icon" type="image/png" href="https://stickyhand.github.io/imageedit_74_4611568328.ico">
     <style>
         body {
@@ -40,7 +40,7 @@
             transition: width 0.2s ease;
             margin: 10px 0;
         }
-        #high-score {
+        #the-high-score {
             font-size: 18px;
             color: #555;
         }
@@ -74,7 +74,7 @@
         <input type="text" id="user-input" placeholder="Type the word here" autofocus disabled>
         <div id="score">Score: 0</div>
         <div id="timer">Time: 30s</div>
-        <div id="high-score">High Score: 0</div>
+        <div id="the-high-score">High Score: 0</div>
         <button id="start-pause-button">Start</button>
         <button id="reset-button">Reset High Score</button>
     </div>
@@ -105,6 +105,10 @@
         var startPauseButton = document.getElementById("start-pause-button");
         var resetButton = document.getElementById("reset-button");
         var progressBar = document.getElementById("progress-bar");
+        var highScoreDisplay = document.getElementById("the-high-score");
+
+        // Update high score display
+        highScoreDisplay.textContent = "High Score: " + highScore;
 
         document.getElementById("difficulty").addEventListener("change", function() {
             difficulty = this.value;
@@ -174,6 +178,7 @@
             if (score > highScore) {
                 highScore = score;
                 localStorage.setItem("highScore", highScore);
+                highScoreDisplay.textContent = "High Score: " + highScore;
             }
         }
 
@@ -183,25 +188,11 @@
             userInput.disabled = true;
             updateHighScore();
             localStorage.setItem("score", score);  // Save the score to localStorage
-            document.getElementById("high-score").textContent = "High Score: " + highScore;
-            addReplayButton();
-        }
-
-        function addReplayButton() {
-            if (!document.querySelector("#game-container button.play-again")) {
-                var replayButton = document.createElement("button");
-                replayButton.textContent = "Play Again";
-                replayButton.classList.add("play-again");
-                replayButton.addEventListener("click", function() {
-                    location.reload();
-                });
-                document.getElementById("game-container").appendChild(replayButton);
-            }
         }
 
         function resetHighScore() {
             localStorage.setItem("highScore", 0);
-            document.getElementById("high-score").textContent = "High Score: 0";
+            highScoreDisplay.textContent = "High Score: 0";
         }
 
         startPauseButton.addEventListener("click", function() {
