@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Challenge Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        #game-container {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 500px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #word-display {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        #user-input {
+            font-size: 18px;
+            padding: 10px;
+            width: 80%;
+        }
+        #score, #timer {
+            font-size: 18px;
+            margin: 10px;
+        }
+        #progress-bar {
+            height: 5px;
+            background: green;
+            transition: width 0.2s ease;
+            margin: 10px 0;
+        }
+        #high-score {
+            font-size: 18px;
+            color: #555;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Typing Challenge Game</h1>
+        <select id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+        <div id="progress-bar"></div>
+        <div id="word-display">Ready?</div>
+        <input type="text" id="user-input" placeholder="Type the word here" autofocus>
+        <div id="score">Score: 0</div>
+        <div id="timer">Time: 30s</div>
+        <div id="high-score">High Score: 0</div>
+    </div>
+
+    <audio id="correct-sound" src="correct.mp3"></audio>
+    <audio id="wrong-sound" src="wrong.mp3"></audio>
+    <audio id="game-over-sound" src="game-over.mp3"></audio>
+
+    <script>
+        var easyWords = ["cat", "dog", "bat", "sun", "moon"];
+        var mediumWords = ["coding", "javascript", "object", "variable", "function"];
+        var hardWords = ["asynchronous", "synchronization", "encapsulation", "inheritance", "polymorphism"];
+
+        var currentWord = "";
+        var score = 0;
+        var timeLeft = 30;
+        var highScore = localStorage.getItem("highScore") || 0;
+        var wordTimeout;
+
+        var wordDisplay = document.getElementById("word-display");
+        var userInput = document.getElementById("user-input");
+        var scoreDisplay = document.getElementById("score");
+        var timerDisplay = document.getElementById("timer");
+        var difficulty = document.getElementById("difficulty").value;
+
+        document.getElementById("difficulty").addEventListener("change", function() {
+            difficulty = this.value;
+        });
+
+        function displayRandomWord() {
+            clearTimeout(wordTimeout);
+            var wordPool = difficulty === "easy" ? easyWords : difficulty === "medium" ? mediumWords : hardWords;
+            currentWord = wordPool[Math.floor(Math.random() * wordPool.length)];
+            wordDisplay.textContent = currentWord;
+            startWordTimer();
+        }
+
+        function startWordTimer() {
+            var wordTime = difficulty === "easy" ? 5000 : difficulty === "medium" ? 3000 : 2000;
+
+            var progressBar = document.getElementById("progress-bar");
+            progressBar.style.width = "100%";
+
+            var startTime = Date.now();
+            wordTimeout = setInterval(function() {
+                var timeElapsed = Date.now() - startTime;
+                var progress = Math.max(0, ((wordTime - timeElapsed) / wordTime) * 100);
+                progressBar.style.width = progress + "%";
+
+                if (progress <= 0) {
+                    clearInterval(wordTimeout);
+                    displayRandomWord();
+                }
+            }, 50);
+        }
+
+        userInput.addEventListener("input", function() {
+            if (userInput.value.trim() === currentWord) {
+                score++;
+                playSound("correct-sound");
+                scoreDisplay.textContent = "Score: " + score;
+                userInput.value = "";
+                displayRandomWord();
+            }
+        });
+
+        function startTimer() {
+            var timerInterval = setInterval(function() {
+                timeLeft--;
+                timerDisplay.textContent = "Time: " + timeLeft + "s";
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function playSound(soundId) {
+            var sound = document.getElementById(soundId);
+            sound.currentTime = 0;
+            sound.play();
+        }
+
+        function updateHighScore() {
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem("highScore", highScore);
+            }
+        }
+
+        function endGame() {
+            playSound("game-over-sound");
+            wordDisplay.textContent = "Game Over!";
+            userInput.disabled = true;
+            updateHighScore();
+            document.getElementById("high-score").textContent = "High Score: " + highScore;
+            addReplayButton();
+        }
+
+        function addReplayButton() {
+            var replayButton = document.createElement("button");
+            replayButton.textContent = "Play Again";
+            replayButton.addEventListener("click", function() {
+                location.reload();
+            });
+            document.getElementById("game-container").appendChild(replayButton);
+        }
+
+        displayRandomWord();
+        startTimer();
+    </script>
+</body>
+</html>
