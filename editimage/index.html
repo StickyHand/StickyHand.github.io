@@ -193,6 +193,10 @@
             
             <button id="resetBtn">Reset</button>
             <button id="downloadBtn">Download Image</button>
+
+            <label for="blur">Blur</label>
+            <input type="range" id="blur" class="slider" min="0" max="20" value="0">
+
         </div>
     </div>
 
@@ -215,6 +219,7 @@
         const brightnessSlider = document.getElementById('brightness');
         const contrastSlider = document.getElementById('contrast');
         const invertSlider = document.getElementById('invert');
+        const blurSlider = document.getElementById('blur');
         const downloadBtn = document.getElementById('downloadBtn');
         const resetBtn = document.getElementById('resetBtn');
         const confirmationModal = document.getElementById('confirmationModal');
@@ -250,6 +255,7 @@
         const brightness = brightnessSlider.value / 100;
         const contrast = contrastSlider.value / 100;
         const invert = invertSlider.value / 100;
+        const blur = blurSlider.value; // Get the blur value
 
         const imgWidth = img.width;
         const imgHeight = img.height;
@@ -258,7 +264,7 @@
         const scaledHeight = imgHeight * scale;
 
         // Apply filter effects to the main canvas context
-        ctx.filter = `hue-rotate(${hue}deg) saturate(${saturation}) brightness(${brightness}) contrast(${contrast}) invert(${invert})`;
+        ctx.filter = `hue-rotate(${hue}deg) saturate(${saturation}) brightness(${brightness}) contrast(${contrast}) invert(${invert}) blur(${blur}px)`;
 
         // Draw the scaled image
         ctx.drawImage(img, (canvas.width - scaledWidth) / 2, (canvas.height - scaledHeight) / 2, scaledWidth, scaledHeight);
@@ -275,6 +281,7 @@
         brightnessSlider.addEventListener('input', drawImage);
         contrastSlider.addEventListener('input', drawImage);
         invertSlider.addEventListener('input', drawImage);
+        blurSlider.addEventListener('input', drawImage);
 
         // Reset button event
         resetBtn.addEventListener('click', function() {
