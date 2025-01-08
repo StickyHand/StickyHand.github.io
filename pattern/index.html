@@ -3,16 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Tessellator</title>
+  <title>Image Tessellation</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       height: 100vh;
       margin: 0;
+      margin-top: 25px;
     }
     canvas {
       border: 1px solid black;
@@ -23,17 +20,17 @@
 <body>
   <h1>Image Tessellation Tool</h1>
   <input type="file" id="upload" accept="image/*">
-  <button id="download" disabled>Download Tessellation</button>
+  <button id="saveButton" disabled>Save Tessellation</button>
   <canvas id="canvas"></canvas>
 
   <script>
     const uploadInput = document.getElementById('upload');
-    const downloadButton = document.getElementById('download');
+    const saveButton = document.getElementById('saveButton');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
     uploadInput.addEventListener('change', handleImageUpload);
-    downloadButton.addEventListener('click', downloadTessellation);
+    saveButton.addEventListener('click', saveTessellation);
 
     function handleImageUpload(event) {
       const file = event.target.files[0];
@@ -41,8 +38,10 @@
 
       const img = new Image();
       img.onload = () => {
-        const imgWidth = img.width;
-        const imgHeight = img.height;
+        var scaleFactor = 500 / Math.max(img.width, img.height);
+        var imgWidth = img.width * scaleFactor;
+        var imgHeight = img.height * scaleFactor;
+
 
         canvas.width = imgWidth * 2;
         canvas.height = imgHeight * 2;
@@ -69,17 +68,48 @@
         ctx.drawImage(canvas, 0, 0, imgWidth, imgHeight, 0, 0, imgWidth, imgHeight);
         ctx.restore();
 
-        downloadButton.disabled = false;
+        saveButton.disabled = false;
       };
 
       img.src = URL.createObjectURL(file);
     }
 
-    function downloadTessellation() {
-      const link = document.createElement('a');
-      link.download = 'tessellation.png';
-      link.href = canvas.toDataURL();
-      link.click();
+    async function saveTessellation() {
+      if (!window.showSaveFilePicker) {
+        alert("Your browser doesn't support the Save File Picker API.");
+        return;
+      }
+
+      try {
+        // Open the save file dialog
+        const fileHandle = await showSaveFilePicker({
+          suggestedName: 'tessellation.png',
+          types: [
+            {
+              description: 'PNG Image',
+              accept: { 'image/png': ['.png'] },
+            },
+            {
+              description: 'JPEG Image',
+              accept: { 'image/jpeg': ['.jpg', '.jpeg'] },
+            },
+          ],
+        });
+
+        // Get a writable stream for the file
+        const writableStream = await fileHandle.createWritable();
+
+        // Convert canvas to blob and write it to the file
+        const blob = await new Promise((resolve) =>
+          canvas.toBlob(resolve, fileHandle.name.endsWith('.png') ? 'image/png' : 'image/jpeg')
+        );
+        await writableStream.write(blob);
+        await writableStream.close();
+
+        alert('File saved successfully!');
+      } catch (err) {
+        console.error('Save cancelled or failed:', err);
+      }
     }
   </script>
 </body>
