@@ -44,8 +44,8 @@
         const imgWidth = img.width;
         const imgHeight = img.height;
 
-        canvas.width = imgWidth * 2;
-        canvas.height = imgHeight * 2;
+        canvas.width = imgWidth;
+        canvas.height = imgHeight;
 
         // Draw the first triangle (bottom-left corner)
         ctx.drawImage(img, 0, 0, imgWidth / 2, imgHeight / 2, 0, 0, imgWidth / 2, imgHeight / 2);
@@ -79,7 +79,7 @@
       try {
         // Open the save file dialog
         const fileHandle = await showSaveFilePicker({
-          suggestedName: 'tessellation.png',
+          suggestedName: 'pattern.png',
           types: [
             {
               description: 'PNG Image',
@@ -89,6 +89,10 @@
               description: 'JPEG Image',
               accept: { 'image/jpeg': ['.jpg', '.jpeg'] },
             },
+            {
+              description: 'GIF Image',
+              accept: { 'image/gif': ['.gif'] },
+            },
           ],
         });
 
@@ -97,7 +101,7 @@
 
         // Convert canvas to blob and write it to the file
         const blob = await new Promise((resolve) =>
-          canvas.toBlob(resolve, fileHandle.name.endsWith('.png') ? 'image/png' : 'image/jpeg')
+          canvas.toBlob(resolve, fileHandle.name.endsWith('.png') ? 'image/png' : fileHandle.name.endsWith('.jpeg') ? 'image/jpeg' : fileHandle.name.endsWith('.jpg') ? 'image/jpg' : 'image/gif')
         );
         await writableStream.write(blob);
         await writableStream.close();
