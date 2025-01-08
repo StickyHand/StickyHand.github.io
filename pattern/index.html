@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Tessellator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    canvas {
+      border: 1px solid black;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Tessellation Tool</h1>
+  <input type="file" id="upload" accept="image/*">
+  <button id="download" disabled>Download Tessellation</button>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const uploadInput = document.getElementById('upload');
+    const downloadButton = document.getElementById('download');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    uploadInput.addEventListener('change', handleImageUpload);
+    downloadButton.addEventListener('click', downloadTessellation);
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const img = new Image();
+      img.onload = () => {
+        const imgWidth = img.width;
+        const imgHeight = img.height;
+
+        canvas.width = imgWidth * 2;
+        canvas.height = imgHeight * 2;
+
+        // Draw the original triangle mirrored to form a square
+        ctx.drawImage(img, 0, 0, imgWidth / 2, imgHeight / 2, 0, 0, imgWidth / 2, imgHeight / 2);
+        ctx.save();
+        ctx.translate(imgWidth, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(img, 0, 0, imgWidth / 2, imgHeight / 2, 0, 0, imgWidth / 2, imgHeight / 2);
+        ctx.restore();
+
+        // Copy and flip vertically
+        ctx.save();
+        ctx.translate(0, imgHeight);
+        ctx.scale(1, -1);
+        ctx.drawImage(canvas, 0, 0, imgWidth, imgHeight, 0, 0, imgWidth, imgHeight);
+        ctx.restore();
+
+        // Copy and flip horizontally
+        ctx.save();
+        ctx.translate(imgWidth, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(canvas, 0, 0, imgWidth, imgHeight, 0, 0, imgWidth, imgHeight);
+        ctx.restore();
+
+        downloadButton.disabled = false;
+      };
+
+      img.src = URL.createObjectURL(file);
+    }
+
+    function downloadTessellation() {
+      const link = document.createElement('a');
+      link.download = 'tessellation.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  </script>
+</body>
+</html>
