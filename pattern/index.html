@@ -21,7 +21,7 @@
   </style>
 </head>
 <body>
-  <h1>Image Tessellation Tool</h1>
+  <h1>Tessellation Tool</h1>
   <input type="file" id="upload" accept="image/*">
   <button id="saveButton" disabled>Save Tessellation</button>
   <canvas id="canvas"></canvas>
@@ -41,8 +41,9 @@
 
       const img = new Image();
       img.onload = () => {
-        const imgWidth = img.width;
-        const imgHeight = img.height;
+        var scaleFactor = 500 / Math.max(img.width, img.height);
+        var imgWidth = img.width * scaleFactor;
+        var imgHeight = img.height * scaleFactor;
 
         canvas.width = imgWidth;
         canvas.height = imgHeight;
