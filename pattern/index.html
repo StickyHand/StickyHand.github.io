@@ -7,6 +7,8 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
       height: 100vh;
       margin: 0;
       margin-top: 25px;
@@ -38,33 +40,26 @@
 
       const img = new Image();
       img.onload = () => {
-        var scaleFactor = 500 / Math.max(img.width, img.height);
-        var imgWidth = img.width * scaleFactor;
-        var imgHeight = img.height * scaleFactor;
-
+        const imgWidth = img.width;
+        const imgHeight = img.height;
 
         canvas.width = imgWidth * 2;
         canvas.height = imgHeight * 2;
 
-        // Draw the original triangle mirrored to form a square
+        // Draw the first triangle (bottom-left corner)
         ctx.drawImage(img, 0, 0, imgWidth / 2, imgHeight / 2, 0, 0, imgWidth / 2, imgHeight / 2);
+        
+        // Mirror the triangle horizontally to form the bottom-right corner
         ctx.save();
         ctx.translate(imgWidth, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(img, 0, 0, imgWidth / 2, imgHeight / 2, 0, 0, imgWidth / 2, imgHeight / 2);
         ctx.restore();
 
-        // Copy and flip vertically
+        // Mirror the bottom half vertically to create the top half
         ctx.save();
         ctx.translate(0, imgHeight);
         ctx.scale(1, -1);
-        ctx.drawImage(canvas, 0, 0, imgWidth, imgHeight, 0, 0, imgWidth, imgHeight);
-        ctx.restore();
-
-        // Copy and flip horizontally
-        ctx.save();
-        ctx.translate(imgWidth, 0);
-        ctx.scale(-1, 1);
         ctx.drawImage(canvas, 0, 0, imgWidth, imgHeight, 0, 0, imgWidth, imgHeight);
         ctx.restore();
 
