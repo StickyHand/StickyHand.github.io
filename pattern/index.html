@@ -50,7 +50,7 @@
 
         // Draw the first triangle (bottom-left corner)
         ctx.drawImage(img, 0, 0, imgWidth / 2, imgHeight / 2, 0, 0, imgWidth / 2, imgHeight / 2);
-        
+        /**
         // Mirror the triangle horizontally to form the bottom-right corner
         ctx.save();
         ctx.translate(imgWidth, 0);
@@ -64,7 +64,7 @@
         ctx.scale(1, -1);
         ctx.drawImage(canvas, 0, 0, imgWidth, imgHeight, 0, 0, imgWidth, imgHeight);
         ctx.restore();
-
+**/
         saveButton.disabled = false;
       };
 
