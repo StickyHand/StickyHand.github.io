@@ -22,12 +22,6 @@
             top: 150px;
             left: 10px;
         }
-        #canvas1{
-            transform: scale(1, -1) rotate(270deg);
-            position: absolute;
-            top: 150px;
-            left: 10px;
-        }
     </style>
 </head>
 <body>
@@ -35,63 +29,57 @@
     <input type="file" id="upload" accept="image/*">
     <button id="saveButton" disabled>Save Tessellation</button>
     <canvas id="canvas"></canvas>
-    <canvas id="canvas1"></canvas>
 
     <script>
         const uploadInput = document.getElementById('upload');
         const saveButton = document.getElementById('saveButton');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        
-        const canvas1 = document.getElementById('canvas1');
-        const ctx1 = canvas1.getContext('2d');
+
 
         uploadInput.addEventListener('change', handleImageUpload);
         saveButton.addEventListener('click', saveTessellation);
 
         function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+    const file = event.target.files[0];
+    if (!file) return;
 
-            const img = new Image();
-            img.onload = () => {
-                var scaleFactor = 500 / Math.max(img.width, img.height);
-                var imgWidth = img.width * scaleFactor;
-                var imgHeight = img.height * scaleFactor;
+    const img = new Image();
+    img.onload = () => {
+        var scaleFactor = 500 / Math.max(img.width, img.height);
+        var imgWidth = img.width * scaleFactor;
+        var imgHeight = img.height * scaleFactor;
 
-                // Set canvas size to match the image size
-                canvas.width = canvas1.width = imgWidth/2;
-                canvas.height = canvas1.height = imgHeight/2;
+        // Set canvas size to match the image size
+        canvas.width = canvas1.width = imgWidth / 2;
+        canvas.height = canvas1.height = imgHeight / 2;
 
-                // Step 1: Clip the canvas to a right triangle
-                ctx.save(); // Save the current state of the canvas
-                ctx.beginPath();
-                ctx.moveTo(0, 0); // Top-left corner of the triangle
-                ctx.lineTo(0, imgHeight / 2); // Left point of the triangle
-                ctx.lineTo(imgWidth / 2, imgHeight / 2); // Right point of the triangle
-                ctx.closePath();
-                ctx.clip(); // Clip the canvas to the triangle
+        // Step 1: Clip the canvas to a right triangle
+        ctx.save(); // Save the current state of the canvas
+        ctx.beginPath();
+        ctx.moveTo(0, 0); // Top-left corner of the triangle
+        ctx.lineTo(0, imgHeight / 2); // Left point of the triangle
+        ctx.lineTo(imgWidth / 2, imgHeight / 2); // Right point of the triangle
+        ctx.closePath();
+        ctx.clip(); // Clip the canvas to the triangle
 
-                // Step 2: Draw the image inside the clipped triangle
-                ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
-                ctx.restore(); // Restore the canvas to its previous state (no clip)
+        // Step 2: Draw the image inside the clipped triangle
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+        ctx.restore(); // Restore the canvas to its previous state (no clip)
 
-                ctx1.save(); // Save the current state of the canvas
-                ctx1.beginPath();
-                ctx1.moveTo(0, 0); // Top-left corner of the triangle
-                ctx1.lineTo(0, imgHeight / 2); // Left point of the triangle
-                ctx1.lineTo(imgWidth / 2, imgHeight / 2); // Right point of the triangle
-                ctx1.closePath();
-                ctx1.clip(); // Clip the canvas to the triangle
+        // Now, copy the content from the first canvas (ctx) to the second one (ctx1)
+        ctx1.save(); // Save the current state of the second canvas
+        ctx1.setTransform(1, 0, 0, -1, 0, imgHeight / 2); // Apply flip and rotation transform
+        ctx1.drawImage(canvas, 0, 0); // Draw the content of the first canvas onto the second canvas
+        ctx1.restore(); // Restore the canvas to its previous state (no transform)
 
-                // Step 2: Draw the image inside the clipped triangle
-                ctx1.drawImage(img, 0, 0, imgWidth, imgHeight);
-                ctx1.restore(); // Restore the canvas to its previous state (no clip)
+        // Enable the save button
+        saveButton.disabled = false;
+    };
 
+    img.src = URL.createObjectURL(file);
+}
 
-                // Enable the save button
-                saveButton.disabled = false;
-            };
 
             img.src = URL.createObjectURL(file);
         }
