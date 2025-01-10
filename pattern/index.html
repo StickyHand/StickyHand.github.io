@@ -1,173 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Tessellation</title>
-   <link rel="shortcut icon" type="image/png" href="https://stickyhand.github.io/imageedit_74_4611568328.ico">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      margin: 0;
-      margin-top: 25px;
-    }
-    canvas {
-      border: 1px solid black;
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Tessellation</title>
+    <link rel="shortcut icon" type="image/png" href="https://stickyhand.github.io/imageedit_74_4611568328.ico">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            margin-top: 25px;
+        }
+        canvas {
+            border: 1px solid black;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Tessellation Tool</h1>
-  <input type="file" id="upload" accept="image/*">
-  <button id="saveButton" disabled>Save Tessellation</button>
-  <canvas id="canvas"></canvas>
+    <h1>Tessellation Tool</h1>
+    <input type="file" id="upload" accept="image/*">
+    <button id="saveButton" disabled>Save Tessellation</button>
+    <canvas id="canvas"></canvas>
 
-  <script>
-    const uploadInput = document.getElementById('upload');
-    const saveButton = document.getElementById('saveButton');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    <script>
+        const uploadInput = document.getElementById('upload');
+        const saveButton = document.getElementById('saveButton');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
 
-    uploadInput.addEventListener('change', handleImageUpload);
-    saveButton.addEventListener('click', saveTessellation);
+        uploadInput.addEventListener('change', handleImageUpload);
+        saveButton.addEventListener('click', saveTessellation);
 
-    function handleImageUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-      const img = new Image();
-      img.onload = () => {
-        var scaleFactor = 500 / Math.max(img.width, img.height);
-        var imgWidth = img.width * scaleFactor;
-        var imgHeight = img.height * scaleFactor;
-        const image = img;
-        canvas.width = imgWidth;
-        canvas.height = imgHeight;
+            const img = new Image();
+            img.onload = () => {
+                var scaleFactor = 500 / Math.max(img.width, img.height);
+                var imgWidth = img.width * scaleFactor;
+                var imgHeight = img.height * scaleFactor;
 
-ctx.save(); // Save the current state of the canvas
-ctx.beginPath();
-ctx.moveTo(0, 0); // Top-left corner of the triangle
-ctx.lineTo(0, imgHeight / 2); // Left point of the triangle
-ctx.lineTo(imgWidth / 2, imgHeight / 2); // Right point of the triangle
-ctx.closePath();
-ctx.clip(); // Clip the canvas to the triangle
+                // Set canvas size to match the image size
+                canvas.width = imgWidth;
+                canvas.height = imgHeight;
 
-// Step 2: Draw the image inside the clipped triangle
-ctx.drawImage(image, 0, 0, imgWidth, imgHeight);
-ctx.restore(); // Restore the canvas to its previous state (no clip)
+                // Step 1: Clip the canvas to a right triangle
+                ctx.save(); // Save the current state of the canvas
+                ctx.beginPath();
+                ctx.moveTo(0, 0); // Top-left corner of the triangle
+                ctx.lineTo(0, imgHeight / 2); // Left point of the triangle
+                ctx.lineTo(imgWidth / 2, imgHeight / 2); // Right point of the triangle
+                ctx.closePath();
+                ctx.clip(); // Clip the canvas to the triangle
 
-// Step 3: Flip the image vertically
-var tempCanvas = document.createElement('canvas');
-var tempCtx = tempCanvas.getContext('2d');
-tempCanvas.width = imgWidth;
-tempCanvas.height = imgHeight;
+                // Step 2: Draw the image inside the clipped triangle
+                ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+                ctx.restore(); // Restore the canvas to its previous state (no clip)
 
-// Flip the image vertically
-tempCtx.save(); // Save the context
-tempCtx.scale(1, -1); // Flip vertically
-tempCtx.drawImage(image, 0, -imgHeight, imgWidth, imgHeight);
-tempCtx.restore(); // Restore after flipping
+                // Step 3: Flip the image vertically
+                var tempCanvas = document.createElement('canvas');
+                var tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = imgWidth;
+                tempCanvas.height = imgHeight;
 
-// Step 4: Rotate the flipped image 90 degrees clockwise
-var rotatedCanvas = document.createElement('canvas');
-var rotatedCtx = rotatedCanvas.getContext('2d');
-rotatedCanvas.width = imgHeight; // Width becomes height
-rotatedCanvas.height = imgWidth; // Height becomes width
+                // Flip the image vertically
+                tempCtx.save(); // Save the context
+                tempCtx.scale(1, -1); // Flip vertically
+                tempCtx.drawImage(img, 0, -imgHeight, imgWidth, imgHeight);
+                tempCtx.restore(); // Restore after flipping
 
-rotatedCtx.save(); // Save the context for rotation
-rotatedCtx.translate(imgHeight / 2, imgWidth / 2); // Move to center for rotation
-rotatedCtx.rotate(Math.PI / 2); // Rotate 90 degrees clockwise
-rotatedCtx.drawImage(tempCanvas, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
-rotatedCtx.restore(); // Restore after rotation
+                // Step 4: Rotate the flipped image 90 degrees clockwise
+                var rotatedCanvas = document.createElement('canvas');
+                var rotatedCtx = rotatedCanvas.getContext('2d');
+                rotatedCanvas.width = imgHeight; // Width becomes height
+                rotatedCanvas.height = imgWidth; // Height becomes width
 
-// Step 5: Combine the original image and rotated image to form a square
-var combinedCanvas = document.createElement('canvas');
-var combinedCtx = combinedCanvas.getContext('2d');
-combinedCanvas.width = imgWidth + imgHeight; // Square side
-combinedCanvas.height = imgWidth; // Same height as the original image
+                rotatedCtx.save(); // Save the context for rotation
+                rotatedCtx.translate(imgHeight / 2, imgWidth / 2); // Move to center for rotation
+                rotatedCtx.rotate(Math.PI / 2); // Rotate 90 degrees clockwise
+                rotatedCtx.drawImage(tempCanvas, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
+                rotatedCtx.restore(); // Restore after rotation
 
-// Draw the original image
-combinedCtx.drawImage(image, 0, 0, imgWidth, imgHeight);
-// Draw the rotated image next to it
-combinedCtx.drawImage(rotatedCanvas, imgWidth, 0, imgHeight, imgWidth); 
+                // Step 5: Combine the original image and rotated image to form a square
+                var combinedCanvas = document.createElement('canvas');
+                var combinedCtx = combinedCanvas.getContext('2d');
+                combinedCanvas.width = imgWidth + imgHeight; // Square side
+                combinedCanvas.height = imgWidth; // Same height as the original image
 
-// Step 6: Flip the square horizontally and place it to the right
-var flippedCanvas = document.createElement('canvas');
-var flippedCtx = flippedCanvas.getContext('2d');
-flippedCanvas.width = combinedCanvas.width * 2; // Double the width
-flippedCanvas.height = combinedCanvas.height; // Same height
+                // Draw the original image
+                combinedCtx.drawImage(img, 0, 0, imgWidth, imgHeight);
 
-// Draw the combined square
-flippedCtx.drawImage(combinedCanvas, 0, 0);
+                // Draw the rotated image next to it
+                combinedCtx.drawImage(rotatedCanvas, imgWidth, 0, imgHeight, imgWidth);
 
-// Flip the combined square horizontally
-flippedCtx.scale(-1, 1);
-flippedCtx.drawImage(combinedCanvas, -combinedCanvas.width, 0);
+                // Step 6: Flip the square horizontally and place it to the right
+                var flippedCanvas = document.createElement('canvas');
+                var flippedCtx = flippedCanvas.getContext('2d');
+                flippedCanvas.width = combinedCanvas.width * 2; // Double the width
+                flippedCanvas.height = combinedCanvas.height; // Same height
 
-// Step 7: Flip the long rectangle and place it below to form a large square
-var largeSquareCanvas = document.createElement('canvas');
-var largeSquareCtx = largeSquareCanvas.getContext('2d');
-largeSquareCanvas.width = flippedCanvas.width; // Same width as flipped rectangle
-largeSquareCanvas.height = flippedCanvas.height * 2; // Double the height for the square
+                // Draw the combined square
+                flippedCtx.drawImage(combinedCanvas, 0, 0);
 
-// Draw the flipped long rectangle
-largeSquareCtx.drawImage(flippedCanvas, 0, 0);
+                // Flip the combined square horizontally
+                flippedCtx.scale(-1, 1);
+                flippedCtx.drawImage(combinedCanvas, -combinedCanvas.width, 0);
 
-// Flip and place the rectangle below to form a large square
-largeSquareCtx.scale(-1, 1);
-largeSquareCtx.drawImage(flippedCanvas, -flippedCanvas.width, flippedCanvas.height);
+                // Step 7: Flip the long rectangle and place it below to form a large square
+                var largeSquareCanvas = document.createElement('canvas');
+                var largeSquareCtx = largeSquareCanvas.getContext('2d');
+                largeSquareCanvas.width = flippedCanvas.width; // Same width as flipped rectangle
+                largeSquareCanvas.height = flippedCanvas.height * 2; // Double the height for the square
 
-        saveButton.disabled = false;
-      };
+                // Draw the flipped long rectangle
+                largeSquareCtx.drawImage(flippedCanvas, 0, 0);
 
-      img.src = URL.createObjectURL(file);
-    }
+                // Flip and place the rectangle below to form a large square
+                largeSquareCtx.scale(-1, 1);
+                largeSquareCtx.drawImage(flippedCanvas, -flippedCanvas.width, flippedCanvas.height);
 
-    async function saveTessellation() {
-      if (!window.showSaveFilePicker) {
-        alert("Your browser doesn't support the Save File Picker API.");
-        return;
-      }
+                // Display the large square result
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+                ctx.drawImage(largeSquareCanvas, 0, 0); // Draw the large square on the main canvas
 
-      try {
-        // Open the save file dialog
-        const fileHandle = await showSaveFilePicker({
-          suggestedName: 'pattern.png',
-          types: [
-            {
-              description: 'PNG Image',
-              accept: { 'image/png': ['.png'] },
-            },
-            {
-              description: 'JPEG Image',
-              accept: { 'image/jpeg': ['.jpg', '.jpeg'] },
-            },
-            {
-              description: 'GIF Image',
-              accept: { 'image/gif': ['.gif'] },
-            },
-          ],
-        });
+                // Enable the save button
+                saveButton.disabled = false;
+            };
 
-        // Get a writable stream for the file
-        const writableStream = await fileHandle.createWritable();
+            img.src = URL.createObjectURL(file);
+        }
 
-        // Convert canvas to blob and write it to the file
-        const blob = await new Promise((resolve) =>
-          canvas.toBlob(resolve, fileHandle.name.endsWith('.png') ? 'image/png' : fileHandle.name.endsWith('.jpeg') ? 'image/jpeg' : fileHandle.name.endsWith('.jpg') ? 'image/jpg' : 'image/gif')
-        );
-        await writableStream.write(blob);
-        await writableStream.close();
+        async function saveTessellation() {
+            if (!window.showSaveFilePicker) {
+                alert("Your browser doesn't support the Save File Picker API.");
+                return;
+            }
 
-        alert('File saved successfully!');
-      } catch (err) {
-        console.error('Save cancelled or failed:', err);
-      }
-    }
-  </script>
+            try {
+                // Open the save file dialog
+                const fileHandle = await showSaveFilePicker({
+                    suggestedName: 'pattern.png',
+                    types: [
+                        {
+                            description: 'PNG Image',
+                            accept: { 'image/png': ['.png'] },
+                        },
+                        {
+                            description: 'JPEG Image',
+                            accept: { 'image/jpeg': ['.jpg', '.jpeg'] },
+                        },
+                        {
+                            description: 'GIF Image',
+                            accept: { 'image/gif': ['.gif'] },
+                        },
+                    ],
+                });
+
+                // Get a writable stream for the file
+                const writableStream = await fileHandle.createWritable();
+
+                // Convert canvas to blob and write it to the file
+                const blob = await new Promise((resolve) =>
+                    canvas.toBlob(
+                        resolve,
+                        fileHandle.name.endsWith('.png')
+                            ? 'image/png'
+                            : fileHandle.name.endsWith('.jpeg')
+                            ? 'image/jpeg'
+                            : fileHandle.name.endsWith('.jpg')
+                            ? 'image/jpg'
+                            : 'image/gif'
+                    )
+                );
+                await writableStream.write(blob);
+                await writableStream.close();
+
+                alert('File saved successfully!');
+            } catch (err) {
+                console.error('Save cancelled or failed:', err);
+            }
+        }
+    </script>
 </body>
 </html>
