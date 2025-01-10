@@ -44,27 +44,71 @@
         var scaleFactor = 500 / Math.max(img.width, img.height);
         var imgWidth = img.width * scaleFactor;
         var imgHeight = img.height * scaleFactor;
-
+        const image = img;
         canvas.width = imgWidth;
         canvas.height = imgHeight;
 
-        // Draw the first triangle (bottom-left corner)
-        ctx.drawImage(img, 0, 0, imgWidth / 2, imgHeight / 2, 0, imgHeight / 2, 0, 0);
-        /**
-        // Mirror the triangle horizontally to form the bottom-right corner
-        ctx.save();
-        ctx.translate(imgWidth, 0);
-        ctx.scale(-1, 1);
-        ctx.drawImage(img, 0, 0, imgWidth / 2, imgHeight / 2, 0, 0, imgWidth / 2, imgHeight / 2);
-        ctx.restore();
+        // Step 1: Clip the canvas to the triangular area
+ctx.beginPath();
+ctx.moveTo(0, 0);  // Top-left corner of the triangle
+ctx.lineTo(0, imgHeight / 2);  // Left point of the triangle
+ctx.lineTo(imgWidth / 2, imgHeight / 2);  // Right point of the triangle
+ctx.closePath();
+ctx.clip();
 
-        // Mirror the bottom half vertically to create the top half
-        ctx.save();
-        ctx.translate(0, imgHeight);
-        ctx.scale(1, -1);
-        ctx.drawImage(canvas, 0, 0, imgWidth, imgHeight, 0, 0, imgWidth, imgHeight);
-        ctx.restore();
-**/
+// Step 2: Draw the image inside the clipped triangle
+ctx.drawImage(image, 0, 0, imgWidth, imgHeight);
+
+// Step 3: Copy and flip the image vertically
+var tempCanvas = document.createElement('canvas');
+var tempCtx = tempCanvas.getContext('2d');
+tempCanvas.width = imgWidth;
+tempCanvas.height = imgHeight;
+
+// Flip the image vertically
+tempCtx.scale(1, -1);
+tempCtx.drawImage(image, 0, -imgHeight, imgWidth, imgHeight);
+
+// Step 4: Rotate the flipped image 90 degrees clockwise
+var rotatedCanvas = document.createElement('canvas');
+var rotatedCtx = rotatedCanvas.getContext('2d');
+rotatedCanvas.width = imgHeight;
+rotatedCanvas.height = imgWidth;
+
+// Rotate the image
+rotatedCtx.translate(imgHeight / 2, imgWidth / 2);  // Move to center for rotation
+rotatedCtx.rotate(Math.PI / 2);  // Rotate 90 degrees clockwise
+rotatedCtx.drawImage(tempCanvas, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
+
+// Step 5: Place the two images to form a square (top-left and rotated)
+ctx.drawImage(image, 0, 0, imgWidth, imgHeight);
+ctx.drawImage(rotatedCanvas, imgWidth, 0, imgHeight, imgWidth); // Place rotated image
+
+// Step 6: Copy the square and flip it horizontally to form a rectangle
+var rectangleCanvas = document.createElement('canvas');
+var rectangleCtx = rectangleCanvas.getContext('2d');
+rectangleCanvas.width = imgWidth * 2;
+rectangleCanvas.height = imgHeight;
+
+// Draw the square first
+rectangleCtx.drawImage(ctx.canvas, 0, 0, imgWidth * 2, imgHeight);
+
+// Flip the square horizontally and place it on the right
+rectangleCtx.scale(-1, 1);
+rectangleCtx.drawImage(ctx.canvas, -imgWidth * 2, 0);
+
+// Step 7: Copy the rectangle, flip it horizontally, and place it below to form a large square
+var largeSquareCanvas = document.createElement('canvas');
+var largeSquareCtx = largeSquareCanvas.getContext('2d');
+largeSquareCanvas.width = imgWidth * 2;
+largeSquareCanvas.height = imgHeight * 2;
+
+// Draw the long rectangle
+largeSquareCtx.drawImage(rectangleCanvas, 0, 0);
+
+// Flip and place the rectangle below
+largeSquareCtx.scale(-1, 1);
+largeSquareCtx.drawImage(rectangleCanvas, -imgWidth * 2, imgHeight);
         saveButton.disabled = false;
       };
 
