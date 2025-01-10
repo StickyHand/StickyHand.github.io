@@ -17,6 +17,7 @@
         canvas {
             border: 1px solid black;
             margin-top: 20px;
+            background-color: transparent;
         }
     </style>
 </head>
@@ -46,8 +47,8 @@
                 var imgHeight = img.height * scaleFactor;
 
                 // Set canvas size to match the image size
-                canvas.width = imgWidth;
-                canvas.height = imgHeight;
+                canvas.width = imgWidth/2;
+                canvas.height = imgHeight/2;
 
                 // Step 1: Clip the canvas to a right triangle
                 ctx.save(); // Save the current state of the canvas
@@ -62,71 +63,6 @@
                 ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
                 ctx.restore(); // Restore the canvas to its previous state (no clip)
 
-                // Step 3: Flip the image vertically
-                var tempCanvas = document.createElement('canvas');
-                var tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = imgWidth;
-                tempCanvas.height = imgHeight;
-
-                // Flip the image vertically
-                tempCtx.save(); // Save the context
-                tempCtx.scale(1, -1); // Flip vertically
-                tempCtx.drawImage(img, 0, -imgHeight, imgWidth, imgHeight);
-                tempCtx.restore(); // Restore after flipping
-
-                // Step 4: Rotate the flipped image 90 degrees clockwise
-                var rotatedCanvas = document.createElement('canvas');
-                var rotatedCtx = rotatedCanvas.getContext('2d');
-                rotatedCanvas.width = imgHeight; // Width becomes height
-                rotatedCanvas.height = imgWidth; // Height becomes width
-
-                rotatedCtx.save(); // Save the context for rotation
-                rotatedCtx.translate(imgHeight / 2, imgWidth / 2); // Move to center for rotation
-                rotatedCtx.rotate(Math.PI / 2); // Rotate 90 degrees clockwise
-                rotatedCtx.drawImage(tempCanvas, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
-                rotatedCtx.restore(); // Restore after rotation
-
-                // Step 5: Combine the original image and rotated image to form a square
-                var combinedCanvas = document.createElement('canvas');
-                var combinedCtx = combinedCanvas.getContext('2d');
-                combinedCanvas.width = imgWidth + imgHeight; // Square side
-                combinedCanvas.height = imgWidth; // Same height as the original image
-
-                // Draw the original image
-                combinedCtx.drawImage(img, 0, 0, imgWidth, imgHeight);
-
-                // Draw the rotated image next to it
-                combinedCtx.drawImage(rotatedCanvas, imgWidth, 0, imgHeight, imgWidth);
-
-                // Step 6: Flip the square horizontally and place it to the right
-                var flippedCanvas = document.createElement('canvas');
-                var flippedCtx = flippedCanvas.getContext('2d');
-                flippedCanvas.width = combinedCanvas.width * 2; // Double the width
-                flippedCanvas.height = combinedCanvas.height; // Same height
-
-                // Draw the combined square
-                flippedCtx.drawImage(combinedCanvas, 0, 0);
-
-                // Flip the combined square horizontally
-                flippedCtx.scale(-1, 1);
-                flippedCtx.drawImage(combinedCanvas, -combinedCanvas.width, 0);
-
-                // Step 7: Flip the long rectangle and place it below to form a large square
-                var largeSquareCanvas = document.createElement('canvas');
-                var largeSquareCtx = largeSquareCanvas.getContext('2d');
-                largeSquareCanvas.width = flippedCanvas.width; // Same width as flipped rectangle
-                largeSquareCanvas.height = flippedCanvas.height * 2; // Double the height for the square
-
-                // Draw the flipped long rectangle
-                largeSquareCtx.drawImage(flippedCanvas, 0, 0);
-
-                // Flip and place the rectangle below to form a large square
-                largeSquareCtx.scale(-1, 1);
-                largeSquareCtx.drawImage(flippedCanvas, -flippedCanvas.width, flippedCanvas.height);
-
-                // Display the large square result
-                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-                ctx.drawImage(largeSquareCanvas, 0, 0); // Draw the large square on the main canvas
 
                 // Enable the save button
                 saveButton.disabled = false;
