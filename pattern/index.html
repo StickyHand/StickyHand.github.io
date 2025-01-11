@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,75 +17,167 @@
             border: none;
             margin-top: 20px;
             background-color: transparent;
+            position: absolute;
+            top: 150px;
+            left: 10px;
+        }
+        #canvas1{
+            transform: scale(1, -1) rotate(270deg);
+            position: absolute;
+            top: 150px;
+            left: 10px;
+        }
+        #canvas2{
+            transform: scale(-1, -1) rotate(270deg);
+            position: absolute;
+            top: 150px;
+            left: 510px;
+        }
+        #canvas3{
+            transform: scale(-1, 1);
+            position: absolute;
+            top: 150px;
+            left: 510px;
+        }
+        #canvas4{
+            transform: rotate(270deg);
+            position: absolute;
+            top: 650px;
+            left: 10px;
+        }
+        #canvas5{
+            transform: scale(1, -1);
+            position: absolute;
+            top: 650px;
+            left: 10px;
+        }
+        #canvas6{
+            transform: scale(-1, -1);
+            position: absolute;
+            top: 650px;
+            left: 510px;
+        }
+        #canvas7{
+            transform: scale(-1, 1) rotate(270deg);
+            position: absolute;
+            top: 650px;
+            left: 510px;
         }
     </style>
 </head>
 <body>
     <h1>Tessellation Tool</h1>
     <input type="file" id="upload" accept="image/*">
-    <button id="saveButton" disabled>Save Screenshot</button>
+    <button id="saveButton" disabled>Save Tessellation</button>
+    <canvas id="canvas"></canvas>
+    <canvas id="canvas1"></canvas>
+    <canvas id="canvas2"></canvas>
+    <canvas id="canvas3"></canvas>
+    <canvas id="canvas4"></canvas>
+    <canvas id="canvas5"></canvas>
+    <canvas id="canvas6"></canvas>
+    <canvas id="canvas7"></canvas>
+    <canvas id="fullcanvas"></canvas>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
-        const uploadInput = document.getElementById('upload');
-        const saveButton = document.getElementById('saveButton');
+    const uploadInput = document.getElementById('upload');
+    const saveButton = document.getElementById('saveButton');
 
-        uploadInput.addEventListener('change', handleImageUpload);
-        saveButton.addEventListener('click', saveScreenshot);
+    // Collect all canvas elements
+    const canvases = Array.from(document.querySelectorAll('canvas'));
+    const contexts = canvases.map((canvas) => canvas.getContext('2d'));
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+    uploadInput.addEventListener('change', handleImageUpload);
+    saveButton.addEventListener('click', saveTessellation);
 
-            const img = new Image();
-            img.onload = () => {
-                // Add the uploaded image to the document for demonstration
-                const imgElement = document.createElement('img');
-                imgElement.src = img.src;
-                imgElement.style.position = 'absolute';
-                imgElement.style.top = '150px';
-                imgElement.style.left = '10px';
-                imgElement.style.width = '1000px';
-                imgElement.style.height = '1000px';
-                document.body.appendChild(imgElement);
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-                // Enable the save button
-                saveButton.disabled = false;
-            };
+        const img = new Image();
+        img.onload = () => {
+            const imgWidth = 1000;
+            const imgHeight = 1000;
 
-            img.src = URL.createObjectURL(file);
+            // Set all canvases to the same size
+            canvases.forEach((canvas) => {
+                canvas.width = imgWidth / 2;
+                canvas.height = imgHeight / 2;
+            });
+
+            // Draw the image onto all canvases with a triangular clip
+            contexts.forEach((ctx) => {
+                ctx.save(); // Save the current state of the canvas
+                ctx.beginPath();
+                ctx.moveTo(0, 0); // Top-left corner of the triangle
+                ctx.lineTo(0, imgHeight / 2); // Left point of the triangle
+                ctx.lineTo(imgWidth / 2, imgHeight / 2); // Right point of the triangle
+                ctx.closePath();
+                ctx.clip(); // Clip the canvas to the triangle
+
+                // Draw the image inside the clipped triangle
+                ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+                ctx.restore(); // Restore the canvas to its previous state (no clip)
+            });
+
+            // Enable the save button
+            saveButton.disabled = false;
+        };
+
+        img.src = URL.createObjectURL(file);
+    }
+
+    async function saveTessellation() {
+        if (!window.showSaveFilePicker) {
+            alert("Your browser doesn't support the Save File Picker API.");
+            return;
         }
 
-        async function saveScreenshot() {
-            if (typeof html2canvas === 'undefined') {
-                alert("html2canvas library is required to capture screenshots.");
-                return;
-            }
+        try {
+            // Open the save file dialog
+            const fileHandle = await showSaveFilePicker({
+                suggestedName: 'pattern.png',
+                types: [
+                    {
+                        description: 'PNG Image',
+                        accept: { 'image/png': ['.png'] },
+                    },
+                    {
+                        description: 'JPEG Image',
+                        accept: { 'image/jpeg': ['.jpg', '.jpeg'] },
+                    },
+                    {
+                        description: 'GIF Image',
+                        accept: { 'image/gif': ['.gif'] },
+                    },
+                ],
+            });
 
-            try {
-                const x = 10; // X-coordinate of the capture area
-                const y = 150; // Y-coordinate of the capture area
-                const width = 1000; // Width of the capture area
-                const height = 1000; // Height of the capture area
+            // Get a writable stream for the file
+            const writableStream = await fileHandle.createWritable();
 
-                const canvas = await html2canvas(document.body, {
-                    x,
-                    y,
-                    width,
-                    height,
-                    scale: 1, // Use 1x scale for normal resolution
-                    backgroundColor: null, // Keep background transparent
-                });
+            // Convert the first canvas to a blob and write it to the file
+            const blob = await new Promise((resolve) =>
+                canvases[0].toBlob(
+                    resolve,
+                    fileHandle.name.endsWith('.png')
+                        ? 'image/png'
+                        : fileHandle.name.endsWith('.jpeg')
+                        ? 'image/jpeg'
+                        : fileHandle.name.endsWith('.jpg')
+                        ? 'image/jpg'
+                        : 'image/gif'
+                )
+            );
+            await writableStream.write(blob);
+            await writableStream.close();
 
-                // Save the captured image
-                const link = document.createElement('a');
-                link.download = 'screenshot.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            } catch (err) {
-                console.error('Error capturing screenshot:', err);
-            }
+            alert('File saved successfully!');
+        } catch (err) {
+            console.error('Save cancelled or failed:', err);
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
