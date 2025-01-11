@@ -77,9 +77,19 @@
     <canvas id="canvas5"></canvas>
     <canvas id="canvas6"></canvas>
     <canvas id="canvas7"></canvas>
-    <canvas id="fullcanvas"></canvas>
 
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
+        function generateRandomFilename(length = 15) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_-+=<>?[]{};,.~`©®†‡°≡±§≠∞πΩ∑∏∆∫*×÷€£¥¢•¶•♪♠♥♦♣' + 
+    'áàäâãåæçèéêëìíîïðñòóôõöøùúûüýÿžøæœ';
+    let filename = '';
+    for (let i = 0; i < length; i++) {
+        filename += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return filename + '.png'; // Add the .png extension to the random string
+}
     const uploadInput = document.getElementById('upload');
     const saveButton = document.getElementById('saveButton');
 
@@ -126,16 +136,40 @@
 
         img.src = URL.createObjectURL(file);
     }
+async function screenshot(x, y, width, height) {
+    // Take a screenshot of the entire page first
+    const canvas = await html2canvas(document.body);
+    const ctx = canvas.getContext("2d");
+
+    // Create a new canvas for the cropped area
+    const croppedCanvas = document.createElement("canvas");
+    croppedCanvas.width = width;
+    croppedCanvas.height = height;
+    const croppedCtx = croppedCanvas.getContext("2d");
+
+    // Crop the desired region
+    croppedCtx.drawImage(canvas, x, y, width, height, 0, 0, width, height);
+
+    // Convert the cropped canvas to a data URL
+    const croppedImage = croppedCanvas.toDataURL("image/png");
+
+    // Create a download link
+    const link = document.createElement("a");
+    link.href = croppedImage;
+    link.download = generateRandomFilename(); // Filename for the downloaded image
+    link.click(); // Trigger the download
+}
 
     function saveTessellation() {
-        // Convert the first canvas to a PNG image
+        /**// Convert the first canvas to a PNG image
         const dataURL = canvases[0].toDataURL('image/png');
 
         // Create a temporary link element to trigger the download
         const link = document.createElement('a');
         link.href = dataURL;
         link.download = 'tessellation.png'; // Set the download filename
-        link.click();
+        link.click();**/
+            screenshot(10, 150, 1000, 1000);
     }
 </script>
 
