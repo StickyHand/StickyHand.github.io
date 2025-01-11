@@ -69,6 +69,7 @@
     <h1>Tessellation Tool</h1>
     <input type="file" id="upload" accept="image/*">
     <button id="saveButton" disabled>Save Tessellation</button>
+<canvas>
     <canvas id="canvas"></canvas>
     <canvas id="canvas1"></canvas>
     <canvas id="canvas2"></canvas>
@@ -77,7 +78,7 @@
     <canvas id="canvas5"></canvas>
     <canvas id="canvas6"></canvas>
     <canvas id="canvas7"></canvas>
-    <canvas id="fullcanvas"></canvas>
+</canvas>
 
     <script>
     const uploadInput = document.getElementById('upload');
@@ -100,13 +101,17 @@
             const imgHeight = 1000;
 
             // Set all canvases to the same size
-            canvases.forEach((canvas) => {
+            canvases.slice(1).forEach((canvas) => {
                 canvas.width = imgWidth / 2;
                 canvas.height = imgHeight / 2;
             });
 
-            // Draw the image onto all canvases with a triangular clip
-            contexts.forEach((ctx) => {
+            // Draw the image onto the first canvas (canvas[0])
+            contexts[0].drawImage(img, 0, 0, imgWidth, imgHeight);
+
+            // Draw the image onto all other canvases (excluding canvas[0]) with a triangular clip
+            canvases.slice(1).forEach((canvas, index) => {
+                const ctx = contexts[index + 1]; // Skip the first canvas (canvas[0])
                 ctx.save(); // Save the current state of the canvas
                 ctx.beginPath();
                 ctx.moveTo(0, 0); // Top-left corner of the triangle
@@ -127,55 +132,15 @@
         img.src = URL.createObjectURL(file);
     }
 
-    async function saveTessellation() {
-        if (!window.showSaveFilePicker) {
-            alert("Your browser doesn't support the Save File Picker API.");
-            return;
-        }
+    function saveTessellation() {
+        // Convert the first canvas to a PNG image
+        const dataURL = canvases[0].toDataURL('image/png');
 
-        try {
-            // Open the save file dialog
-            const fileHandle = await showSaveFilePicker({
-                suggestedName: 'pattern.png',
-                types: [
-                    {
-                        description: 'PNG Image',
-                        accept: { 'image/png': ['.png'] },
-                    },
-                    {
-                        description: 'JPEG Image',
-                        accept: { 'image/jpeg': ['.jpg', '.jpeg'] },
-                    },
-                    {
-                        description: 'GIF Image',
-                        accept: { 'image/gif': ['.gif'] },
-                    },
-                ],
-            });
-
-            // Get a writable stream for the file
-            const writableStream = await fileHandle.createWritable();
-
-            // Convert the first canvas to a blob and write it to the file
-            const blob = await new Promise((resolve) =>
-                canvases[0].toBlob(
-                    resolve,
-                    fileHandle.name.endsWith('.png')
-                        ? 'image/png'
-                        : fileHandle.name.endsWith('.jpeg')
-                        ? 'image/jpeg'
-                        : fileHandle.name.endsWith('.jpg')
-                        ? 'image/jpg'
-                        : 'image/gif'
-                )
-            );
-            await writableStream.write(blob);
-            await writableStream.close();
-
-            alert('File saved successfully!');
-        } catch (err) {
-            console.error('Save cancelled or failed:', err);
-        }
+        // Create a temporary link element to trigger the download
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = 'tessellation.png'; // Set the download filename
+        link.click();
     }
 </script>
 
