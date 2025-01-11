@@ -27,6 +27,18 @@
             top: 150px;
             left: 10px;
         }
+        #canvas2{
+            transform: scale(-1, -1) rotate(270deg);
+            position: absolute;
+            top: 150px;
+            left: 510px;
+        }
+        #canvas3{
+            transform: scale(-1, 1);
+            position: absolute;
+            top: 150px;
+            left: 510px;
+        }
     </style>
 </head>
 <body>
@@ -35,34 +47,41 @@
     <button id="saveButton" disabled>Save Tessellation</button>
     <canvas id="canvas"></canvas>
     <canvas id="canvas1"></canvas>
+    <canvas id="canvas2"></canvas>
+    <canvas id="canvas3"></canvas>
+    <canvas id="canvas4"></canvas>
+    <canvas id="canvas5"></canvas>
+    <canvas id="canvas6"></canvas>
+    <canvas id="canvas7"></canvas>
 
     <script>
-        const uploadInput = document.getElementById('upload');
-        const saveButton = document.getElementById('saveButton');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        const canvas1 = document.getElementById('canvas1');
-        const ctx1 = canvas1.getContext('2d');
+    const uploadInput = document.getElementById('upload');
+    const saveButton = document.getElementById('saveButton');
 
-        uploadInput.addEventListener('change', handleImageUpload);
-        saveButton.addEventListener('click', saveTessellation);
+    // Collect all canvas elements
+    const canvases = Array.from(document.querySelectorAll('canvas'));
+    const contexts = canvases.map((canvas) => canvas.getContext('2d'));
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+    uploadInput.addEventListener('change', handleImageUpload);
+    saveButton.addEventListener('click', saveTessellation);
 
-            const img = new Image();
-            img.onload = () => {
-                var scaleFactor = 500 / Math.max(img.width, img.height);
-                var imgWidth = img.width * scaleFactor;
-                var imgHeight = img.height * scaleFactor;
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-                // Set canvas size to match the image size
-                canvas.width = canvas1.width = imgWidth/2;
-                canvas.height = canvas1.height = imgHeight/2;
+        const img = new Image();
+        img.onload = () => {
+            const imgWidth = 500;
+            const imgHeight = 500;
 
-                // Step 1: Clip the canvas to a right triangle
+            // Set all canvases to the same size
+            canvases.forEach((canvas) => {
+                canvas.width = imgWidth / 2;
+                canvas.height = imgHeight / 2;
+            });
+
+            // Draw the image onto all canvases with a triangular clip
+            contexts.forEach((ctx) => {
                 ctx.save(); // Save the current state of the canvas
                 ctx.beginPath();
                 ctx.moveTo(0, 0); // Top-left corner of the triangle
@@ -71,80 +90,69 @@
                 ctx.closePath();
                 ctx.clip(); // Clip the canvas to the triangle
 
-                // Step 2: Draw the image inside the clipped triangle
+                // Draw the image inside the clipped triangle
                 ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
                 ctx.restore(); // Restore the canvas to its previous state (no clip)
+            });
 
-                ctx1.save(); // Save the current state of the canvas
-                ctx1.beginPath();
-                ctx1.moveTo(0, 0); // Top-left corner of the triangle
-                ctx1.lineTo(0, imgHeight / 2); // Left point of the triangle
-                ctx1.lineTo(imgWidth / 2, imgHeight / 2); // Right point of the triangle
-                ctx1.closePath();
-                ctx1.clip(); // Clip the canvas to the triangle
+            // Enable the save button
+            saveButton.disabled = false;
+        };
 
-                // Step 2: Draw the image inside the clipped triangle
-                ctx1.drawImage(img, 0, 0, imgWidth, imgHeight);
-                ctx1.restore(); // Restore the canvas to its previous state (no clip)
+        img.src = URL.createObjectURL(file);
+    }
 
-
-                // Enable the save button
-                saveButton.disabled = false;
-            };
-
-            img.src = URL.createObjectURL(file);
+    async function saveTessellation() {
+        if (!window.showSaveFilePicker) {
+            alert("Your browser doesn't support the Save File Picker API.");
+            return;
         }
 
-        async function saveTessellation() {
-            if (!window.showSaveFilePicker) {
-                alert("Your browser doesn't support the Save File Picker API.");
-                return;
-            }
+        try {
+            // Open the save file dialog
+            const fileHandle = await showSaveFilePicker({
+                suggestedName: 'pattern.png',
+                types: [
+                    {
+                        description: 'PNG Image',
+                        accept: { 'image/png': ['.png'] },
+                    },
+                    {
+                        description: 'JPEG Image',
+                        accept: { 'image/jpeg': ['.jpg', '.jpeg'] },
+                    },
+                    {
+                        description: 'GIF Image',
+                        accept: { 'image/gif': ['.gif'] },
+                    },
+                ],
+            });
 
-            try {
-                // Open the save file dialog
-                const fileHandle = await showSaveFilePicker({
-                    suggestedName: 'pattern.png',
-                    types: [
-                        {
-                            description: 'PNG Image',
-                            accept: { 'image/png': ['.png'] },
-                        },
-                        {
-                            description: 'JPEG Image',
-                            accept: { 'image/jpeg': ['.jpg', '.jpeg'] },
-                        },
-                        {
-                            description: 'GIF Image',
-                            accept: { 'image/gif': ['.gif'] },
-                        },
-                    ],
-                });
+            // Get a writable stream for the file
+            const writableStream = await fileHandle.createWritable();
 
-                // Get a writable stream for the file
-                const writableStream = await fileHandle.createWritable();
+            // Convert the first canvas to a blob and write it to the file
+            const blob = await new Promise((resolve) =>
+                canvases[0].toBlob(
+                    resolve,
+                    fileHandle.name.endsWith('.png')
+                        ? 'image/png'
+                        : fileHandle.name.endsWith('.jpeg')
+                        ? 'image/jpeg'
+                        : fileHandle.name.endsWith('.jpg')
+                        ? 'image/jpg'
+                        : 'image/gif'
+                )
+            );
+            await writableStream.write(blob);
+            await writableStream.close();
 
-                // Convert canvas to blob and write it to the file
-                const blob = await new Promise((resolve) =>
-                    canvas.toBlob(
-                        resolve,
-                        fileHandle.name.endsWith('.png')
-                            ? 'image/png'
-                            : fileHandle.name.endsWith('.jpeg')
-                            ? 'image/jpeg'
-                            : fileHandle.name.endsWith('.jpg')
-                            ? 'image/jpg'
-                            : 'image/gif'
-                    )
-                );
-                await writableStream.write(blob);
-                await writableStream.close();
-
-                alert('File saved successfully!');
-            } catch (err) {
-                console.error('Save cancelled or failed:', err);
-            }
+            alert('File saved successfully!');
+        } catch (err) {
+            console.error('Save cancelled or failed:', err);
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
