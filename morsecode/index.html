@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morse Code Encoder and Decoder</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 2.2em;
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 700px;
+            width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        h2 {
+            font-size: 1.5em;
+            color: #2c3e50;
+        }
+        label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        textarea, p {
+            width: calc(100% - 40px);
+            min-height: 80px;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 10px 10px;
+            resize: vertical;
+            display: block;
+        }
+        p {
+            background-color: #ecf0f1;
+            color: #34495e;
+            border: 1px solid #bdc3c7;
+            min-height: 80px;
+            line-height: 1.5;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            font-size: 1em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin: 10px auto;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .section-divider {
+            margin: 40px 0;
+            border-top: 2px solid #ecf0f1;
+        }
+
+        /* LOADING OVERLAY */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.65);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease;
+            cursor: wait; /* Make the cursor show loading */
+        }
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid black;
+            border-top: 5px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.5s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Morse Code Encoder and Decoder</h1>
+
+        <!-- Morse Code Decoder -->
+        <h2>Decode Morse Code</h2>
+        <label for="morseInput">Enter Morse Code:</label>
+        <textarea id="morseInput" placeholder="e.g. .... . .-.. .-.. ---"></textarea>
+        <button onclick="handleAction(decodeMorse)">Decode</button>
+        <h3>Decoded Message:</h3>
+        <p id="decodedMessage"></p>
+
+        <div class="section-divider"></div>
+
+        <!-- Morse Code Encoder -->
+        <h2>Encode Text to Morse Code</h2>
+        <label for="textInput">Enter Text:</label>
+        <textarea id="textInput" placeholder="e.g. Hello World!"></textarea>
+        <button onclick="handleAction(encodeMorse)">Encode</button>
+        <h3>Morse Code:</h3>
+        <p id="encodedMessage"></p>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader"></div>
+    </div>
+
+    <script>
+        const morseCode = {
+            '.-': 'A', '-...': 'B', '-.-.': 'C', '-..': 'D', '.': 'E',
+            '..-.': 'F', '--.': 'G', '....': 'H', '..': 'I', '.---': 'J',
+            '-.-': 'K', '.-..': 'L', '--': 'M', '-.': 'N', '---': 'O',
+            '.--.': 'P', '--.-': 'Q', '.-.': 'R', '...': 'S', '-': 'T',
+            '..-': 'U', '...-': 'V', '.--': 'W', '-..-': 'X', '-.--': 'Y',
+            '--..': 'Z', '-----': '0', '.----': '1', '..---': '2', '...--': '3',
+            '....-': '4', '.....': '5', '-....': '6', '--...': '7', '---..': '8',
+            '----.': '9', '/': ' ', '.-.-.-': '.', '--..--': ',', '..--..': '?',
+            '-.-.--': '!', '-....-': '-', '.----.': "'", '-.-.-.': ';', '-..-.': '/',
+            '.-..-.': '"', '.--.-.': '@', '---...': ':', '-.-.-': '=', '-.--.-': '(',
+            '-.--.-': ')', '.-.-.': '+', '---.': '&', '...-..-': '$', '.--.-': ' '
+        };
+
+        const textToMorse = Object.keys(morseCode).reduce((obj, key) => {
+            obj[morseCode[key]] = key;
+            return obj;
+        }, {});
+        var randomTime = Math.random()*1000+500;
+        function handleAction(action) {
+            showLoading();
+            setTimeout(() => {
+                action();
+                hideLoading();
+		randomTime = Math.random()*1000+500;
+            }, randomTime);
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.body.style.cursor = 'wait';  // Change cursor to loading
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+            document.body.style.cursor = 'default';  // Reset cursor to normal
+        }
+
+        function decodeMorse() {
+            const morseInput = document.getElementById('morseInput').value.trim();
+            const morseArray = morseInput.split(' ');
+            let decodedMessage = '';
+
+            morseArray.forEach(symbol => {
+                decodedMessage += morseCode[symbol] || '';
+            });
+
+            document.getElementById('decodedMessage').textContent = decodedMessage;
+        }
+
+        function encodeMorse() {
+            const textInput = document.getElementById('textInput').value.toUpperCase().trim();
+            let encodedMessage = '';
+
+            for (let char of textInput) {
+                if (char === ' ') {
+                    encodedMessage += '/ ';
+                } else if (textToMorse[char]) {
+                    encodedMessage += textToMorse[char] + ' ';
+                }
+            }
+
+            document.getElementById('encodedMessage').textContent = encodedMessage.trim();
+        }
+    </script>
+</body>
+</html>
