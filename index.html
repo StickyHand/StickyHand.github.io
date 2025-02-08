@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>New webpage</title>
+        <style>
+            *{
+                font-size: 15pt;
+                font-family: courier, monospace;
+            }
+        </style>
+    </head>
+    <body>
+<script>
+    var array = [
+        {
+            name: "editimage",
+            nickname: "Image Editor"
+        },
+        {
+            name: "morsecode",
+            nickname: "Morse Code Encrypter & Decrypter"
+        },
+        {
+            name: "type",
+            nickname: "Typing Fun"
+        },
+    ];
+    for(var i = 0; i < array.length; i ++){
+        document.body.innerHTML += "<a href='https://stickyhand.github.io/"+array[i].name+"'>"+array[i].nickname+"</a><br>";
+    }
+</script>
+
+    </body>
+</html>
