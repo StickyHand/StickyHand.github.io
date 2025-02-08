@@ -178,7 +178,7 @@
         '----.': '9', '/': ' ', '.-.-.-': '.', '--..--': ',', '..--..': '?',
         '-.-.--': '!', '-....-': '-', '.----.': "'", '-.-.-.': ';', '-..-.': '/',
         '.-..-.': '"', '.--.-.': '@', '---...': ':', '-.-.-': '=', '-.--.': '(',
-        '-.--.-': ')', '.-.-.': '+', '---.': '&', '...-..-': '$', '.--.-': ' ', '~' : '~'
+        '-.--.-': ')', '.-.-.': '+', '---.': '&', '...-..-': '$', '.--.-': ' ', '~' : '~', '\n': '\n'
 	    
     };
 
@@ -222,7 +222,7 @@
     function decodeMorse() {
         const morseInput = document.getElementById('morseInput').value.trim();
         // Ensure spaces around slashes
-        let formattedInput = morseInput.replace(/\//g, ' / ').replace(/\n/g, ' / ');
+        let formattedInput = morseInput.replace(/\//g, ' / ');
         let decodedMessage = formattedInput.split(' ').map(code => morseCode[code] || '').join('');
         document.getElementById('decodedMessage').textContent = decodedMessage;
     }
