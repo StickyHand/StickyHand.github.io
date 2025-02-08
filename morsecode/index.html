@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="shortcut icon" type="image/png" href="https://stickyhand.github.io/morsecode/shortcutico.png">
+    <link rel="shortcut icon" type="image/png" href="https://stickyhand.github.io/morsecode/shortcutico.png">
     <title>Morse Code Encoder and Decoder</title>
-	
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -16,12 +16,6 @@
             display: flex;
             justify-content: center;
         }
-        h1 {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 2.2em;
-            color: #2c3e50;
-        }
         .container {
             max-width: 700px;
             width: 90%;
@@ -31,6 +25,12 @@
             border-radius: 8px;
             box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
             position: relative;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2.2em;
+            color: #2c3e50;
         }
         h2 {
             font-size: 1.5em;
@@ -57,6 +57,7 @@
             border: 1px solid #bdc3c7;
             min-height: 80px;
             line-height: 1.5;
+            position: relative;
         }
         button {
             padding: 10px 20px;
@@ -73,12 +74,25 @@
         button:hover {
             background-color: #2980b9;
         }
-        .section-divider {
-            margin: 40px 0;
-            border-top: 2px solid #ecf0f1;
+        .copy-btn {
+            position: absolute;
+            right: 9px;
+            top: -10px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: "Courier", "Monospace";
+            font-size: 0.9em;
+            border-radius: 4px;
         }
-
-        /* LOADING OVERLAY */
+        .copy-btn:hover {
+            background: #27ae60;
+        }
+        .output-container {
+            position: relative;
+        }
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -92,7 +106,7 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.5s ease;
-            cursor: wait; /* Make the cursor show loading */
+            cursor: wait;
         }
         .loading-overlay.active {
             opacity: 1;
@@ -110,101 +124,118 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+
+	.material-symbols-outlined{
+	    font-size: 85%;
+	    position: relative;
+	    top: 2px;
+	    margin-right: 5px;
+	}
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Morse Code Encoder and Decoder</h1>
 
-        <!-- Morse Code Decoder -->
         <h2>Decode Morse Code</h2>
         <label for="morseInput">Enter Morse Code:</label>
         <textarea id="morseInput" placeholder="e.g. .... . .-.. .-.. ---"></textarea>
         <button onclick="handleAction(decodeMorse)">Decode</button>
         <h3>Decoded Message:</h3>
-        <p id="decodedMessage"></p>
+        <div class="output-container">
+            <p id="decodedMessage"></p>
+            <button class="copy-btn" id="decodedMessageCopy" onclick="copyText('decodedMessage')"><span class='material-symbols-outlined'>content_copy</span>Copy</button>
+        </div>
 
         <div class="section-divider"></div>
 
-        <!-- Morse Code Encoder -->
         <h2>Encode Text to Morse Code</h2>
         <label for="textInput">Enter Text:</label>
         <textarea id="textInput" placeholder="e.g. Hello World!"></textarea>
         <button onclick="handleAction(encodeMorse)">Encode</button>
         <h3>Morse Code:</h3>
-        <p id="encodedMessage"></p>
+        <div class="output-container">
+            <p id="encodedMessage"></p>
+            <button class="copy-btn" id="encodedMessageCopy" onclick="copyText('encodedMessage')"><span class='material-symbols-outlined'>content_copy</span>Copy</button>
+        </div>
     </div>
 
-    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loader"></div>
     </div>
 
     <script>
-        const morseCode = {
-            '.-': 'A', '-...': 'B', '-.-.': 'C', '-..': 'D', '.': 'E',
-            '..-.': 'F', '--.': 'G', '....': 'H', '..': 'I', '.---': 'J',
-            '-.-': 'K', '.-..': 'L', '--': 'M', '-.': 'N', '---': 'O',
-            '.--.': 'P', '--.-': 'Q', '.-.': 'R', '...': 'S', '-': 'T',
-            '..-': 'U', '...-': 'V', '.--': 'W', '-..-': 'X', '-.--': 'Y',
-            '--..': 'Z', '-----': '0', '.----': '1', '..---': '2', '...--': '3',
-            '....-': '4', '.....': '5', '-....': '6', '--...': '7', '---..': '8',
-            '----.': '9', '/': ' ', '.-.-.-': '.', '--..--': ',', '..--..': '?',
-            '-.-.--': '!', '-....-': '-', '.----.': "'", '-.-.-.': ';', '-..-.': '/',
-            '.-..-.': '"', '.--.-.': '@', '---...': ':', '-.-.-': '=', '-.--.-': '(',
-            '-.--.-': ')', '.-.-.': '+', '---.': '&', '...-..-': '$', '.--.-': ' '
-        };
+    const morseCode = {
+        '.-': 'A', '-...': 'B', '-.-.': 'C', '-..': 'D', '.': 'E',
+        '..-.': 'F', '--.': 'G', '....': 'H', '..': 'I', '.---': 'J',
+        '-.-': 'K', '.-..': 'L', '--': 'M', '-.': 'N', '---': 'O',
+        '.--.': 'P', '--.-': 'Q', '.-.': 'R', '...': 'S', '-': 'T',
+        '..-': 'U', '...-': 'V', '.--': 'W', '-..-': 'X', '-.--': 'Y',
+        '--..': 'Z', '-----': '0', '.----': '1', '..---': '2', '...--': '3',
+        '....-': '4', '.....': '5', '-....': '6', '--...': '7', '---..': '8',
+        '----.': '9', '/': ' ', '.-.-.-': '.', '--..--': ',', '..--..': '?',
+        '-.-.--': '!', '-....-': '-', '.----.': "'", '-.-.-.': ';', '-..-.': '/',
+        '.-..-.': '"', '.--.-.': '@', '---...': ':', '-.-.-': '=', '-.--.': '(',
+        '-.--.-': ')', '.-.-.': '+', '---.': '&', '...-..-': '$', '.--.-': ' '
+    };
 
-        const textToMorse = Object.keys(morseCode).reduce((obj, key) => {
-            obj[morseCode[key]] = key;
-            return obj;
-        }, {});
-        var randomTime = Math.random()*1000+500;
-        function handleAction(action) {
-            showLoading();
-            setTimeout(() => {
-                action();
-                hideLoading();
-		randomTime = Math.random()*1000+500;
-            }, randomTime);
-        }
+    const textToMorse = {};
+    for (let key in morseCode) {
+        textToMorse[morseCode[key]] = key;
+    }
+    textToMorse['’'] = textToMorse["'"];
+    textToMorse['‘'] = textToMorse["'"];
+    textToMorse['“'] = textToMorse['"'];
+    textToMorse['”'] = textToMorse['"'];
 
-        function showLoading() {
-            document.getElementById('loadingOverlay').classList.add('active');
-            document.body.style.cursor = 'wait';  // Change cursor to loading
-        }
+    function normalizeText(text) {
+        return text.replace(/[‘’]/g, "'").replace(/[“”]/g, '"');
+    }
 
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.remove('active');
-            document.body.style.cursor = 'default';  // Reset cursor to normal
-        }
+    function handleAction(action) {
+        showLoading();
+        setTimeout(() => {
+            action();
+            hideLoading();
+        }, 500);
+    }
 
-        function decodeMorse() {
-            const morseInput = document.getElementById('morseInput').value.trim();
-            const morseArray = morseInput.split(' ');
-            let decodedMessage = '';
+    function showLoading() {
+        document.getElementById('loadingOverlay').classList.add('active');
+        document.body.style.cursor = 'wait';
+    }
 
-            morseArray.forEach(symbol => {
-                decodedMessage += morseCode[symbol] || '';
+    function hideLoading() {
+        document.getElementById('loadingOverlay').classList.remove('active');
+        document.body.style.cursor = 'default';
+    }
+
+    function encodeMorse() {
+        const textInput = normalizeText(document.getElementById('textInput').value.toUpperCase().trim());
+        let encodedMessage = textInput.split('').map(char => textToMorse[char] || '').join(' ');
+        document.getElementById('encodedMessage').textContent = encodedMessage;
+    }
+
+    function decodeMorse() {
+        const morseInput = document.getElementById('morseInput').value.trim();
+        let decodedMessage = morseInput.split(' ').map(code => morseCode[code] || '').join('');
+        document.getElementById('decodedMessage').textContent = decodedMessage;
+    }
+
+    function copyText(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+            	document.getElementById(elementId+"Copy").innerHTML = "<span class='material-symbols-outlined'>check</span>Copied";
+                setTimeout(() => {
+            	    document.getElementById(elementId+"Copy").innerHTML = "<span class='material-symbols-outlined'>content_copy</span>Copy";
+            	}, 1500);
+            }).catch(err => {
+		alert("Sorry, failed to copy!");
+                console.error("Failed to copy:", err);
             });
-
-            document.getElementById('decodedMessage').textContent = decodedMessage;
         }
+</script>
 
-        function encodeMorse() {
-            const textInput = document.getElementById('textInput').value.toUpperCase().trim();
-            let encodedMessage = '';
-
-            for (let char of textInput) {
-                if (char === ' ') {
-                    encodedMessage += '/ ';
-                } else if (textToMorse[char]) {
-                    encodedMessage += textToMorse[char] + ' ';
-                }
-            }
-
-            document.getElementById('encodedMessage').textContent = encodedMessage.trim();
-        }
-    </script>
 </body>
 </html>
