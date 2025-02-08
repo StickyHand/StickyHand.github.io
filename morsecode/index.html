@@ -219,7 +219,9 @@
 
     function decodeMorse() {
         const morseInput = document.getElementById('morseInput').value.trim();
-        let decodedMessage = morseInput.split(' ').map(code => morseCode[code] || '').join('');
+        // Ensure spaces around slashes
+        let formattedInput = morseInput.replace(/\//g, ' / ').replace(/\n/g, ' / ');
+        let decodedMessage = formattedInput.split(' ').map(code => morseCode[code] || '').join('');
         document.getElementById('decodedMessage').textContent = decodedMessage;
     }
 
