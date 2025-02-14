@@ -32,27 +32,35 @@ margin-top: 5px;
 
 }
         button {
-            font-size: 20px;
-            padding: 10px;
+border: 5px solid white;
+outline: 2px solid black;
+            background: black;
+            color: white;
+            font-size: 15px;
+            padding: 5px;
             cursor: pointer;
         }
 </style>
-        <script>
-        function copyRandomDice() {
-            const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-            const randomDice = diceEmojis[Math.floor(Math.random() * diceEmojis.length)];
-            navigator.clipboard.writeText(randomDice).then(() => {
-                alert('Copied: ' + randomDice);
-            });
-        }
-    </script>
     </head>
     <body>
-        <button onclick="copyRandomDice()">Roll Dice</button>
+        <button onclick="copyRandomDice()" id="copy-dice">Roll Dice</button><br><br>
 <iframe src="https://docs.google.com/drawings/d/15tF911E5f-6ebA1l4Nn3OEPjrzlhAWhMZj2A_paIKps/edit?usp=sharing"></iframe>
 <iframe src="https://docs.google.com/drawings/d/1vx5zFwHblqWwgGOxin33W-_ZRWdu6AZnOsGPB2OSHyk/edit?usp=sharing"></iframe>
 <iframe src="https://docs.google.com/drawings/d/1ie-kiiO-ejgJodpqb54erc-FP-8U7Zfq-A54r6VmoRI/edit?usp=sharing"></iframe>
 <iframe src="https://docs.google.com/drawings/d/1xfIuNbIpw09fYscxIlOjav4ZVweV_CD9Jj0kjqsb9CA/edit?usp=sharing"></iframe>
 <iframe src="https://docs.google.com/drawings/d/1SHIyxWH-c8WKJzp88phGZFxuQx6l9i_I1FFaAX9KVP8/edit?usp=sharing"></iframe>
+        <script>
+        function copyRandomDice() {
+            const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+            const randomDice = diceEmojis[Math.floor(Math.random() * diceEmojis.length)];
+            navigator.clipboard.writeText(randomDice).then(() => {
+                console.log('Copied: ' + randomDice);
+                document.getElementById("copy-dice").textContent = "Rolled!";
+                setTimeout(function(){
+                    document.getElementById("copy-dice").textContent = "Roll Dice";
+                }, 1500);
+            });
+        }
+    </script>
     </body>
 </html>
