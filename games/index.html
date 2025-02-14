@@ -62,7 +62,7 @@ outline: 2px solid black;
             const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
             //const randomDice = diceEmojis[Math.floor(Math.random() * diceEmojis.length)];
             let randomDice = "";
-            var numDie = Number(document.getElementById("num-die"));
+            var numDie = Number(document.getElementById("num-die").value);
             if(numDie > 15) {
                 alert("Too many dice!");
                 return;
