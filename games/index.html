@@ -61,8 +61,8 @@ outline: 2px solid black;
         function copyRandomDice() {
             const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
             //const randomDice = diceEmojis[Math.floor(Math.random() * diceEmojis.length)];
-            const randomDice = "";
-            var numDie = Number(document.getElementById("num-die");
+            let randomDice = "";
+            var numDie = Number(document.getElementById("num-die"));
             if(numDie > 15) {
                 alert("Too many dice!");
                 return;
