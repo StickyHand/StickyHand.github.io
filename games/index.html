@@ -31,7 +31,7 @@ margin-right: 2.5px;
 margin-top: 5px;
 
 }
-        button {
+        button, input, label {
 border: 2px solid white;
             margin-right: 600px;
             margin-left: 600px;
@@ -41,12 +41,17 @@ outline: 2px solid black;
             color: white;
             font-size: 15px;
             padding: 5px;
-            cursor: pointer;
+            margin-top: 10px;
         }
+    button:hover{
+        cursor: pointer;
+    }
 </style>
     </head>
     <body>
         <button onclick="copyRandomDice()" id="copy-dice">Roll Dice</button>
+        <label>Number of Die to Roll:</label>
+        <input type="number" id="num-die" min="1" max="15" value="1">
 <iframe src="https://docs.google.com/drawings/d/15tF911E5f-6ebA1l4Nn3OEPjrzlhAWhMZj2A_paIKps/edit?usp=sharing"></iframe>
 <iframe src="https://docs.google.com/drawings/d/1vx5zFwHblqWwgGOxin33W-_ZRWdu6AZnOsGPB2OSHyk/edit?usp=sharing"></iframe>
 <iframe src="https://docs.google.com/drawings/d/1ie-kiiO-ejgJodpqb54erc-FP-8U7Zfq-A54r6VmoRI/edit?usp=sharing"></iframe>
@@ -55,7 +60,20 @@ outline: 2px solid black;
         <script>
         function copyRandomDice() {
             const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-            const randomDice = diceEmojis[Math.floor(Math.random() * diceEmojis.length)];
+            //const randomDice = diceEmojis[Math.floor(Math.random() * diceEmojis.length)];
+            const randomDice = "";
+            var numDie = Number(document.getElementById("num-die");
+            if(numDie > 15) {
+                alert("Too many dice!");
+                return;
+            }
+            if(numDie < 1) {
+                alert("Too few dice!");
+                return;
+            }
+            for(var i = 0; i < numDie; i ++) {
+                randomDice += diceEmojis[Math.floor(Math.random() * diceEmojis.length)];
+            }
             navigator.clipboard.writeText(randomDice).then(() => {
                 console.log('Copied: ' + randomDice);
                 document.getElementById("copy-dice").textContent = "Rolled!";
