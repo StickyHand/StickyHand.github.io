@@ -214,10 +214,12 @@
     }
 
     function encodeMorse() {
-        const textInput = normalizeText(document.getElementById('textInput').value.toUpperCase().trim());
-        let encodedMessage = textInput.split('').map(char => textToMorse[char] || '').join(' ');
-        document.getElementById('encodedMessage').textContent = encodedMessage;
-    }
+    const textInput = normalizeText(document.getElementById('textInput').value.toUpperCase().trim());
+    let encodedMessage = textInput.split(' ').map(word => 
+        word.split('').map(char => textToMorse[char] || '').join(' ')
+    ).join(' / ');  // <-- Adds `/` between words
+    document.getElementById('encodedMessage').textContent = encodedMessage;
+}
 
     function decodeMorse() {
         const morseInput = document.getElementById('morseInput').value.trim();
