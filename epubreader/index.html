@@ -25,8 +25,9 @@
             display: flex;
             justify-content: center;
             margin-top: 10px;
+            align-items: center;
         }
-        .nav-buttons button {
+        .nav-buttons button, .nav-buttons input {
             padding: 10px;
             margin: 0 5px;
             font-size: 16px;
@@ -40,6 +41,8 @@
     <div id="viewer"></div>
     <div class="nav-buttons">
         <button id="prevButton">Previous</button>
+        <!-- Page number input -->
+        <input type="number" id="pageInput" placeholder="Page number" />
         <button id="nextButton">Next</button>
     </div>
 
@@ -48,8 +51,10 @@
         const fileInput = document.getElementById('fileInput');
         const prevButton = document.getElementById('prevButton');
         const nextButton = document.getElementById('nextButton');
+        const pageInput = document.getElementById('pageInput');
 
         let rendition;
+        let currentPage = 0; // Track current page
 
         // Function to load the EPUB file
         function loadEPUB(arrayBuffer) {
@@ -88,6 +93,7 @@
         nextButton.addEventListener('click', function() {
             if (rendition) {
                 rendition.next();
+                currentPage++;
             }
         });
 
@@ -95,6 +101,25 @@
         prevButton.addEventListener('click', function() {
             if (rendition) {
                 rendition.prev();
+                currentPage--;
+            }
+        });
+
+        // Navigate to the page entered in the input
+        pageInput.addEventListener('change', function() {
+            const newPageNum = parseInt(pageInput.value);
+            if (rendition && !isNaN(newPageNum) && newPageNum !== currentPage) {
+                const pageDiff = newPageNum - currentPage;
+                if (pageDiff > 0) {
+                    for (let i = 0; i < pageDiff; i++) {
+                        rendition.next();
+                    }
+                } else {
+                    for (let i = 0; i < Math.abs(pageDiff); i++) {
+                        rendition.prev();
+                    }
+                }
+                currentPage = newPageNum;
             }
         });
     </script>
