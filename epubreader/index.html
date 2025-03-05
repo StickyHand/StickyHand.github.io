@@ -47,81 +47,88 @@
     </div>
 
     <script>
-        const viewer = document.getElementById('viewer');
-        const fileInput = document.getElementById('fileInput');
-        const prevButton = document.getElementById('prevButton');
-        const nextButton = document.getElementById('nextButton');
-        const pageInput = document.getElementById('pageInput');
+    const viewer = document.getElementById('viewer');
+    const fileInput = document.getElementById('fileInput');
+    const prevButton = document.getElementById('prevButton');
+    const nextButton = document.getElementById('nextButton');
+    const pageInput = document.getElementById('pageInput');
 
-        let rendition;
-        let currentPage = 0; // Track current page
+    let rendition;
+    let currentPage = 1; // Start at page 1
 
-        // Function to load the EPUB file
-        function loadEPUB(arrayBuffer) {
-            try {
-                const book = ePub(arrayBuffer);
-                rendition = book.renderTo("viewer", {
-                    width: "100%",
-                    height: "100%",
-                    spread: "always"  // Enable spread mode to show two pages at once
-                });
+    function loadEPUB(arrayBuffer) {
+        try {
+            const book = ePub(arrayBuffer);
+            rendition = book.renderTo("viewer", {
+                width: "100%",
+                height: "100%",
+                spread: "always"
+            });
 
-                rendition.display().then(function() {
-                    console.log("EPUB rendered successfully");
-                }).catch(function(error) {
-                    console.error("Error rendering EPUB:", error);
-                });
-            } catch (error) {
-                console.error("Error loading EPUB:", error);
-            }
+            rendition.display().then(() => {
+                console.log("EPUB rendered successfully");
+                updatePageNumber();
+            }).catch(error => {
+                console.error("Error rendering EPUB:", error);
+            });
+
+            // Update the page number on every navigation
+            rendition.on("relocated", updatePageNumber);
+        } catch (error) {
+            console.error("Error loading EPUB:", error);
         }
+    }
 
-        // When the user selects an EPUB file
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const arrayBuffer = event.target.result;
-                    loadEPUB(arrayBuffer);
-                };
-                reader.readAsArrayBuffer(file);
-            }
-        });
+    function updatePageNumber() {
+        pageInput.value = currentPage;
+    }
 
-        // Navigate to the next spread (two pages)
-        nextButton.addEventListener('click', function() {
-            if (rendition) {
-                rendition.next();
-                currentPage++;
-            }
-        });
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const arrayBuffer = event.target.result;
+                loadEPUB(arrayBuffer);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    });
 
-        // Navigate to the previous spread (two pages)
-        prevButton.addEventListener('click', function() {
-            if (rendition) {
-                rendition.prev();
-                currentPage--;
-            }
-        });
+    nextButton.addEventListener('click', function() {
+        if (rendition) {
+            rendition.next();
+            currentPage++;
+            updatePageNumber();
+        }
+    });
 
-        // Navigate to the page entered in the input
-        pageInput.addEventListener('change', function() {
-            const newPageNum = parseInt(pageInput.value);
-            if (rendition && !isNaN(newPageNum) && newPageNum !== currentPage) {
-                const pageDiff = newPageNum - currentPage;
-                if (pageDiff > 0) {
-                    for (let i = 0; i < pageDiff; i++) {
-                        rendition.next();
-                    }
-                } else {
-                    for (let i = 0; i < Math.abs(pageDiff); i++) {
-                        rendition.prev();
-                    }
+    prevButton.addEventListener('click', function() {
+        if (rendition && currentPage > 1) {
+            rendition.prev();
+            currentPage--;
+            updatePageNumber();
+        }
+    });
+
+    pageInput.addEventListener('change', function() {
+        const newPageNum = parseInt(pageInput.value);
+        if (rendition && !isNaN(newPageNum) && newPageNum > 0) {
+            const pageDiff = newPageNum - currentPage;
+            if (pageDiff > 0) {
+                for (let i = 0; i < pageDiff; i++) {
+                    rendition.next();
                 }
-                currentPage = newPageNum;
+            } else {
+                for (let i = 0; i < Math.abs(pageDiff); i++) {
+                    rendition.prev();
+                }
             }
-        });
-    </script>
+            currentPage = newPageNum;
+            updatePageNumber();
+        }
+    });
+</script>
+
 </body>
 </html>
