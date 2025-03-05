@@ -52,11 +52,23 @@ outline: 2px solid black;
         <button onclick="copyRandomDice()" id="copy-dice">Roll Dice</button>
         <label>Number of Die to Roll:</label>
         <input type="number" id="num-die" min="1" max="15" value="1">
-<iframe src="https://docs.google.com/drawings/d/15tF911E5f-6ebA1l4Nn3OEPjrzlhAWhMZj2A_paIKps/edit?usp=sharing"></iframe>
-<iframe src="https://docs.google.com/drawings/d/1vx5zFwHblqWwgGOxin33W-_ZRWdu6AZnOsGPB2OSHyk/edit?usp=sharing"></iframe>
-<iframe src="https://docs.google.com/drawings/d/1ie-kiiO-ejgJodpqb54erc-FP-8U7Zfq-A54r6VmoRI/edit?usp=sharing"></iframe>
-<iframe src="https://docs.google.com/drawings/d/1xfIuNbIpw09fYscxIlOjav4ZVweV_CD9Jj0kjqsb9CA/edit?usp=sharing"></iframe>
-<iframe src="https://docs.google.com/drawings/d/1SHIyxWH-c8WKJzp88phGZFxuQx6l9i_I1FFaAX9KVP8/edit?usp=sharing"></iframe>
+        <script>
+            var games = [
+                "https://docs.google.com/drawings/d/15tF911E5f-6ebA1l4Nn3OEPjrzlhAWhMZj2A_paIKps/edit?usp=sharing",
+                "https://docs.google.com/drawings/d/1vx5zFwHblqWwgGOxin33W-_ZRWdu6AZnOsGPB2OSHyk/edit?usp=sharing",
+                "https://docs.google.com/drawings/d/1ie-kiiO-ejgJodpqb54erc-FP-8U7Zfq-A54r6VmoRI/edit?usp=sharing",
+                "https://docs.google.com/drawings/d/1xfIuNbIpw09fYscxIlOjav4ZVweV_CD9Jj0kjqsb9CA/edit?usp=sharing",
+                "https://docs.google.com/drawings/d/1SHIyxWH-c8WKJzp88phGZFxuQx6l9i_I1FFaAX9KVP8/edit?usp=sharing",
+                "https://docs.google.com/drawings/d/1fbGTBSfDvs8JycDRJ9kB0rQ4nUjvFjm8fqlFsgCRanQ/edit?usp=sharing",
+                "https://docs.google.com/drawings/d/175R2hHzr-8L3J6HCLbWpq97M7kNaO40XtlSp7hzRvFw/edit?usp=sharing",
+                "https://docs.google.com/drawings/d/1DAuZI08sPEmo5YQL5UctGbOzsFXIlsM8I56Bkk0uXQY/edit?usp=sharing",
+            ];
+            for(var i = 0; i < games.length; i ++) {
+                var j = document.createElement("iframe");
+                j.src = games[i];
+                document.appendChild(j);
+            }
+        </script>
         <script>
         function copyRandomDice() {
             const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
