@@ -181,7 +181,7 @@
         '----.': '9', '/': ' ', '.-.-.-': '.', '--..--': ',', '..--..': '?',
         '-.-.--': '!', '-....-': '-', '.----.': "'", '-.-.-.': ';', '-..-.': '/',
         '.-..-.': '"', '.--.-.': '@', '---...': ':', '-.-.-': '=', '-.--.': '(',
-        '-.--.-': ')', '.-.-.': '+', '---.': '&', '...-..-': '$', '.--.-': ' ', '~' : '~', '\n' : '\n'
+        '-.--.-': ')', '.-.-.': '+', '---.': '&', '...-..-': '$', '.--.-': ' ', '~' : '~'
 	    
     };
 
@@ -218,19 +218,24 @@
 
     function encodeMorse() {
     const textInput = normalizeText(document.getElementById('textInput').value.toUpperCase().trim());
-    let encodedMessage = textInput.split(' ').map(word => 
-        word.split('').map(char => textToMorse[char] || '').join(' ')
-    ).join(' / ');  // <-- Adds `/` between words
-    document.getElementById('encodedMessage').textContent = encodedMessage;
+    let encodedMessage = textInput.split('\n').map(line =>
+        line.split(' ').map(word => 
+            word.split('').map(char => textToMorse[char] || '').join(' ')
+        ).join(' / ')
+    ).join('\n');  // Preserve new lines
+    document.getElementById('encodedMessage').innerHTML = encodedMessage.replace(/\n/g, '<br>'); // Display new lines
 }
 
-    function decodeMorse() {
-        const morseInput = document.getElementById('morseInput').value.trim();
-        // Ensure spaces around slashes
-        let formattedInput = morseInput.replace(/\//g, ' / ').replace(/…/g, '...');
-        let decodedMessage = formattedInput.split(' ').map(code => morseCode[code] || '').join('');
-        document.getElementById('decodedMessage').textContent = decodedMessage;
-    }
+function decodeMorse() {
+    const morseInput = document.getElementById('morseInput').value.trim();
+    let formattedInput = morseInput.replace(/\//g, ' / ').replace(/…/g, '...');
+    let decodedMessage = formattedInput.split('\n').map(line =>
+        line.split(' ').map(code => morseCode[code] || '').join('')
+    ).join('\n');  // Preserve new lines
+    document.getElementById('decodedMessage').innerHTML = decodedMessage.replace(/\n/g, '<br>'); // Display new lines
+}
+
+	    
 
     function copyText(elementId) {
             const text = document.getElementById(elementId).textContent;
