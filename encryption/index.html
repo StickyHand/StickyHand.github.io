@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Encryption</title>
+        <style>
+            *{
+                margin: 0;
+                padding: 0;
+                outline-color: transparent;
+            }
+            
+            .page{
+                display: grid;
+                position: relative;
+                background: antiquewhite;
+                border: 2px solid sienna;
+                border-radius: 20px;
+                top: 25px;
+                left: 25px;
+                width: calc(100vw - 50px);
+                height: 450px;
+                margin-bottom: 50px;
+                max-width: 700px;
+                min-width: 400px;
+                box-shadow: 4px 4px 8px rgba(160, 82, 45, 0.5);
+            }
+            form {
+                margin: 10px;
+            }
+            h1{
+                color: transparent;
+                height: 50px;
+                text-align: center;
+                font: bold 40px sans-serif;
+                line-height: 50px;
+                margin: 10px;
+                border: 2px solid sienna;
+                border-radius: 50px 5px;
+                transition: 500ms;
+                -webkit-text-stroke: 1.6px sienna;
+            }
+            h1:hover{
+                border-radius: 5px 50px;
+            }
+            
+            input{
+                width: calc(100% - 1.5px);
+                background: none;
+                border: 2px solid sienna;
+                border-radius: 10px;
+                margin-bottom: 5px;
+                padding: 2px;
+                color: sienna;
+                transition: 500ms;
+            }
+            .output{
+                margin-left: 10px;
+                width: calc(100% - 25px);
+                height: 40px;
+                background: none;
+                border: 2px solid sienna;
+                border-radius: 10px;
+                overflow: auto;
+                font-family: monospace;
+                transition: 500ms;
+                color: sienna;
+            }
+            input:focus, .output:focus{
+                outline: 1px solid white;
+                border-radius: 0;
+            }
+            button{
+                color: sienna;
+                background: none;
+                padding: 2px;
+                border: 2px solid sienna;
+                border-radius: 10px;
+                transition: 500ms;
+            }
+            button:hover{
+                outline: 1px solid white;
+                cursor: pointer;
+                border-radius: 0;
+            }
+            button:active{
+                transition: 100ms;
+                transform: scale(1.25);
+            }
+            .seperator{
+                color:sienna;
+                border: 1px solid sienna;
+                margin-top:10px;
+                margin-bottom: 10px;
+                height: 0px;
+                padding-left: 10px;
+                font-family: sans-serif;
+            }
+            ::placeholder{
+                color: sienna;
+                opacity: 0.5;
+                user-select: none;
+            }
+            ::selection{
+                background: chocolate;
+                color: white;
+            }
+            ::-webkit-scrollbar{
+                width: 10px;
+                height: 10px;
+                background-color: antiquewhite;
+            }
+            ::-webkit-scrollbar-thumb{
+                background-color: sienna;
+                border-radius: 5px;
+            }
+            .output::-webkit-scrollbar{
+                width: 10px;
+                height: 10px;
+                background-color: rgba(160, 82, 45, 0.2);
+            }
+            #page-container {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+<div id="page-container">
+<div class="page">
+<h1>Rail Fence Cipher</h1>
+    <div class="seperator">Encryption:</div>
+    <form>
+        <input required id="rail-message-encrypt" placeholder="Message:"><br>
+        <input type="number" required id="rail-number-encrypt" placeholder="Rails:"><br>
+        <button id="rail-button-encrypt">Encrypt</button>
+    </form>
+    <div class="output" id="rail-output-encrypt" contentEditable></div>
+    <div class="seperator">Decryption:</div>
+    <form>
+        <input id="rail-message-decrypt" placeholder="Message:"><br>
+        <input min="2" type="number" id="rail-number-decrypt" placeholder="Rails:"><br>
+        <button id="rail-button-decrypt">Decrypt</button>
+    </form>
+    <div class="output" id="rail-output-decrypt" contentEditable></div>
+</div>
+<div class="page">
+<h1>Caesar Cipher</h1>
+    <div class="seperator">Encryption:</div>
+    <form>
+        <input required id="caesar-message-encrypt" placeholder="Message:"><br>
+        <input type="number" required id="caesar-number-encrypt" placeholder="Shift:"><br>
+        <button id="caesar-button-encrypt">Encrypt</button>
+    </form>
+    <div class="output" id="caesar-output-encrypt" contentEditable></div>
+    <div class="seperator">Decryption:</div>
+    <form>
+        <input id="caesar-message-decrypt" placeholder="Message:"><br>
+        <input type="number" id="caesar-number-decrypt" placeholder="Shift:"><br>
+        <button id="caesar-button-decrypt">Decrypt</button>
+    </form>
+    <div class="output" id="caesar-output-decrypt" contentEditable></div>
+</div>
+<div class="page">
+<h1>Vigenère Cipher</h1>
+    <div class="seperator">Encryption:</div>
+    <form>
+        <input required id="vigenere-message-encrypt" placeholder="Message:"><br>
+        <input required id="vigenere-number-encrypt" placeholder="Key:"><br>
+        <button id="vigenere-button-encrypt">Encrypt</button>
+    </form>
+    <div class="output" id="vigenere-output-encrypt" contentEditable></div>
+    <div class="seperator">Decryption:</div>
+    <form>
+        <input id="vigenere-message-decrypt" placeholder="Message:"><br>
+        <input id="vigenere-number-decrypt" placeholder="Key:"><br>
+        <button id="vigenere-button-decrypt">Decrypt</button>
+    </form>
+    <div class="output" id="vigenere-output-decrypt" contentEditable></div>
+</div>
+<div class="page">
+<h1>Base 64</h1>
+    <div class="seperator">Encryption:</div>
+    <form>
+        <input required id="base64-message-encrypt" placeholder="Message:"><br>
+        <button id="base64-button-encrypt">Encrypt</button>
+    </form>
+    <div class="output" id="base64-output-encrypt" contentEditable></div>
+    <div class="seperator">Decryption:</div>
+    <form>
+        <input id="base64-message-decrypt" placeholder="Message:"><br>
+        <button id="base64-button-decrypt">Decrypt</button>
+    </form>
+    <div class="output" id="base64-output-decrypt" contentEditable></div>
+</div>
+<div class="page">
+<h1>Morse Code</h1>
+    <div class="seperator">Encryption:</div>
+    <form>
+        <input required id="morse-message-encrypt" placeholder="Message:"><br>
+        <button id="morse-button-encrypt">Encrypt</button>
+    </form>
+    <div class="output" id="morse-output-encrypt" contentEditable></div>
+    <div class="seperator">Decryption:</div>
+    <form>
+        <input id="morse-message-decrypt" placeholder="Message:"><br>
+        <button id="morse-button-decrypt">Decrypt</button>
+    </form>
+    <div class="output" id="morse-output-decrypt" contentEditable></div>
+</div>
+</div>
+
+<script>
+    var railNumberE = document.getElementById("rail-number-encrypt");
+    var railMessageE = document.getElementById("rail-message-encrypt");
+    var railButtonE = document.getElementById("rail-button-encrypt");
+    var railOutputE = document.getElementById("rail-output-encrypt");
+    
+    var railNumberD = document.getElementById("rail-number-decrypt");
+    var railMessageD = document.getElementById("rail-message-decrypt");
+    var railButtonD = document.getElementById("rail-button-decrypt");
+    var railOutputD = document.getElementById("rail-output-decrypt");
+    
+    function getRailFenceZigzag(message, rails) {
+        var railArray = [];
+        
+        // Initialize the 2D rail array with dots (".") as placeholders
+        for (var i = 0; i < rails; i++) {
+            railArray[i] = Array(message.length).fill('௹');
+        }
+    
+        var direction = 1; // 1 means moving down, -1 means moving up
+        var currentRail = 0;
+    
+        // Fill the zigzag pattern
+        for (var i = 0; i < message.length; i++) {
+            railArray[currentRail][i] = message[i]; // Place character in correct rail
+    
+            if (currentRail === 0) {
+                direction = 1;
+            } else if (currentRail === rails - 1) {
+                direction = -1;
+            }
+    
+            currentRail += direction;
+        }
+    
+        return railArray;
+    }
+    
+    function getCiphertext(zigzagPattern) {
+        var ciphertext = "";
+        for (var i = 0; i < zigzagPattern.length; i++) {
+            for (var j = 0; j < zigzagPattern[i].length; j++) {
+                if (zigzagPattern[i][j] !== '௹') {
+                    ciphertext += zigzagPattern[i][j]; // Collect non-௹ characters
+                }
+            }
+        }
+        return ciphertext;
+    }
+    
+    var decodeRailFence = function(message, numRails) {
+        var matrix = [];
+        var index = 0;
+      
+        // Create an empty matrix to fill the zigzag pattern
+        for (var i = 0; i < numRails; i++) {
+            matrix.push([]);
+        }
+    
+        // Fill the matrix with placeholders
+        for (var i = 0; i < numRails; i++) {
+            for (var j = 0; j < message.length; j++) {
+                matrix[i].push(null);
+            }
+        }
+    
+        // Create the zigzag pattern
+        var direction = 1; // 1 means down, -1 means up
+        var row = 0;
+      
+        // Mark positions with placeholders for the zigzag pattern
+        for (var i = 0; i < message.length; i++) {
+            matrix[row][i] = "*"; // Mark position with a placeholder
+            row += direction;
+          
+            // Change direction when we reach the top or bottom
+            if (row === 0 || row === numRails - 1) {
+                direction *= -1;
+            }
+        }
+    
+        // Fill the matrix with the encoded message
+        index = 0;
+        for (var i = 0; i < numRails; i++) {
+            for (var j = 0; j < message.length; j++) {
+                if (matrix[i][j] === "*") {
+                    matrix[i][j] = message[index++];
+                }
+            }
+        }
+    
+        // Read the message from the matrix row by row
+        var decodedMessage = "";
+        for (var j = 0; j < message.length; j++) {
+            for (var i = 0; i < numRails; i++) {
+                if (matrix[i][j] !== null) {
+                    decodedMessage += matrix[i][j];
+                }
+            }
+        }
+    
+        return decodedMessage;
+    };
+    
+    railButtonE.addEventListener("click", function(e) {
+        e.preventDefault();
+        try{
+            var zigzag = getRailFenceZigzag(railMessageE.value, Number(railNumberE.value));
+            railOutputE.innerHTML = getCiphertext(zigzag);
+        }catch(e){
+            alert(e);
+        }
+    });
+    railButtonD.addEventListener("click", function(e) {
+        e.preventDefault();
+        try{
+            railOutputD.innerHTML = decodeRailFence(railMessageD.value, Number(railNumberD.value));
+        }catch(e){
+            alert(e);
+        }
+    });
+</script>
+<script>
+    var caesarNumberE = document.getElementById("caesar-number-encrypt");
+    var caesarMessageE = document.getElementById("caesar-message-encrypt");
+    var caesarButtonE = document.getElementById("caesar-button-encrypt");
+    var caesarOutputE = document.getElementById("caesar-output-encrypt");
+    
+    var caesarNumberD = document.getElementById("caesar-number-decrypt");
+    var caesarMessageD = document.getElementById("caesar-message-decrypt");
+    var caesarButtonD = document.getElementById("caesar-button-decrypt");
+    var caesarOutputD = document.getElementById("caesar-output-decrypt");
+    
+    function caesarCipherEncrypt(message, shift) {
+        var alphabet = "abcdefghijklmnopqrstuvwxyz";
+        var capsAlphabet = alphabet.toUpperCase();
+        shift = shift % 26;
+        shift = Math.abs(shift);
+        
+        var encryption = "";
+        var caps = false;
+        for(var i = 0; i < message.length; i ++) {
+            if(capsAlphabet.includes(message[i])) {
+                caps = true;
+            }
+            if(alphabet.includes(message[i].toLowerCase())) {
+                var spot = (alphabet.indexOf(message[i].toLowerCase())+shift+26)%26;
+                if(caps) {
+                    encryption += capsAlphabet[spot];
+                }else{
+                    encryption += alphabet[spot];
+                }
+            }else{
+                encryption += message[i];
+            }
+            caps = false;
+            
+        }
+        return encryption;
+    }
+    function caesarCipherDecrypt(message, shift) {
+        var alphabet = "abcdefghijklmnopqrstuvwxyz";
+        var capsAlphabet = alphabet.toUpperCase();
+        shift = shift % 26;
+        shift = -Math.abs(shift);
+        
+        var encryption = "";
+        var caps = false;
+        for(var i = 0; i < message.length; i ++) {
+            if(capsAlphabet.includes(message[i])) {
+                caps = true;
+            }
+            if(alphabet.includes(message[i].toLowerCase())) {
+                var spot = (alphabet.indexOf(message[i].toLowerCase())+shift+26)%26;
+                if(caps) {
+                    encryption += capsAlphabet[spot];
+                }else{
+                    encryption += alphabet[spot];
+                }
+            }else{
+                encryption += message[i];
+            }
+            caps = false;
+            
+        }
+        return encryption;
+    }
+    
+    caesarButtonE.addEventListener("click", function(e) {
+        e.preventDefault();
+        try{
+            if(Number(caesarNumberE.value) < 1){
+                alert("Shift MUST be greater than or equal to 1");
+                return;
+            }
+            caesarOutputE.innerHTML = caesarCipherEncrypt(caesarMessageE.value, Number(caesarNumberE.value));
+        }catch(e){
+            alert(e);
+        }
+    });
+    caesarButtonD.addEventListener("click", function(e) {
+        e.preventDefault();
+        try{
+            if(Number(caesarNumberD.value) < 1){
+                alert("Shift MUST be greater than or equal to 1");
+                return;
+            }
+            caesarOutputD.innerHTML = caesarCipherDecrypt(caesarMessageD.value, Number(caesarNumberD.value));
+        }catch(e){
+            alert(e);
+        }
+    });
+</script>
+<script>
+    var vigenereNumberE = document.getElementById("vigenere-number-encrypt");
+    var vigenereMessageE = document.getElementById("vigenere-message-encrypt");
+    var vigenereButtonE = document.getElementById("vigenere-button-encrypt");
+    var vigenereOutputE = document.getElementById("vigenere-output-encrypt");
+    
+    var vigenereNumberD = document.getElementById("vigenere-number-decrypt");
+    var vigenereMessageD = document.getElementById("vigenere-message-decrypt");
+    var vigenereButtonD = document.getElementById("vigenere-button-decrypt");
+    var vigenereOutputD = document.getElementById("vigenere-output-decrypt");
+    
+    var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var encryptVigenere = function(text, key) {
+        key = key.toUpperCase();
+        var encryptedText = "";
+        var keyIndex = 0;
+        
+        for (var i = 0; i < text.length; i++) {
+            var char = text[i];
+            var isUpper = char === char.toUpperCase();
+            var textPos = alphabet.indexOf(char.toUpperCase());
+            
+            if (textPos !== -1) {
+                var keyPos = alphabet.indexOf(key[keyIndex % key.length]);
+                var newPos = (textPos + keyPos) % alphabet.length;
+                var newChar = alphabet[newPos];
+                encryptedText += isUpper ? newChar : newChar.toLowerCase();
+                keyIndex++;
+            } else {
+                encryptedText += char;
+            }
+        }
+        return encryptedText;
+    };
+    var decryptVigenere = function(text, key) {
+        key = key.toUpperCase();
+        var decryptedText = "";
+        var keyIndex = 0;
+        
+        for (var i = 0; i < text.length; i++) {
+            var char = text[i];
+            var isUpper = char === char.toUpperCase();
+            var textPos = alphabet.indexOf(char.toUpperCase());
+            
+            if (textPos !== -1) {
+                var keyPos = alphabet.indexOf(key[keyIndex % key.length]);
+                var newPos = (textPos - keyPos + alphabet.length) % alphabet.length;
+                var newChar = alphabet[newPos];
+                decryptedText += isUpper ? newChar : newChar.toLowerCase();
+                keyIndex++;
+            } else {
+                decryptedText += char;
+            }
+        }
+        return decryptedText;
+    };
+    
+    vigenereButtonE.addEventListener("click", function(e) {
+        e.preventDefault();
+        try{
+            var valid = "abcdefghijklmnopqrstuvwxyz";
+            var invalid = "";
+            for(var i = 0; i < vigenereNumberD.value.length; i ++) {
+                var vnd = vigenereNumberD.value[i];
+                if(!valid.includes(vnd)) {
+                    if(!invalid.includes(vnd)) {
+                        invalid += vnd;
+                    }
+                }
+            }
+            if(invalid !== "") {
+                if(invalid.length === 1) {
+                    alert("Invalid character: \""+invalid+"\"");
+                }else{
+                    alert("Invalid characters: "+invalid)
+                }
+                return;
+            }
+            vigenereOutputE.innerHTML = encryptVigenere(vigenereMessageE.value, vigenereNumberE.value);
+        }catch(e){
+            alert(e);
+        }
+    });
+    
+    vigenereButtonD.addEventListener("click", function(e) {
+        e.preventDefault();
+        try{
+            var valid = "abcdefghijklmnopqrstuvwxyz";
+            var invalid = "";
+            for(var i = 0; i < vigenereNumberD.value.length; i ++) {
+                var vnd = vigenereNumberD.value[i];
+                if(!valid.includes(vnd)) {
+                    if(!invalid.includes(vnd)) {
+                        invalid += vnd;
+                    }
+                }
+            }
+            if(invalid !== "") {
+                if(invalid.length === 1) {
+                    alert("Invalid character: \""+invalid+"\"");
+                }else{
+                    alert("Invalid characters: "+invalid)
+                }
+                return;
+            }
+            vigenereOutputD.innerHTML = decryptVigenere(vigenereMessageD.value, vigenereNumberD.value);
+        }catch(e){
+            alert(e);
+        }
+    });
+    
+</script>
+<script>
+    var base64MessageE = document.getElementById("base64-message-encrypt");
+    var base64ButtonE = document.getElementById("base64-button-encrypt");
+    var base64OutputE = document.getElementById("base64-output-encrypt");
+    
+    var base64MessageD = document.getElementById("base64-message-decrypt");
+    var base64ButtonD = document.getElementById("base64-button-decrypt");
+    var base64OutputD = document.getElementById("base64-output-decrypt");
+    
+    var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var encodeBase64 = function(inputText) {
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+        var str = '';
+        var i = 0;
+        var byte1, byte2, byte3;
+        
+        // Convert text to base64
+        while (i < inputText.length) {
+            byte1 = inputText.charCodeAt(i++);
+            byte2 = inputText.charCodeAt(i++);
+            byte3 = inputText.charCodeAt(i++);
+            
+            str += chars.charAt(byte1 >> 2);
+            str += chars.charAt(((byte1 & 3) << 4) | (byte2 >> 4));
+            str += chars.charAt(((byte2 & 15) << 2) | (byte3 >> 6));
+            str += chars.charAt(byte3 & 63);
+        }
+        
+        // If the length is not divisible by 3, add padding characters
+        if (inputText.length % 3 === 1) {
+            str = str.substring(0, str.length - 2) + '==';
+        } else if (inputText.length % 3 === 2) {
+            str = str.substring(0, str.length - 1) + '=';
+        }
+        
+        return str;
+    };
+    var decodeBase64 = function(base64Text) {
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+        var str = '';
+        var i = 0;
+        var byte1, byte2, byte3, byte4;
+        
+        // Remove padding characters
+        base64Text = base64Text.replace(/=/g, '');
+        
+        // Decode the Base64 string
+        while (i < base64Text.length) {
+            byte1 = chars.indexOf(base64Text.charAt(i++));
+            byte2 = chars.indexOf(base64Text.charAt(i++));
+            byte3 = chars.indexOf(base64Text.charAt(i++));
+            byte4 = chars.indexOf(base64Text.charAt(i++));
+            
+            str += String.fromCharCode((byte1 << 2) | (byte2 >> 4));
+            if (byte3 !== 64) {
+                str += String.fromCharCode(((byte2 & 15) << 4) | (byte3 >> 2));
+            }
+            if (byte4 !== 64) {
+                str += String.fromCharCode(((byte3 & 3) << 6) | byte4);
+            }
+        }
+        
+        return str;
+    };
+    
+    base64ButtonE.addEventListener("click", function(e) {
+        e.preventDefault();
+        try{
+            base64OutputE.innerHTML = encodeBase64(base64MessageE.value);
+        }catch(e){
+            alert(e);
+        }
+    });
+    
+    base64ButtonD.addEventListener("click", function(e) {
+        e.preventDefault();
+        try{
+            base64OutputD.innerHTML = decodeBase64(base64MessageD.value);
+        }catch(e){
+            alert(e);
+        }
+    });
+    
+</script>
+<script>
+    var morseMessageE = document.getElementById("morse-message-encrypt");
+    var morseButtonE = document.getElementById("morse-button-encrypt");
+    var morseOutputE = document.getElementById("morse-output-encrypt");
+    
+    var morseMessageD = document.getElementById("morse-message-decrypt");
+    var morseButtonD = document.getElementById("morse-button-decrypt");
+    var morseOutputD = document.getElementById("morse-output-decrypt");
+    
+    var morseCodeMap = {
+        'A': ".-", 'B': "-...", 'C': "-.-.", 'D': "-..", 'E': ".",
+        'F': "..-.", 'G': "--.", 'H': "....", 'I': "..", 'J': ".---",
+        'K': "-.-", 'L': ".-..", 'M': "--", 'N': "-.", 'O': "---",
+        'P': ".--.", 'Q': "--.-", 'R': ".-.", 'S': "...", 'T': "-",
+        'U': "..-", 'V': "...-", 'W': ".--", 'X': "-..-", 'Y': "-.--", 'Z': "--..",
+        '0': "-----", '1': ".----", '2': "..---", '3': "...--", '4': "....-",
+        '5': ".....", '6': "-....", '7': "--...", '8': "---..", '9': "----.",
+        '.': ".-.-.-", ',': "--..--", '?': "..--..", "'": ".----.",
+        '!': "-.-.--", '/': "-..-.", '(': "-.--.", ')': "-.--.-",
+        '&': ".-...", ':': "---...", ';': "-.-.-.", '=': "-...-",
+        '+': ".-.-.", '-': "-....-", '_': "..--.-", '"': ".-..-.",
+        '$': "...-..-", '@': ".--.-.", ' ': "/"
+    };
+    
+    
+    var encryptToMorse = function(text) {
+        text = text.toUpperCase();
+        var morseText = "";
+        for (var i = 0; i < text.length; i++) {
+            var char = text[i];
+            if (morseCodeMap[char] !== undefined) {
+                morseText += morseCodeMap[char] + " ";
+            }
+        }
+        return morseText;
+    };
+    
+    var decryptFromMorse = function(morse) {
+        var text = "";
+        var words = morse.split(" /");
+        for (var w = 0; w < words.length; w++) {
+            var letters = words[w].trim().split(" ");
+            for (var l = 0; l < letters.length; l++) {
+                for (var key in morseCodeMap) {
+                    if (morseCodeMap[key] === letters[l]) {
+                        text += key;
+                        break;
+                    }
+                }
+            }
+            text += " ";
+        }
+        return text.trim();
+    };
+    
+    morseButtonE.addEventListener("click", function(e) {
+        e.preventDefault();
+        try{
+            morseOutputE.innerHTML = encryptToMorse(morseMessageE.value);
+        }catch(e){
+            alert(e);
+        }
+    });
+    
+    morseButtonD.addEventListener("click", function(e) { 
+        e.preventDefault();
+        try{
+            morseOutputD.innerHTML = decryptFromMorse(morseMessageD.value);
+        }catch(e){
+            alert(e);
+        }
+    });
+    
+</script>
+    </body>
+</html>
