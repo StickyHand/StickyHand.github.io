@@ -7,6 +7,7 @@
     <head>
         <meta charset="utf-8">
         <title>Family Generator</title>
+        <!DOCTYPE html>
         <style>
             *{
                 padding: 0;
@@ -70,18 +71,27 @@
             .invisible{
                 display: none;
             }
+            input{
+                width: 200px;
+            }
         </style>
     </head>
     <body>
-    
+    <form id="form"><input type="number" id="father-min-age" name="Min age of father" placeholder="Min age of father" min="20" required><br>
+    <input type="number" id="father-max-age" name="Max age of father" placeholder="Max age of father" min="20" required><br>
+    <input type="number" id="number-of-children" name="≈Number of children" min="0" max="250" placeholder="≈Number of children" required><br>
+    <input type="number" id="begining-year-of-story" name="Beginning year of story" min="1" placeholder="Beginning year of story" required>
+    </form>
+    <button id="generate">generate</button>
     <span id="family">
     <span><div id="father" class="boy"></div>
     <div id="mother" class="girl"></div></span>
     </span>
     <span><div style="padding-left: 50px" id="other-popup"><h1 id="other-popup-h1">+</h1>What does it mean by "Died at age <span id="other-popup-age"></span> due to other"?<br>What does other stand for as a death type?<br>Why does it say died due to other?<br>How is other a cause of death?</div></span>
     <span><div id="other-popup-info" class="invisible"></div></span>
+    </body>
 <script type>
-        
+    var bodyHTML = document.body.innerHTML;
     var hairColors = [
         "brown", "black", "red", "auburn", "blonde", "strawberry blonde", "dark brown", "light brown", "chestnut"];
     var hairTypes = [
@@ -269,6 +279,44 @@
         //var cause = causes[floor(random(causes.length))];
         
         return "Died at age "+deathAge+" due to "+lowercase(causeOfDeath);
+    }
+    var isYearALeapYear = function(year) {
+        if (year % 4 !== 0) {
+            return false;
+        } else if (year % 100 !== 0) {
+            return true;
+        } else if (year % 400 === 0) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+    function generateBirthday(age) {
+        var birthYear = yearOfStory-age;
+        var daysInMonths = {
+            "January": 31,
+            "February": 28,
+            "March": 31,
+            "April": 30,
+            "May": 31,
+            "June": 30,
+            "July": 31,
+            "August": 31,
+            "September": 30,
+            "October": 31,
+            "November": 30,
+            "December": 31
+        };
+        if(isYearALeapYear(birthYear)) {
+            daysInMonths.february = 29;
+        }
+        var months = [];
+        for(var i in daysInMonths) {
+            months.push(i);
+        }
+        var birthMonth = months[floor(random(months.length))];
+        var birthDay = floor(random(1, daysInMonths[birthMonth]));
+        return birthMonth+" "+birthDay+", "+birthYear;
     }
     
     var boynames = /*{*/`Aaden
@@ -7049,39 +7097,52 @@ Thompson`/*}*/;
     girlnames = Girlnames;
     Lastnames = Lastnames;
 //}
+
+    var now = new Date();
+    document.getElementById("begining-year-of-story").max = now.getFullYear();
+var father, mother;
     </script>
 <script>
+    var yearOfStory = floor(random(1000, 1500)) 
     var maxAge = 110;
-    var boyJuniorChance = 1;
+    var boyJuniorChance = 0.2;
     var girlJuniorChance = 0.05;
-    var numChildren = 20;
+    var numChildren = 50;
     var parentAgeToHaveChild = 20;
     var motherAgeToStopHavingChildren = 50;
     var ageForFatherHairToChangeColor = random(60, 75);
     var ageForMotherHairToChangeColor = random(60, 75);
     var likelyhoodOfInitialForMiddleName = 0.25;
-    var father = {
-        name: boynames[floor(random(boynames.length))],
-        middleName: boynames[floor(random(boynames.length))],
-        lastName: lastnames[floor(random(lastnames.length))],
-        hairColor: hairColors[floor(random(hairColors.length))],
-        hairType: hairTypes[floor(random(hairTypes.length))],
-        eyeColor: eyeColors[floor(random(eyeColors.length))],
-        age: floor(random(30, 45)),
-    };
-    father.death = generateDeath(father.age);
-    var mother = {
-        name: girlnames[floor(random(girlnames.length))],
-        middleName: girlnames[floor(random(girlnames.length))],
-        lastName: lastnames[floor(random(lastnames.length))],
-        hairColor: hairColors[floor(random(hairColors.length))],
-        hairType: hairTypes[floor(random(hairTypes.length))],
-        eyeColor: eyeColors[floor(random(eyeColors.length))],
-        age: floor(random(father.age-5, father.age+3))
-    };
-    mother.death = generateDeath(mother.age);
+    var fatherMinAge = 40;
+    var fatherMaxAge = 50;
+    function generateParents() {
+        father = {
+            name: boynames[floor(random(boynames.length))],
+            middleName: boynames[floor(random(boynames.length))],
+            lastName: lastnames[floor(random(lastnames.length))],
+            hairColor: hairColors[floor(random(hairColors.length))],
+            hairType: hairTypes[floor(random(hairTypes.length))],
+            eyeColor: eyeColors[floor(random(eyeColors.length))],
+            age: floor(random(fatherMinAge, fatherMaxAge)),
+        };
+        father.death = generateDeath(father.age);
+        father.birthday = generateBirthday(father.age);
+        mother = {
+            name: girlnames[floor(random(girlnames.length))],
+            middleName: girlnames[floor(random(girlnames.length))],
+            lastName: lastnames[floor(random(lastnames.length))],
+            hairColor: hairColors[floor(random(hairColors.length))],
+            hairType: hairTypes[floor(random(hairTypes.length))],
+            eyeColor: eyeColors[floor(random(eyeColors.length))],
+            age: floor(random(father.age-5, father.age+3))
+        };
+        mother.death = generateDeath(mother.age);
+        mother.birthday = generateBirthday(mother.age);
+    }
+    generateParents();
     </script>
 <script>
+function run() {
 try{    
     function capitalize(inputString) {
         return inputString.charAt(0).toUpperCase() + inputString.slice(1);
@@ -7222,6 +7283,14 @@ try{
                     hairColors.push("light brown", "blonde", "strawberry blonde", "brown", "red", "auburn");
                 }
                 child.hairColor = hairColors[floor(random(hairColors.length))];
+                
+                if(child.age > random(60, 70)) {
+                    if(child.hairColor === "brown" || child.hairColor === "dark brown" || child.hairColor === "black" || child.hairColor === "chestnut") {
+                        child.hairColor = "gray"
+                    } else {
+                        child.hairColor = "white";
+                    }
+                }
             }
             if(!child.hairType) {
                 var hairTypes = [];
@@ -7268,7 +7337,7 @@ try{
     if(father.age > ageForFatherHairToChangeColor) {
         if(father.hairColor === "brown" || father.hairColor === "dark brown" || father.hairColor === "black" || father.hairColor === "chestnut") {
             father.hairColor = "gray"
-        }else {
+        } else {
             father.hairColor = "white";
         }
     }
@@ -7288,13 +7357,24 @@ try{
         var child = generateChild({father:father, mother:mother});
         var attempts = 0;
         var multiple = random();
-        while(ages.includes(child.age) && attempts < 10) {
+        while(ages.includes(child.age) && attempts < 25) {
             if(multiple < 0.0126 && (mother.age - child.age) <= motherAgeToStopHavingChildren) {
-                child.multiple = true;
                 children.push(child);
                 ages.push(child.age);
-                attempts = 10;
             }else {
+                if(!child.isJunior) {
+                    if(child.gender === "boy") {
+                        boynames.push(child.name);
+                        if(child.middleName) {
+                            boynames.push(child.middleName);
+                        }
+                    } else {
+                        girlnames.push(child.name);
+                        if(child.middleName) {
+                            girlnames.push(child.middleName);
+                        }
+                    }
+                }
                 child = generateChild({father:father, mother:mother});
                 multiple = random()
                 attempts ++;
@@ -7306,14 +7386,14 @@ try{
         }
     }
     ages.sort(function(a, b){
-        return b-a
+        return b-a;
     });
     children.sort(function(a, b){
         return b.age - a.age;
     });
     
     for(var i = 0; i < ages.length; i ++) {
-        document.getElementById("family").innerHTML += "<span id='age"+ages[i]+"'></span>";
+        document.getElementById("family").innerHTML += "<span id='age"+ages[i]+"' birthday='"+generateBirthday(ages[i])+"'></span>";
     }
     var fatherSenior = "", motherSenior = "";
     var showOtherPopup = false;
@@ -7337,12 +7417,16 @@ try{
         }
         div.style.paddingLeft = offset+"px"
         div.innerHTML = "<h1 style='margin-left:-"+(offset-10)+"px'>"+(i+1)+"</h1>";
-        div.innerHTML += capitalize(child.gender)+": "+child.name+" "+child.middleName+" "+father.lastName+" "+junior+"<br>"+"Age: "+child.age+"<br>Description: "+capitalize(child.hairType)+" "+child.hairColor+" hair. "+capitalize(child.eyeColor)+" eyes.<br>"+child.death+".";
+        
+        
+        div.innerHTML += capitalize(child.gender)+": "+child.name+" "+child.middleName+" "+father.lastName+" "+junior+"<br>"+"Age: "+child.age+"<br>Description: "+capitalize(child.hairType)+" "+child.hairColor+" hair. "+capitalize(child.eyeColor)+" eyes.<br>"+child.death+".<br>Born on "+document.getElementById("age"+child.age).getAttribute("birthday");
         if(child.death.includes("other")) {
             showOtherPopup = true;
             otherPopupAge = child.death.match(/\b\d{1,3}\b/g)[0];
         }
+        
         document.getElementById("age"+child.age).append(div);
+        
     }
     document.getElementById("father").innerHTML = "Father: "+father.name+" "+father.middleName+" "+father.lastName+" "+fatherSenior+"<br>"+"Age: "+father.age+"<br>Description: "+capitalize(father.hairType)+" "+father.hairColor+" hair. "+capitalize(father.eyeColor)+" eyes.<br>"+father.death+".";
     document.getElementById("mother").innerHTML = "Mother: "+mother.name+" "+mother.middleName+" "+mother.lastName+" "+father.lastName+" "+motherSenior+"<br>"+"Age: "+mother.age+"<br>Description: "+capitalize(mother.hairType)+" "+mother.hairColor+" hair. "+capitalize(mother.eyeColor)+" eyes.<br>"+mother.death+".";
@@ -7395,9 +7479,61 @@ try{
             });
         });
     });
+    document.addEventListener("keydown", function(event) {
+        // Check if the key pressed is Enter
+        if (event.key === "Enter") {
+            // Check if the active element is an input or textarea
+            var active = document.activeElement;
+            if (active.tagName === "INPUT" || active.tagName === "TEXTAREA") {
+                event.preventDefault(); // Optional: prevent form submission or line breaks
+                document.getElementById("generate").click();
+            }
+        }
+    });
+    document.getElementById("generate").onclick = function(){
+        var form = document.getElementById("form");
+        var elements = form.elements;
+        elements[0].max = elements[1].max = maxAge;
+        var reasons = [];
+        
+        for (var i = 0; i < elements.length; i++) {
+            var el = elements[i];
+    
+            if (!el.checkValidity()) {
+                if (el.validity.valueMissing) {
+                    reasons.push(el.name + " is required.");
+                } else if (el.validity.typeMismatch) {
+                    reasons.push(el.name + " has an invalid format.");
+                } else if (el.validity.rangeUnderflow) {
+                    reasons.push(el.name + " is below the minimum value.");
+                } else if (el.validity.rangeOverflow) {
+                    reasons.push(el.name + " is above the maximum value.");
+                } else if (el.validity.patternMismatch) {
+                    reasons.push(el.name + " doesn't match the expected pattern.");
+                } else {
+                    reasons.push(el.name + " is invalid.");
+                }
+            }
+        }
+        
+        if (reasons.length > 0) {
+            alert(reasons.join("\n"));
+        } else {
+            fatherMinAge = parseInt(document.getElementById("father-min-age").value);
+            fatherMaxAge = parseInt(document.getElementById("father-max-age").value);
+            numChildren = parseInt(document.getElementById("number-of-children").value);
+            document.body.innerHTML = bodyHTML;
+            generateParents();
+            run();
+            document.getElementById("father-min-age").value = fatherMinAge;
+            document.getElementById("father-max-age").value = fatherMaxAge;
+            document.getElementById("number-of-children").value = numChildren;
+        }
+    }
 }catch(e){
-    alert(e.stack)
+    console.log(e.stack)
 }
+}
+run();
 </script>
-    </body>
 </html>
