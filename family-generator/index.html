@@ -7106,7 +7106,7 @@ var father, mother;
     var maxAge = 110;
     var boyJuniorChance = 0.2;
     var girlJuniorChance = 0.05;
-    var numChildren = 50;
+    var numChildren = 10;
     var parentAgeToHaveChild = 20;
     var motherAgeToStopHavingChildren = 50;
     var ageForFatherHairToChangeColor = random(60, 75);
@@ -7356,7 +7356,7 @@ try{
         var child = generateChild({father:father, mother:mother});
         var attempts = 0;
         var multiple = random();
-        while(ages.includes(child.age) && attempts < 25) {
+        while(ages.includes(child.age) && attempts < 10 || ages.includes(child.age+1) && attempts < 10) {
             if(multiple < 0.0126 && (mother.age - child.age) <= motherAgeToStopHavingChildren) {
                 children.push(child);
                 ages.push(child.age);
@@ -7521,16 +7521,18 @@ try{
             fatherMinAge = parseInt(document.getElementById("father-min-age").value);
             fatherMaxAge = parseInt(document.getElementById("father-max-age").value);
             numChildren = parseInt(document.getElementById("number-of-children").value);
+            yearOfStory = parseInt(document.getElementById("begining-year-of-story").value);
             document.body.innerHTML = bodyHTML;
             generateParents();
             run();
             document.getElementById("father-min-age").value = fatherMinAge;
             document.getElementById("father-max-age").value = fatherMaxAge;
             document.getElementById("number-of-children").value = numChildren;
+            document.getElementById("begining-year-of-story").value = yearOfStory;
         }
     }
 }catch(e){
-    console.log(e.stack)
+    console.warn(e.stack);
 }
 }
 run();
