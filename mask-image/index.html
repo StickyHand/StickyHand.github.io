@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mask Text</title>
+  <style>
+    body {
+      font-family: 'Charm', cursive;
+      text-align: center;
+      background: #f0f0f0;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+    #controls {
+      margin-bottom: 10px;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Charm:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <h1>Image-Masked Text</h1>
+
+  <div id="controls">
+    <input type="file" id="imageUpload" accept="image/*"><br><br>
+    <input type="text" id="textInput" placeholder="Enter your text"><br><br>
+    <button onclick="render()">Mask Text</button>
+    <button onclick="download()">Download PNG</button>
+  </div>
+
+  <canvas id="canvas" width="800" height="400"></canvas>
+
+  <script>
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var image = new Image();
+
+    document.getElementById('imageUpload').addEventListener('change', function(e) {
+      var reader = new FileReader();
+      reader.onload = function(event) {
+        image.src = event.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    });
+
+    function render() {
+      if (!image.src) {
+        alert("Please upload an image first.");
+        return;
+      }
+
+      var text = document.getElementById('textInput').value;
+      if (!text) {
+        alert("Please enter some text.");
+        return;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = "source-over";
+
+      var fontSize = 160;
+      ctx.font = "bold " + fontSize + "px 'Charm', cursive";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      var textX = canvas.width / 2;
+      var textY = canvas.height / 2;
+      var textWidth = ctx.measureText(text).width;
+
+      // Stroke to thicken it
+      ctx.lineWidth = 7;
+      ctx.strokeStyle = "#000";
+      ctx.strokeText(text, textX, textY);
+
+      // Fill text
+      ctx.fillStyle = "#000";
+      ctx.fillText(text, textX, textY);
+
+      // Thick underline
+      var underlineY = textY + fontSize / 3;
+      var underlineHeight = 22;
+      ctx.fillRect(textX - textWidth / 2, underlineY, textWidth, underlineHeight);
+
+      // Use text + underline as mask
+      ctx.globalCompositeOperation = "source-in";
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      ctx.globalCompositeOperation = "source-over";
+    }
+
+    function download() {
+      var link = document.createElement('a');
+      link.download = 'masked-text.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+
+</body>
+</html>
