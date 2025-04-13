@@ -117,10 +117,10 @@
         </style>
     </head>
     <body>
-    <span><div id="regenerate"><form id="form"><input type="number" id="father-min-age" name="Min age of father" placeholder="Min age of father" min="20" required><br>
-    <input type="number" id="father-max-age" name="Max age of father" placeholder="Max age of father" min="20" required><br>
-    <input type="number" id="number-of-children" name="≈Number of children" min="0" max="250" placeholder="≈Number of children" required><br>
-    <input type="number" id="begining-year-of-story" name="Beginning year of story" min="1" placeholder="Beginning year of story" required>
+    <span><div id="regenerate"><form id="form"><input type="number" id="father-min-age" name="Min age of father" placeholder="Min age of father" min="20"><br>
+    <input type="number" id="father-max-age" name="Max age of father" placeholder="Max age of father" min="20"><br>
+    <input type="number" id="number-of-children" name="≈Number of children" min="0" max="250" placeholder="≈Number of children"><br>
+    <input type="number" id="begining-year-of-story" name="Beginning year of story" min="1000" placeholder="Beginning year of story">
     </form>
     <button id="generate">Generate</button>
     </div></span>
@@ -7184,18 +7184,18 @@ Thompson`/*}*/;
 var father, mother;
     </script>
 <script>
-    var yearOfStory = floor(random(1000, 1500)) 
+    var yearOfStory = floor(random(1300, 1500)) 
     var maxAge = 110;
     var boyJuniorChance = 0.2;
     var girlJuniorChance = 0.05;
     var numChildren = 10;
-    var parentAgeToHaveChild = 20;
+    var parentAgeToHaveChild = floor(random(3, 25));
     var motherAgeToStopHavingChildren = 50;
     var ageForFatherHairToChangeColor = random(60, 75);
     var ageForMotherHairToChangeColor = random(60, 75);
     var likelyhoodOfInitialForMiddleName = 0.005;
-    var fatherMinAge = 40;
-    var fatherMaxAge = 50;
+    var fatherMinAge = floor(random(30, 45));
+    var fatherMaxAge = floor(random(45, 70));
     function generateParents() {
         father = {
             name: boynames[floor(random(boynames.length))],
@@ -7223,10 +7223,6 @@ var father, mother;
     generateParents();
     </script>
 <script>
-document.getElementById("father-min-age").value = fatherMinAge;
-document.getElementById("father-max-age").value = fatherMaxAge;
-document.getElementById("number-of-children").value = numChildren;
-document.getElementById("begining-year-of-story").value = yearOfStory;
 var addLabelsToInputs = function() {
     var inputs = document.body.getElementsByTagName("input");
     
@@ -7613,9 +7609,9 @@ try{
                 } else if (el.validity.typeMismatch) {
                     reasons.push(el.name + " has an invalid format.");
                 } else if (el.validity.rangeUnderflow) {
-                    reasons.push(el.name + " is below the minimum value.");
+                    reasons.push(el.name + " is below the minimum value of " + el.min);
                 } else if (el.validity.rangeOverflow) {
-                    reasons.push(el.name + " is above the maximum value.");
+                    reasons.push(el.name + " is above the maximum value of " + el.max);
                 } else if (el.validity.patternMismatch) {
                     reasons.push(el.name + " doesn't match the expected pattern.");
                 } else {
@@ -7627,23 +7623,40 @@ try{
         if (reasons.length > 0) {
             alert(reasons.join("\n"));
         } else {
+            var fmna = true, fmxa = true, nc = true, yos = true;
             fatherMinAge = parseInt(document.getElementById("father-min-age").value);
+            if(isNaN(fatherMinAge)) {
+                fatherMinAge = floor(random(30, 45));
+                fmna = false;
+            }
             fatherMaxAge = parseInt(document.getElementById("father-max-age").value);
+            if(isNaN(fatherMaxAge)) {
+                fatherMaxAge = floor(random(45, 70));
+                fmxa = false;
+            }
             numChildren = parseInt(document.getElementById("number-of-children").value);
+            if(isNaN(numChildren)) {
+                numChildren = floor(random(3, 25));
+                nc = false;
+            } 
             yearOfStory = parseInt(document.getElementById("begining-year-of-story").value);
+            if(isNaN(yearOfStory)) {
+                yearOfStory = floor(random(1300, 1500));
+                yos = false;
+            }
             document.body.innerHTML = bodyHTML;
             generateParents();
             run();
-            document.getElementById("father-min-age").value = fatherMinAge;
-            document.getElementById("father-max-age").value = fatherMaxAge;
-            document.getElementById("number-of-children").value = numChildren;
-            document.getElementById("begining-year-of-story").value = yearOfStory;
+            if(fmna) document.getElementById("father-min-age").value = fatherMinAge;
+            if(fmxa) document.getElementById("father-max-age").value = fatherMaxAge;
+            if(nc) document.getElementById("number-of-children").value = numChildren;
+            if(yos) document.getElementById("begining-year-of-story").value = yearOfStory;
         }
     }
     
 addLabelsToInputs();
 }catch(e){
-    console.warn(e.stack);
+    console.error(e.stack);
 }
 
 }
