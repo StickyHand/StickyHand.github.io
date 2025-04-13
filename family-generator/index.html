@@ -156,6 +156,7 @@
         return inputString.charAt(0).toLowerCase() + inputString.slice(1);
     };
     
+        
         var causes0  = [
             {cause: "Sudden Infant Death Syndrome (SIDS)", chance: 35},
             {cause: "An infection", chance: 15},
@@ -248,7 +249,46 @@
             {cause: "Brain aneurysm", chance: 5},
             {cause: "Other", chance: 20}
         ];
-    function generateDeath(currentAge) {
+    var isYearALeapYear = function(year) {
+        if (year % 4 !== 0) {
+            return false;
+        } else if (year % 100 !== 0) {
+            return true;
+        } else if (year % 400 === 0) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+    function getDeathDate(startDate, yearsLater) {
+    var baseDate = new Date(startDate);
+    baseDate.setFullYear(baseDate.getFullYear() + yearsLater);
+
+    var monthOffset = floor(random(-2, 12));
+    var dayOffset = floor(random(-15, 28));
+
+    var newDate = new Date(baseDate);
+    newDate.setMonth(newDate.getMonth() + monthOffset);
+    newDate.setDate(newDate.getDate() + dayOffset);
+
+    var minValid = new Date(startDate);
+    minValid.setFullYear(minValid.getFullYear() + yearsLater);
+
+    while (newDate < minValid) {
+        newDate.setDate(newDate.getDate() + 1);
+    }
+
+    return newDate;
+};
+
+var formatDate = function(date) {
+    var months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    return months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
+};
+    function generateDeath(currentAge, birthday) {
         var deathAges;
         if(currentAge < 4) {
             deathAges = ["baby", "baby", "child", "child", "teen", "young adult", "young adult", "young adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult"];
@@ -317,21 +357,8 @@
                 }
             }
         
-        //var cause = causes[floor(random(causes.length))];
-        
-        return "Died at age "+deathAge+" due to "+lowercase(causeOfDeath);
+        return "Died at age "+deathAge+", on "+formatDate(getDeathDate(new Date(birthday), deathAge))+" due to "+lowercase(causeOfDeath);
     }
-    var isYearALeapYear = function(year) {
-        if (year % 4 !== 0) {
-            return false;
-        } else if (year % 100 !== 0) {
-            return true;
-        } else if (year % 400 === 0) {
-            return true;
-        } else {
-            return false;
-        }
-    };
     function generateBirthday(age) {
         var birthYear = yearOfStory-age;
         var daysInMonths = {
@@ -349,7 +376,7 @@
             "December": 31
         };
         if(isYearALeapYear(birthYear)) {
-            daysInMonths.february = 29;
+            daysInMonths["February"] = 29;
         }
         var months = [];
         for(var i in daysInMonths) {
@@ -7179,8 +7206,8 @@ var father, mother;
             eyeColor: eyeColors[floor(random(eyeColors.length))],
             age: floor(random(fatherMinAge, fatherMaxAge)),
         };
-        father.death = generateDeath(father.age);
         father.birthday = generateBirthday(father.age);
+        father.death = generateDeath(father.age, father.birthday);
         mother = {
             name: girlnames[floor(random(girlnames.length))],
             middleName: girlnames[floor(random(girlnames.length))],
@@ -7190,8 +7217,8 @@ var father, mother;
             eyeColor: eyeColors[floor(random(eyeColors.length))],
             age: floor(random(father.age-5, father.age+3))
         };
-        mother.death = generateDeath(mother.age);
         mother.birthday = generateBirthday(mother.age);
+        mother.death = generateDeath(mother.age, mother.birthday);
     }
     generateParents();
     </script>
@@ -7315,9 +7342,6 @@ try{
                 } else {
                     child.middleName = " ";
                 }
-            }
-            if(!child.death) {
-                child.death = generateDeath(child.age);
             }
             if(!child.hairColor) {
                 var hairColors = [];
@@ -7495,6 +7519,7 @@ try{
         div.innerHTML = "<h1 style='margin-left:-"+(offset-10)+"px'>"+(i+1)+"</h1>";
         
         child.birthday = capitalize(document.getElementById("age"+child.age).getAttribute("birthday"));
+        child.death = generateDeath(child.age, child.birthday);
         div.innerHTML += capitalize(child.gender)+": "+child.name+" "+child.middleName+" "+father.lastName+" "+junior+"<br>"+"Age: "+child.age+"<br>Description: "+capitalize(child.hairType)+" "+child.hairColor+" hair. "+capitalize(child.eyeColor)+" eyes.<br>Born on "+child.birthday+"<br>"+child.death+".";
         if(child.death.includes("other")) {
             showOtherPopup = true;
