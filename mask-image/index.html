@@ -109,7 +109,7 @@
 <body>
 
 <h1>Image-Masked Text</h1>
-<img id="mini-image" width="225"></img>
+<img id="mini-image" width="175"></img>
 <div id="controls">
   <input onchange="render()" type="file" id="imageUpload" accept="image/*">
 
@@ -150,6 +150,7 @@
   <label>Shift Text X:</label>
   <input type="range" id="shift-text-x" min="-500" max="500" value="0" oninput="syncSlider(this)">
   <input type="number" min="-500" max="500" value="0" oninput="syncNumber(this, 'shift-text-x')">
+  
   <label>Shift Text Y:</label>
   <input type="range" id="shift-text-y" min="-500" max="500" value="0" oninput="syncSlider(this)">
   <input type="number" min="-500" max="500" value="0" oninput="syncNumber(this, 'shift-text-y')"><br>
