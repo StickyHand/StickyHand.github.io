@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Image Masking</title>
+  <title>Masked Text Tool with Font Check</title>
   <style>
     body {
       font-family: sans-serif;
@@ -16,14 +16,9 @@
     #controls {
       margin-bottom: 20px;
     }
-    input:not([type="range"]), select, button {
-      margin: 5px;
-      padding: 5px;
-    }
     label {
       margin-right: 10px;
     }
-    /* Hidden font test spans */
     #fontTest, #differentFontTest {
       position: absolute;
       left: -9999px;
@@ -35,7 +30,7 @@
 </head>
 <body>
 
-<h1>Mask Your Image:</h1>
+<h1>Image-Masked Text</h1>
 
 <div id="controls">
   <input onchange="render()" type="file" id="imageUpload" accept="image/*"><br>
@@ -43,11 +38,10 @@
   <input onchange="render()" type="text" id="imageURL" placeholder="Paste image URL">
   <button onclick="loadImageFromURL()">Load from URL</button><br>
 
-  <input onchange="render()" type="text" id="textInput" placeholder="Enter your text"><br>
+  <textarea id="textInput" placeholder="Enter your text" oninput="render()"></textarea><br>
 
   <label>Font:</label>
-  <select id="fontSelect" onchange="render()">
-  </select>
+  <select id="fontSelect" onchange="render()"></select>
 
   <input type="text" id="customFont" placeholder="Google Font name">
   <button id="load-font" onclick="loadCustomFont()">Load Font</button><br>
@@ -72,30 +66,25 @@
 
 <canvas id="canvas" width="800" height="400"></canvas>
 
-<!-- Hidden text spans for font detection -->
 <span id="fontTest">abcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()-=_+{}[]|\:";'?,./</span>
 <span id="differentFontTest" style="font-family: monospace;">abcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()-=_+{}[]|\:";'?,./</span>
+
 <script>
   if(localStorage.getItem("allGoogleFonts")) {
-    var fontStorage = localStorage.getItem("allGoogleFonts");
-    fontStorage = JSON.parse(fontStorage);
-    for(var i = 0; i < fontStorage.length; i ++) {
+    var fontStorage = JSON.parse(localStorage.getItem("allGoogleFonts"));
+    for(var i = 0; i < fontStorage.length; i++) {
       var name = fontStorage[i];
       var familyParam = name.replace(/ /g, '+');
       var fontURL = 'https://fonts.googleapis.com/css2?family=' + familyParam + '&display=swap';
       var option = new Option(name, name);
-      
       var link = document.createElement('link');
       link.href = fontURL;
       link.rel = 'stylesheet';
       document.head.appendChild(link);
-
       document.getElementById('fontSelect').appendChild(option);
       document.getElementById('fontSelect').value = name;
     }
   }
-
-
 
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
@@ -127,79 +116,60 @@
   }
 
   image.onload = () => imageLoaded = true;
-  function capitalize(inputString) {
-    var words = inputString.split(" ");
-    for (var i = 0; i < words.length; i++) {
-        if (words[i].length > 0) {
-            words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
-        }
-    }
-    return words.join(" ");
+
+  function capitalize(str) {
+    return str.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
   }
+
   function loadCustomFont() {
     var name = capitalize(document.getElementById('customFont').value.trim().toLowerCase());
     if (!name) return;
 
     var familyParam = name.replace(/ /g, '+');
     var fontURL = 'https://fonts.googleapis.com/css2?family=' + familyParam + '&display=swap';
-
-    // Add <link> tag to load the font
     var link = document.createElement('link');
     link.href = fontURL;
     link.rel = 'stylesheet';
     document.head.appendChild(link);
 
-
     var test = document.getElementById('fontTest');
     var differentFontTest = document.getElementById('differentFontTest');
-    var fontTest = "monospace";
-    if(name.includes("mono")) {
-      fontTest = "serif";
-    }
-
+    var fontTest = name.includes("mono") ? "serif" : "monospace";
     test.style.fontFamily = `'${name}', ${fontTest}`;
+
     document.getElementById("load-font").innerHTML = "Loading...";    
     document.getElementById("load-font").disabled = true;
 
-    // Try to test the font after a delay
     setTimeout(() => {
       var alreadyIncluded = false;
-      if(localStorage.getItem("allGoogleFonts")) {
-        var fontStorage = localStorage.getItem("allGoogleFonts");
-        fontStorage = JSON.parse(fontStorage);
-        if(fontStorage.includes(name)) {
-          alreadyIncluded = true;
-        }
-      }
+      var fontStorage = JSON.parse(localStorage.getItem("allGoogleFonts") || "[]");
+      if(fontStorage.includes(name)) alreadyIncluded = true;
+
       document.getElementById("load-font").innerHTML = "Load Font";  
       document.getElementById("load-font").disabled = false;
-      // Compare width of the same text in both fonts
+
       if (test.offsetWidth === differentFontTest.offsetWidth) {
-        alert(name+" is a non-existing font!");
-      }else if(alreadyIncluded) {
-        alert(name+" is an already existing font!");
+        alert(name + " is a non-existing font!");
+      } else if (alreadyIncluded) {
+        alert(name + " is an already existing font!");
       } else {
         var option = new Option(name, name);
         document.getElementById('fontSelect').appendChild(option);
         document.getElementById('fontSelect').value = name;
-        if(localStorage.getItem("allGoogleFonts")) {
-          var fontStorage = localStorage.getItem("allGoogleFonts");
-          fontStorage = JSON.parse(fontStorage);
-          fontStorage.push(name);
-          fontStorage.sort();
-          localStorage.setItem("allGoogleFonts", JSON.stringify(fontStorage));
-        }else {
-          localStorage.setItem("allGoogleFonts", JSON.stringify([name]));
-        }
-	render();
+        fontStorage.push(name);
+        fontStorage.sort();
+        localStorage.setItem("allGoogleFonts", JSON.stringify(fontStorage));
+        render();
       }
     }, 1000);
   }
 
   function render() {
     if (!imageLoaded || !image.src) return console.log("need an image");
-    var text = document.getElementById('textInput').value;
-    if (!text) return console.log("need some text");
+
+    var rawText = document.getElementById('textInput').value;
+    if (!rawText) return console.log("need some text");
+    var lines = rawText.split('\n');
 
     var font = document.getElementById('fontSelect').value;
     var size = +document.getElementById('fontSize').value;
@@ -215,18 +185,25 @@
 
     var x = canvas.width / 2;
     var y = canvas.height / 2 + parseInt(document.getElementById("shift-text").value);
-    var textW = ctx.measureText(text).width;
+    var lineHeight = size * 1.2;
+    y -= (lines.length - 1) * lineHeight / 2;
 
     ctx.lineWidth = stroke;
-    ctx.strokeStyle = "#000";
-    ctx.strokeText(text, x, y);
-
     ctx.fillStyle = "#000";
-    ctx.fillText(text, x, y);
+    ctx.strokeStyle = "#000";
 
-    if (underline > 0) {
-      var underlineY = y + size / 3;
-      ctx.fillRect(x - textW / 2, underlineY, textW, underline);
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var lineY = y + i * lineHeight;
+      var lineW = ctx.measureText(line).width;
+
+      ctx.strokeText(line, x, lineY);
+      ctx.fillText(line, x, lineY);
+
+      if (underline > 0) {
+        var underlineY = lineY + size / 3;
+        ctx.fillRect(x - lineW / 2, underlineY, lineW, underline);
+      }
     }
 
     ctx.globalCompositeOperation = "source-in";
