@@ -1,102 +1,254 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Mask Text</title>
+  <title>Image Masking</title>
   <style>
     body {
-      font-family: 'Charm', cursive;
+      font-family: sans-serif;
       text-align: center;
       background: #f0f0f0;
     }
     canvas {
       border: 1px solid #ccc;
       margin-top: 10px;
+      background: white;
     }
     #controls {
-      margin-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    input:not([type="range"]), select, button {
+      margin: 5px;
+      padding: 5px;
+    }
+    label {
+      margin-right: 10px;
+    }
+    /* Hidden font test spans */
+    #fontTest, #differentFontTest {
+      position: absolute;
+      left: -9999px;
+      font-size: 40px;
+      visibility: hidden;
+      white-space: nowrap;
     }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Charm:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <h1>Mask Text</h1>
+<h1>Mask Your Image:</h1>
 
-  <div id="controls">
-    <input type="file" id="imageUpload" accept="image/*"><br><br>
-    <input type="text" id="textInput" placeholder="Enter your text"><br><br>
-    <button onclick="render()">Mask Text</button>
-    <button onclick="download()">Download PNG</button>
-  </div>
+<div id="controls">
+  <input onchange="render()" type="file" id="imageUpload" accept="image/*"><br>
 
-  <canvas id="canvas" width="800" height="400"></canvas>
+  <input onchange="render()" type="text" id="imageURL" placeholder="Paste image URL">
+  <button onclick="loadImageFromURL()">Load from URL</button><br>
 
-  <script>
-    var canvas = document.getElementById('canvas');
-    var ctx = canvas.getContext('2d');
-    var image = new Image();
+  <input onchange="render()" type="text" id="textInput" placeholder="Enter your text"><br>
 
-    document.getElementById('imageUpload').addEventListener('change', function(e) {
+  <label>Font:</label>
+  <select id="fontSelect" onchange="render()">
+  </select>
+
+  <input type="text" id="customFont" placeholder="Google Font name">
+  <button id="load-font" onclick="loadCustomFont()">Load Font</button><br>
+
+  <label>Font Size:</label>
+  <input onchange="render()" type="range" id="fontSize" min="40" max="400" value="160">
+
+  <label>Bold Thickness:</label>
+  <input onchange="render()" type="range" id="boldness" min="1" max="30" value="0">
+
+  <label>Underline Height:</label>
+  <input onchange="render()" type="range" id="underlineHeight" min="0" max="50" value="0">
+
+  <label><input onchange="render()" type="checkbox" id="italicToggle"> Italic</label><br>
+  
+  <label>Shift Text:</label>
+  <input onchange="render()" type="range" id="shift-text" min="-100" max="100" value="0" step="3"><br>
+
+  <button onclick="render()">Mask Text</button>
+  <button onclick="download()">Download PNG</button>
+</div>
+
+<canvas id="canvas" width="800" height="400"></canvas>
+
+<!-- Hidden text spans for font detection -->
+<span id="fontTest">abcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()-=_+{}[]|\:";'?,./</span>
+<span id="differentFontTest" style="font-family: monospace;">abcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()-=_+{}[]|\:";'?,./</span>
+<script>
+  if(localStorage.getItem("allGoogleFonts")) {
+    var fontStorage = localStorage.getItem("allGoogleFonts");
+    fontStorage = JSON.parse(fontStorage);
+    for(var i = 0; i < fontStorage.length; i ++) {
+      var name = fontStorage[i];
+      var familyParam = name.replace(/ /g, '+');
+      var fontURL = 'https://fonts.googleapis.com/css2?family=' + familyParam + '&display=swap';
+      var option = new Option(name, name);
+      
+      var link = document.createElement('link');
+      link.href = fontURL;
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+
+      document.getElementById('fontSelect').appendChild(option);
+      document.getElementById('fontSelect').value = name;
+    }
+  }
+
+
+
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  var image = new Image();
+  var imageLoaded = false;
+
+  canvas.addEventListener('dragover', e => e.preventDefault());
+  canvas.addEventListener('drop', function(e) {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       var reader = new FileReader();
-      reader.onload = function(event) {
-        image.src = event.target.result;
-      };
-      reader.readAsDataURL(e.target.files[0]);
-    });
+      reader.onload = evt => image.src = evt.target.result;
+      reader.readAsDataURL(e.dataTransfer.files[0]);
+    }
+  });
 
-    function render() {
-      if (!image.src) {
-        alert("Please upload an image first.");
-        return;
-      }
+  document.getElementById('imageUpload').addEventListener('change', function(e) {
+    var reader = new FileReader();
+    reader.onload = event => image.src = event.target.result;
+    reader.readAsDataURL(e.target.files[0]);
+  });
 
-      var text = document.getElementById('textInput').value;
-      if (!text) {
-        alert("Please enter some text.");
-        return;
-      }
+  function loadImageFromURL() {
+    var url = document.getElementById('imageURL').value.trim();
+    if (url) {
+      image.crossOrigin = "anonymous";
+      image.src = url;
+    }
+  }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.globalCompositeOperation = "source-over";
+  image.onload = () => imageLoaded = true;
+  function capitalize(inputString) {
+    var words = inputString.split(" ");
+    for (var i = 0; i < words.length; i++) {
+        if (words[i].length > 0) {
+            words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+        }
+    }
+    return words.join(" ");
+  }
+  function loadCustomFont() {
+    var name = capitalize(document.getElementById('customFont').value.trim().toLowerCase());
+    if (!name) return;
 
-      var fontSize = 160;
-      ctx.font = "bold " + fontSize + "px 'Charm', cursive";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+    var familyParam = name.replace(/ /g, '+');
+    var fontURL = 'https://fonts.googleapis.com/css2?family=' + familyParam + '&display=swap';
 
-      var textX = canvas.width / 2;
-      var textY = canvas.height / 2;
-      var textWidth = ctx.measureText(text).width;
+    // Add <link> tag to load the font
+    var link = document.createElement('link');
+    link.href = fontURL;
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
 
-      // Stroke to thicken it
-      ctx.lineWidth = 7;
-      ctx.strokeStyle = "#000";
-      ctx.strokeText(text, textX, textY);
 
-      // Fill text
-      ctx.fillStyle = "#000";
-      ctx.fillText(text, textX, textY);
-
-      // Thick underline
-      var underlineY = textY + fontSize / 3;
-      var underlineHeight = 22;
-      ctx.fillRect(textX - textWidth / 2, underlineY, textWidth, underlineHeight);
-
-      // Use text + underline as mask
-      ctx.globalCompositeOperation = "source-in";
-      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-      ctx.globalCompositeOperation = "source-over";
+    var test = document.getElementById('fontTest');
+    var differentFontTest = document.getElementById('differentFontTest');
+    var fontTest = "monospace";
+    if(name.includes("mono")) {
+      fontTest = "serif";
     }
 
-    function download() {
-      var link = document.createElement('a');
-      link.download = 'masked-text.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+    test.style.fontFamily = `'${name}', ${fontTest}`;
+    document.getElementById("load-font").innerHTML = "Loading...";    
+    document.getElementById("load-font").disabled = true;
+
+    // Try to test the font after a delay
+    setTimeout(() => {
+      var alreadyIncluded = false;
+      if(localStorage.getItem("allGoogleFonts")) {
+        var fontStorage = localStorage.getItem("allGoogleFonts");
+        fontStorage = JSON.parse(fontStorage);
+        if(fontStorage.includes(name)) {
+          alreadyIncluded = true;
+        }
+      }
+      document.getElementById("load-font").innerHTML = "Load Font";  
+      document.getElementById("load-font").disabled = false;
+      // Compare width of the same text in both fonts
+      if (test.offsetWidth === differentFontTest.offsetWidth) {
+        alert(name+" is a non-existing font!");
+      }else if(alreadyIncluded) {
+        alert(name+" is an already existing font!");
+      } else {
+        var option = new Option(name, name);
+        document.getElementById('fontSelect').appendChild(option);
+        document.getElementById('fontSelect').value = name;
+        if(localStorage.getItem("allGoogleFonts")) {
+          var fontStorage = localStorage.getItem("allGoogleFonts");
+          fontStorage = JSON.parse(fontStorage);
+          fontStorage.push(name);
+          fontStorage.sort();
+          localStorage.setItem("allGoogleFonts", JSON.stringify(fontStorage));
+        }else {
+          localStorage.setItem("allGoogleFonts", JSON.stringify([name]));
+        }
+	render();
+      }
+    }, 1000);
+  }
+
+  function render() {
+    if (!imageLoaded || !image.src) return console.log("need an image");
+    var text = document.getElementById('textInput').value;
+    if (!text) return console.log("need some text");
+
+    var font = document.getElementById('fontSelect').value;
+    var size = +document.getElementById('fontSize').value;
+    var stroke = +document.getElementById('boldness').value;
+    var underline = +document.getElementById('underlineHeight').value;
+    var italic = document.getElementById('italicToggle').checked;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = "source-over";
+    ctx.font = (italic ? "italic " : "") + size + "px '" + font + "'";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    var x = canvas.width / 2;
+    var y = canvas.height / 2 + parseInt(document.getElementById("shift-text").value);
+    var textW = ctx.measureText(text).width;
+
+    ctx.lineWidth = stroke;
+    ctx.strokeStyle = "#000";
+    ctx.strokeText(text, x, y);
+
+    ctx.fillStyle = "#000";
+    ctx.fillText(text, x, y);
+
+    if (underline > 0) {
+      var underlineY = y + size / 3;
+      ctx.fillRect(x - textW / 2, underlineY, textW, underline);
     }
-  </script>
+
+    ctx.globalCompositeOperation = "source-in";
+    drawImageCover(ctx, image, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = "source-over";
+  }
+
+  function download() {
+    var link = document.createElement('a');
+    link.download = 'masked-text.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  function drawImageCover(ctx, img, canvasW, canvasH) {
+    var iw = img.width, ih = img.height;
+    var scale = Math.max(canvasW / iw, canvasH / ih);
+    var sw = canvasW / scale, sh = canvasH / scale;
+    var sx = (iw - sw) / 2, sy = (ih - sh) / 2;
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvasW, canvasH);
+  }
+</script>
 
 </body>
 </html>
