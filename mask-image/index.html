@@ -38,7 +38,7 @@
   <input onchange="render()" type="text" id="imageURL" placeholder="Paste image URL">
   <button onclick="loadImageFromURL()">Load from URL</button><br>
 
-  <textarea id="textInput" placeholder="Enter your text" oninput="render()"></textarea><br>
+  <textarea id="textInput" placeholder="Enter your text" oninput="render()" style="height:75px; width:300px;"></textarea><br>
 
   <label>Font:</label>
   <select id="fontSelect" onchange="render()"></select>
@@ -47,22 +47,27 @@
   <button id="load-font" onclick="loadCustomFont()">Load Font</button><br>
 
   <label>Font Size:</label>
-  <input onchange="render()" type="range" id="fontSize" min="40" max="400" value="160">
+  <input type="range" id="fontSize" min="40" max="400" value="160" oninput="syncSlider(this)">
+  <input type="number" min="40" max="400" value="160" oninput="syncNumber(this, 'fontSize')"><br>
 
   <label>Bold Thickness:</label>
-  <input onchange="render()" type="range" id="boldness" min="1" max="30" value="0">
+  <input type="range" id="boldness" min="0" max="30" value="0" oninput="syncSlider(this)">
+  <input type="number" min="0" max="30" value="0" oninput="syncNumber(this, 'boldness')"><br>
 
   <label>Underline Height:</label>
-  <input onchange="render()" type="range" id="underlineHeight" min="0" max="50" value="0">
+  <input type="range" id="underlineHeight" min="0" max="50" value="0" oninput="syncSlider(this)">
+  <input type="number" min="0" max="50" value="0" oninput="syncNumber(this, 'underlineHeight')"><br>
+
+  <label>Shift Text:</label>
+  <input type="range" id="shift-text" min="-100" max="100" value="0" oninput="syncSlider(this)">
+  <input type="number" min="-100" max="100" value="0" oninput="syncNumber(this, 'shift-text')"><br>
 
   <label><input onchange="render()" type="checkbox" id="italicToggle"> Italic</label><br>
-  
-  <label>Shift Text:</label>
-  <input onchange="render()" type="range" id="shift-text" min="-100" max="100" value="0" step="3"><br>
 
   <button onclick="render()">Mask Text</button>
   <button onclick="download()">Download PNG</button>
 </div>
+
 
 <canvas id="canvas" width="800" height="400"></canvas>
 
@@ -85,6 +90,18 @@
       document.getElementById('fontSelect').value = name;
     }
   }
+
+function syncSlider(slider) {
+  var number = slider.nextElementSibling;
+  number.value = slider.value;
+  render();
+}
+
+function syncNumber(number, sliderId) {
+  var slider = document.getElementById(sliderId);
+  slider.value = number.value;
+  render();
+}
 
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
