@@ -58,9 +58,13 @@
   <input type="range" id="underlineHeight" min="0" max="50" value="0" oninput="syncSlider(this)">
   <input type="number" min="0" max="50" value="0" oninput="syncNumber(this, 'underlineHeight')"><br>
 
+  <label>Line Spacing:</label>
+  <input type="range" id="lineSpacing" min="0.5" max="1.5" step="0.01" value="1" oninput="syncSlider(this)">
+  <input type="number" min="0.5" max="1.5" step="0.01" value="1" oninput="syncNumber(this, 'lineSpacing')"><br>
+
   <label>Shift Text:</label>
-  <input type="range" id="shift-text" min="-100" max="100" value="0" oninput="syncSlider(this)">
-  <input type="number" min="-100" max="100" value="0" oninput="syncNumber(this, 'shift-text')"><br>
+  <input type="range" id="shift-text" min="-500" max="500" value="0" oninput="syncSlider(this)">
+  <input type="number" min="-500" max="500" value="0" oninput="syncNumber(this, 'shift-text')"><br>
 
   <label><input onchange="render()" type="checkbox" id="italicToggle"> Italic</label><br>
 
@@ -181,52 +185,68 @@ function syncNumber(number, sliderId) {
     }, 1000);
   }
 
-  function render() {
-    if (!imageLoaded || !image.src) return console.log("need an image");
+function render() {
+  if (!imageLoaded || !image.src) return console.log("need an image");
+  var text = document.getElementById('textInput').value;
+  if (!text) return console.log("need some text");
 
-    var rawText = document.getElementById('textInput').value;
-    if (!rawText) return console.log("need some text");
-    var lines = rawText.split('\n');
+  var font = document.getElementById('fontSelect').value;
+  var size = +document.getElementById('fontSize').value;
+  var stroke = +document.getElementById('boldness').value;
+  var underline = +document.getElementById('underlineHeight').value;
+  var italic = document.getElementById('italicToggle').checked;
+  var lineSpacing = parseFloat(document.getElementById('lineSpacing').value);
 
-    var font = document.getElementById('fontSelect').value;
-    var size = +document.getElementById('fontSize').value;
-    var stroke = +document.getElementById('boldness').value;
-    var underline = +document.getElementById('underlineHeight').value;
-    var italic = document.getElementById('italicToggle').checked;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = "source-over";
+  ctx.font = (italic ? "italic " : "") + size + "px '" + font + "'";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";  // Start from the top of each line
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.globalCompositeOperation = "source-over";
-    ctx.font = (italic ? "italic " : "") + size + "px '" + font + "'";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+  var x = canvas.width / 2;
 
-    var x = canvas.width / 2;
-    var y = canvas.height / 2 + parseInt(document.getElementById("shift-text").value);
-    var lineHeight = size * 1.2;
-    y -= (lines.length - 1) * lineHeight / 2;
+  // Split text into lines
+  var lines = text.split("\n");
+  
+  // Calculate the height of one line and total height of all lines
+  var lineHeight = size * lineSpacing;
+  var totalHeight = lines.length * lineHeight;
 
-    ctx.lineWidth = stroke;
-    ctx.fillStyle = "#000";
-    ctx.strokeStyle = "#000";
+  // Calculate the starting Y position to center the text vertically
+  var y = (canvas.height - totalHeight) / 2 + parseInt(document.getElementById("shift-text").value);
 
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i];
-      var lineY = y + i * lineHeight;
-      var lineW = ctx.measureText(line).width;
-
-      ctx.strokeText(line, x, lineY);
-      ctx.fillText(line, x, lineY);
-
-      if (underline > 0) {
-        var underlineY = lineY + size / 3;
-        ctx.fillRect(x - lineW / 2, underlineY, lineW, underline);
-      }
-    }
-
-    ctx.globalCompositeOperation = "source-in";
-    drawImageCover(ctx, image, canvas.width, canvas.height);
-    ctx.globalCompositeOperation = "source-over";
+  // If the number of lines is even, adjust to center the lines correctly
+  if (lines.length % 2 === 0) {
+    y += lineHeight / 2;
   }
+
+  // Draw each line of text
+  ctx.lineWidth = stroke;
+  ctx.strokeStyle = "#000";
+  ctx.fillStyle = "#000";
+
+  for (var i = 0; i < lines.length; i++) {
+  var textLineY = y + i * lineHeight;
+  var textW = ctx.measureText(lines[i]).width;
+
+  ctx.strokeText(lines[i], x, textLineY);
+  ctx.fillText(lines[i], x, textLineY);
+
+  if (underline > 0) {
+    // underlineY sits slightly below the baseline of the current line
+    var underlineY = textLineY + size * 0.8;
+    ctx.fillRect(x - textW / 2, underlineY, textW, underline);
+  }
+}
+
+
+  ctx.globalCompositeOperation = "source-in";
+  drawImageCover(ctx, image, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = "source-over";
+}
+
+
+
 
   function download() {
     var link = document.createElement('a');
