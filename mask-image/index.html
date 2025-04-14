@@ -71,6 +71,13 @@
 
   <button onclick="render()">Mask Text</button>
   <button onclick="download()">Download PNG</button>
+
+<label>Canvas Width:</label>
+  <input type="range" id="canvas-width" min="0" max="1000" value="800" oninput="syncSlider(this)">
+  <input type="number" min="-500" max="500" value="0" oninput="syncNumber(this, 'canvas-width')">
+<label>Canvas Height:</label>
+  <input type="range" id="canvas-height" min="0" max="1000" value="400" oninput="syncSlider(this)">
+  <input type="number" min="-500" max="500" value="0" oninput="syncNumber(this, 'canvas-height')">
 </div>
 
 
@@ -187,6 +194,8 @@ function syncNumber(number, sliderId) {
   }
 
 function render() {
+  canvas.width = parseInt(document.getElementById("canvas-width").value);
+  canvas.height = parseInt(document.getElementById("canvas-height").value);
   if (!imageLoaded || !image.src) return console.log("need an image");
   var text = document.getElementById('textInput').value;
   if (!text) return console.log("need some text");
