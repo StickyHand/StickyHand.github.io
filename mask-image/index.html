@@ -10,9 +10,10 @@
       background: #f0f0f0;
     }
     canvas {
-      border: 1px solid #ccc;
+      border: 5px solid rgb(0, 200, 0);
       margin-top: 10px;
-      background: white;
+      background: transparent;
+      border-radius: 10px;
     }
     #controls {
       margin-bottom: 20px;
@@ -27,14 +28,92 @@
       visibility: hidden;
       white-space: nowrap;
     }
+    button{
+      background-color: transparent;
+      height: 30px;
+      font-size: 10px;
+      border-radius: 20px;
+      border: 5px solid rgb(0, 200, 0);
+      color: rgb(0, 100, 0);
+      transition: 0.25s;
+    }
+    button:hover {
+      border-color: rgb(0, 230, 0);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    input[type="range"] {
+      accent-color: rgb(0, 200, 0);
+    }
+    input[type="range"]:hover {
+      cursor: ew-resize;
+    }
+    input[type="text"], textArea{
+      background-color: transparent;
+      color: rgb(0, 100, 0);
+      border-radius: 10px;
+      height: 20px;
+      width: 200px;
+      line-height: 20px;
+      transition: 0.25s;
+      border: 5px solid rgb(0, 200, 0);
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+    input[type="number"] {
+      background-color: transparent;
+      color: rgb(0, 100, 0);
+      border-radius: 10px;
+      height: 20px;
+      width: 70px;
+      line-height: 20px;
+      transition: 0.25s;
+      border: 5px solid rgb(0, 200, 0);
+      padding-left: 5px;
+      padding-right: 5px;
+      margin-bottom: 3px;
+    }
+    select{
+      background-color: transparent;
+      color: rgb(0, 100, 0);
+      border-radius: 10px;
+      height: 30px;
+      width: 200px;
+      line-height: 30px;
+      transition: 0.25s;
+      border: 5px solid rgb(0, 200, 0);
+    }
+    select:hover{
+        cursor: pointer;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, textArea:focus, select:focus {
+      border-color: rgb(0, 230, 0);
+      border-radius: 5px;
+      outline: none
+    }
+    #imageUpload{
+      position: absolute;
+      left: -9999px;
+    }
+    #mini-image{
+      position: absolute;
+      top: 50px;
+      right: 50px;
+      border-radius: 5px;
+    }
+    button {
+      margin-bottom: 3px;
+    }
   </style>
 </head>
 <body>
 
 <h1>Image-Masked Text</h1>
-
+<img id="mini-image" width="225"></img>
 <div id="controls">
-  <input onchange="render()" type="file" id="imageUpload" accept="image/*"><br>
+  <input onchange="render()" type="file" id="imageUpload" accept="image/*">
+
+  <button id="file-upload">Upload Image</button><br>
 
   <input onchange="render()" type="text" id="imageURL" placeholder="Paste image URL">
   <button onclick="loadImageFromURL()">Load from URL</button><br>
@@ -54,6 +133,10 @@
   <label>Bold Thickness:</label>
   <input type="range" id="boldness" min="0" max="30" value="0" oninput="syncSlider(this)">
   <input type="number" min="0" max="30" value="0" oninput="syncNumber(this, 'boldness')"><br>
+  
+  <label>Italicize:</label>
+  <input type="range" id="italicSlant" min="-50" max="50" value="0" oninput="syncSlider(this)">
+  <input type="number" id="italicSlantNumber" min="-50" max="50" value="0" oninput="syncNumber(this, 'italicSlant')"><br>
 
   <label>Underline Height:</label>
   <input type="range" id="underlineHeight" min="0" max="50" value="0" oninput="syncSlider(this)">
@@ -63,11 +146,13 @@
   <input type="range" id="lineSpacing" min="0.5" max="1.5" step="0.01" value="1" oninput="syncSlider(this)">
   <input type="number" min="0.5" max="1.5" step="0.01" value="1" oninput="syncNumber(this, 'lineSpacing')"><br>
 
-  <label>Shift Text:</label>
-  <input type="range" id="shift-text" min="-500" max="500" value="0" oninput="syncSlider(this)">
-  <input type="number" min="-500" max="500" value="0" oninput="syncNumber(this, 'shift-text')"><br>
 
-  <label><input onchange="render()" type="checkbox" id="italicToggle"> Italic</label><br>
+  <label>Shift Text X:</label>
+  <input type="range" id="shift-text-x" min="-500" max="500" value="0" oninput="syncSlider(this)">
+  <input type="number" min="-500" max="500" value="0" oninput="syncNumber(this, 'shift-text-x')">
+  <label>Shift Text Y:</label>
+  <input type="range" id="shift-text-y" min="-500" max="500" value="0" oninput="syncSlider(this)">
+  <input type="number" min="-500" max="500" value="0" oninput="syncNumber(this, 'shift-text-y')"><br>
 
   <button onclick="render()">Mask Text</button>
   <button onclick="download()">Download PNG</button><br>
@@ -87,6 +172,10 @@
 <span id="differentFontTest" style="font-family: monospace;">abcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()-=_+{}[]|\:";'?,./</span>
 
 <script>
+  var canvas = document.getElementById('canvas');
+  var img = document.getElementById('mini-image');
+  var pos = window.innerWidth - 1075;
+  img.style.right = `${pos}px`;
   if(localStorage.getItem("allGoogleFonts")) {
     var fontStorage = JSON.parse(localStorage.getItem("allGoogleFonts"));
     for(var i = 0; i < fontStorage.length; i++) {
@@ -98,10 +187,15 @@
       link.href = fontURL;
       link.rel = 'stylesheet';
       document.head.appendChild(link);
+      option.style.fontFamily = name;
       document.getElementById('fontSelect').appendChild(option);
       document.getElementById('fontSelect').value = name;
     }
   }
+
+  document.getElementById("file-upload").addEventListener("click", function(){
+    document.getElementById("imageUpload").click();
+  });
 
 function syncSlider(slider) {
   var number = slider.nextElementSibling;
@@ -115,7 +209,6 @@ function syncNumber(number, sliderId) {
   render();
 }
 
-  var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
   var image = new Image();
   var imageLoaded = false;
@@ -144,7 +237,18 @@ function syncNumber(number, sliderId) {
     }
   }
 
-  image.onload = () => imageLoaded = true;
+// This function will be called immediately after the image is loaded
+image.onload = function() {
+  imageLoaded = true;
+  imageUploaded();  // Call this function to update the background
+  render();
+};
+
+var imageUploaded = function(){
+  if (!imageLoaded || !image.src) return console.log("need an image");
+  document.getElementById("mini-image").style.boxShadow = "3px 3px 10px rgba(0, 0, 0, 0.5)";
+  document.getElementById("mini-image").src = image.src;
+};
 
   function capitalize(str) {
     return str.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
@@ -183,8 +287,12 @@ function syncNumber(number, sliderId) {
         alert(name + " is an already existing font!");
       } else {
         var option = new Option(name, name);
-        document.getElementById('fontSelect').appendChild(option);
-        document.getElementById('fontSelect').value = name;
+        option.style.fontFamily = name;
+        setTimeout(() => {
+          document.getElementById('fontSelect').appendChild(option);
+          document.getElementById('fontSelect').value = name;
+          render();
+        }, 15);
         fontStorage.push(name);
         fontStorage.sort();
         localStorage.setItem("allGoogleFonts", JSON.stringify(fontStorage));
@@ -193,27 +301,30 @@ function syncNumber(number, sliderId) {
     }, 1000);
   }
 
+
+
 function render() {
   canvas.width = parseInt(document.getElementById("canvas-width").value);
   canvas.height = parseInt(document.getElementById("canvas-height").value);
   if (!imageLoaded || !image.src) return console.log("need an image");
   var text = document.getElementById('textInput').value;
   if (!text) return console.log("need some text");
-
   var font = document.getElementById('fontSelect').value;
   var size = +document.getElementById('fontSize').value;
   var stroke = +document.getElementById('boldness').value;
   var underline = +document.getElementById('underlineHeight').value;
-  var italic = document.getElementById('italicToggle').checked;
   var lineSpacing = parseFloat(document.getElementById('lineSpacing').value);
+  var italicSlant = parseFloat(document.getElementById('italicSlant').value);
+  
+  var skew = -Math.tan(italicSlant * Math.PI / 180);
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.globalCompositeOperation = "source-over";
-  ctx.font = (italic ? "italic " : "") + size + "px '" + font + "'";
+  ctx.font = size + "px '" + font + "'";
   ctx.textAlign = "center";
   ctx.textBaseline = "top";  // Start from the top of each line
 
-  var x = canvas.width / 2;
+  var x = canvas.width / 2 + parseInt(document.getElementById("shift-text-x").value);
 
   // Split text into lines
   var lines = text.split("\n");
@@ -223,12 +334,9 @@ function render() {
   var totalHeight = lines.length * lineHeight;
 
   // Calculate the starting Y position to center the text vertically
-  var y = (canvas.height - totalHeight) / 2 + parseInt(document.getElementById("shift-text").value);
+  var y = (canvas.height - totalHeight) / 2 + parseInt(document.getElementById("shift-text-y").value);
 
-  // If the number of lines is even, adjust to center the lines correctly
-  if (lines.length % 2 === 0) {
-    y += lineHeight / 2;
-  }
+
 
   // Draw each line of text
   ctx.lineWidth = stroke;
@@ -238,10 +346,11 @@ function render() {
   for (var i = 0; i < lines.length; i++) {
   var textLineY = y + i * lineHeight;
   var textW = ctx.measureText(lines[i]).width;
-
+  ctx.save();
+  ctx.transform(1, 0, skew, 1, -(textLineY + size) * skew, 0);
   ctx.strokeText(lines[i], x, textLineY);
   ctx.fillText(lines[i], x, textLineY);
-
+  ctx.restore();
   if (underline > 0) {
     // underlineY sits slightly below the baseline of the current line
     var underlineY = textLineY + size * 0.8;
