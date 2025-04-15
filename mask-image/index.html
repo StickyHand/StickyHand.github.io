@@ -174,8 +174,8 @@
 <script>
   var canvas = document.getElementById('canvas');
   var img = document.getElementById('mini-image');
-  var pos = window.innerWidth - 1075;
-  img.style.right = `${pos}px`;
+  var pos = window.innerWidth - 300;
+  img.style.left = pos+"px";
   if(localStorage.getItem("allGoogleFonts")) {
     var fontStorage = JSON.parse(localStorage.getItem("allGoogleFonts"));
     for(var i = 0; i < fontStorage.length; i++) {
