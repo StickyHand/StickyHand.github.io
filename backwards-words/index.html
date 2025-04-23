@@ -47,7 +47,7 @@
             color: #999;
         }
 
-        button {
+        #copy-button {
             padding: 10px 15px;
             background-color: #3498db;
             color: #fff;
@@ -58,7 +58,7 @@
             transition: background-color 0.3s ease;
         }
 
-        button:hover {
+        #copy-button:hover {
             background-color: #2980b9;
         }
 
@@ -69,7 +69,7 @@
             overflow-y: auto;
         }
 
-        #listofnames span {
+        #listofnames .span {
             display: inline-block;
             padding: 5px;
             background-color: #ecf0f1;
@@ -81,30 +81,41 @@
 
         #listofnames button {
             background: transparent;
-            color: #e74c3c;
+            color: #2c3e50;
+            font-size: 1em;
             border: none;
-            font-size: 1.1em;
             cursor: pointer;
-            padding: 0 10px;
+            padding: 0px;
+            height: 30px;
+            width: 30px;
+            border-radius: 15px;
+            transition: 0.3s;
         }
 
         #listofnames button:hover {
-            color: #c0392b;
+            color: #AAA;
         }
 
         .material-symbols-outlined {
             font-size: 1.5em;
             vertical-align: middle;
-            margin-left: 10px;
+            margin-left: 2px;
             cursor: pointer;
         }
-
         .error {
             color: red;
             font-size: 0.9em;
             margin-top: 10px;
         }
 
+        select {
+            padding: 10px;
+            font-size: 1em;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 380px;
+        }
     </style>
 </head>
 <body>
@@ -112,49 +123,109 @@
         <h1>Sdrow Ssdrawkcab</h1>
         <input id="input" placeholder="Input name here:" oninput="run();">
         <input id="output" disabled placeholder="Output:">
-        <button onclick="copy();">
+        <button id="copy-button" onclick="copy();">
             <span class="material-symbols-outlined">content_copy</span>
         </button>
+        
+        <!-- Dropdown for selecting voice -->
+        <select id="voiceSelect" onchange="runNames()"></select>
+
         <div id="listofnames"></div>
         <div class="error" id="error-message"></div>
     </div>
 
     <script>
+        let voices = [];
+        
+        // Initialize voices on load
+        function populateVoices() {
+    voices = speechSynthesis.getVoices();
+    const voiceSelect = document.getElementById("voiceSelect");
+    voiceSelect.innerHTML = "";
+
+    // Include all natural-sounding voices
+    const filteredVoices = voices.filter(voice =>
+        voice.name.toLowerCase().includes("natural")
+    );
+
+    filteredVoices.forEach((voice, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = voice.name;
+        voiceSelect.appendChild(option);
+    });
+
+    // Try to select the first English-US voice
+    const firstEnglishUSIndex = filteredVoices.findIndex(voice =>
+        voice.lang === "en-US"
+    );
+
+    if (firstEnglishUSIndex !== -1) {
+        voiceSelect.selectedIndex = firstEnglishUSIndex;
+    } else if (voiceSelect.options.length > 0) {
+        voiceSelect.selectedIndex = 0; // fallback
+    }
+
+    // Save the filtered list globally
+    voices = filteredVoices;
+}
+
+        // Run function to handle names and speaker buttons
         function runNames(){
             document.getElementById("listofnames").innerHTML = "";
             if(localStorage.getItem("listofnames")){
-                var names = localStorage.getItem("listofnames");
-                names = names.split(", ");
-                for(var i = 0; i < names.length; i++){
-                    var n = names[i];
-                    document.getElementById("listofnames").innerHTML += "<span id='" + i + "'>" + n + "</span><button class='material-symbols-outlined' onclick='del(" + i + ")'>delete</button><br>";
-                }
+                const names = localStorage.getItem("listofnames").split(", ");
+                names.forEach((name, i) => {
+                    const nameElement = document.createElement("span");
+                    nameElement.textContent = name;
+                    nameElement.classList.add("span");
+                    const speakerButton = document.createElement("button");
+                    speakerButton.innerHTML = '<span class="material-symbols-outlined">volume_up</span>';
+                    speakerButton.onclick = () => speakWord(name);
+                    const deleteButton = document.createElement("button");
+                    deleteButton.innerHTML = '<span class="material-symbols-outlined">delete</span>';
+                    deleteButton.onclick = () => del(i);
+                    document.getElementById("listofnames").appendChild(nameElement);
+                    document.getElementById("listofnames").appendChild(speakerButton);
+                    document.getElementById("listofnames").appendChild(deleteButton);
+                    document.getElementById("listofnames").appendChild(document.createElement("br"));
+                });
             }
         }
-        runNames();
 
-        function capitalize(inputString) {
-            inputString = inputString.toLowerCase();
-            return inputString.charAt(0).toUpperCase() + inputString.slice(1);
+        // Function to speak a word using speech synthesis
+        function speakWord(word) {
+            const voiceIndex = document.getElementById("voiceSelect").value;
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.voice = voices[voiceIndex];
+            speechSynthesis.speak(utterance);
         }
 
+        // Run when input is updated
         function run(){
-            var input = document.getElementById("input").value;
-            var output = "";
-            for(var i = input.length; i > 0; i--){
+            const input = document.getElementById("input").value;
+            let output = "";
+            for(let i = input.length; i > 0; i--){
                 output += input[i-1];
             }
             document.getElementById("output").value = capitalize(output);
         }
 
+        // Function to capitalize the first letter
+        function capitalize(inputString) {
+            inputString = inputString.toLowerCase();
+            return inputString.charAt(0).toUpperCase() + inputString.slice(1);
+        }
+
+        // Copy to clipboard
         function copy() {
-            var val = document.getElementById("output").value.trim();
+            const val = document.getElementById("output").value.trim();
             if (val === "") return;
 
-            var can = true;
-            var names = localStorage.getItem("listofnames") ? localStorage.getItem("listofnames").split(", ") : [];
+            let can = true;
+            let names = localStorage.getItem("listofnames") ? localStorage.getItem("listofnames").split(", ") : [];
             if (names.includes(val)) {
-                var confirmation = confirm("Are you sure you want to add a duplicate?");
+                const confirmation = confirm("Are you sure you want to add a duplicate?");
                 can = confirmation;
             }
 
@@ -166,7 +237,7 @@
                 });
 
                 if (localStorage.getItem("listofnames")) {
-                    var string = localStorage.getItem("listofnames");
+                    let string = localStorage.getItem("listofnames");
                     string += ", " + val;
                     localStorage.setItem("listofnames", string);
                 } else {
@@ -177,15 +248,25 @@
             }
         }
 
+        // Delete name from the list
         function del(id){
-            var confirmation = confirm("Are you sure you want to delete this name?");
+            const confirmation = confirm("Are you sure you want to delete this name?");
             if(localStorage.getItem("listofnames") && confirmation) {
-                var names = localStorage.getItem("listofnames").split(", ");
+                let names = localStorage.getItem("listofnames").split(", ");
                 names.splice(Number(id), 1);
                 localStorage.setItem("listofnames", names.join(", "));
                 runNames();
             }
         }
+
+        // Initialize voices when the page is loaded
+        window.onload = function() {
+            populateVoices();
+            runNames();
+        };
+
+        // Re-populate voices when the voices are loaded
+        speechSynthesis.onvoiceschanged = populateVoices;
     </script>
 </body>
 </html>
