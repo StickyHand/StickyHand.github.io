@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <title>Sdrow Ssdrawkcab</title>
@@ -175,6 +175,7 @@
             document.getElementById("listofnames").innerHTML = "";
             if(localStorage.getItem("listofnames")){
                 const names = localStorage.getItem("listofnames").split(", ");
+                names.sort();
                 names.forEach((name, i) => {
                     const nameElement = document.createElement("span");
                     nameElement.textContent = name;
