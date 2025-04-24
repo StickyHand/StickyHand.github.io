@@ -213,12 +213,16 @@
         }
 
         function run() {
-            const input = document.getElementById("input").value;
+            const input = document.getElementById("input").value.split(" ");
             let output = "";
-            for (let i = input.length; i > 0; i--) {
-                output += input[i - 1];
+            for(let i = 0; i < input.length; i ++) {
+                let output1 = "";
+                for (let j = input[i].length; j > 0; j--) {
+                    output1 += input[i][j - 1];
+                }
+                output += output1+" ";
             }
-            document.getElementById("output").value = capitalize(output);
+            document.getElementById("output").value = capitalize(output.trim());
         }
 
         function capitalize(inputString) {
@@ -264,7 +268,7 @@
         function clearHistory() {
             var conf = confirm("ARE YOU SURE YOU WANT TO CLEAR YOUR HISTORY?");
             if(conf) {
-                var confirmCode = Math.random().toString(36).substring(2, 8);
+                var confirmCode = Math.random().toString(36).substring(2, 5);
                 var confi = prompt("Type: "+confirmCode+" to continue");
                 if(confi === confirmCode) {
                     localStorage.removeItem("listofnames");
