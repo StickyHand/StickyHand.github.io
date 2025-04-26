@@ -37,8 +37,8 @@
     // Camera position
     camera.position.z = 20;
 
-    // Controls (this works now, because OrbitControls is loaded)
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    // Controls (fixed)
+    const controls = new OrbitControls(camera, renderer.domElement);  // No THREE. prefix
 
     // Banner background
     const bannerGeometry = new THREE.PlaneGeometry(20, 10);
@@ -89,7 +89,7 @@
     // Animate
     function animate() {
       requestAnimationFrame(animate);
-      controls.update();
+      controls.update();  // Ensure OrbitControls is updated
       renderer.render(scene, camera);
     }
 
