@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OpenAI Banner (No Modules)</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <!-- Three.js core -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+  <!-- OrbitControls -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- FontLoader and TextGeometry -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/FontLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/geometries/TextGeometry.js"></script>
+
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Lighting
+    const light = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(light);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(0, 5, 10);
+    scene.add(dirLight);
+
+    // Camera position
+    camera.position.z = 20;
+
+    // Controls
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    // Banner background
+    const bannerGeometry = new THREE.PlaneGeometry(20, 10);
+    const bannerMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+    const banner = new THREE.Mesh(bannerGeometry, bannerMaterial);
+    scene.add(banner);
+
+    // Logo
+    const loader = new THREE.TextureLoader();
+    loader.load('https://upload.wikimedia.org/wikipedia/commons/4/4d/OpenAI_Logo.svg', texture => {
+      const logoGeometry = new THREE.PlaneGeometry(4, 4);
+      const logoMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+      const logo = new THREE.Mesh(logoGeometry, logoMaterial);
+      logo.position.set(-5, 0, 0.1);
+      scene.add(logo);
+    });
+
+    // Font + Text
+    const fontLoader = new THREE.FontLoader();
+    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', font => {
+      const textGeometry = new THREE.TextGeometry("I am 4-o", {
+        font: font,
+        size: 1,
+        height: 0.2,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 0.02,
+        bevelSize: 0.02,
+        bevelOffset: 0,
+        bevelSegments: 5
+      });
+
+      textGeometry.center();
+
+      const textMaterial = new THREE.MeshStandardMaterial({ color: 0x00ffcc });
+      const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+      textMesh.position.set(5, -0.5, 0.1);
+      scene.add(textMesh);
+    });
+
+    // Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Animate
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
