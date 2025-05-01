@@ -2,7 +2,8 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>New webpage</title>
+        <link rel="shortcut icon" type="image/png" href="https://stickyhand.github.io/scooter-game/scooter.png">
+        <title>Scooter Game</title>
         <style>
             *{
                 margin: 0;
@@ -157,7 +158,7 @@ var professions = [
 ];
 var criminals = [
     "Druggy, if caught jail time is 3 minutes",
-    "Drunk, Driver if caught jail time is 2 1/2 minutes",
+    "Drunk Driver, if caught jail time is 2 1/2 minutes",
     "Robber, if caught jail time is 1 1/2 minutes",
     "Idiot(e.g. Jazz, Show Off), if caught jail time is 1 minute",
     "Drug Dealer, if caught jail time is 4 minutes",
@@ -198,14 +199,23 @@ function changeProfession(id) {
 function gotCaught(id) {
     var prof = document.getElementById(id+"-profession").innerHTML.split("(")[1].trim();
     prof = prof.split(",")[0];
-    var newProfessions = professions.filter(function(item) {
-        return item !== "Criminal";
-    });
     var person = document.getElementById(id+"-profession");
-    var profession = newProfessions[Math.floor(Math.random()*newProfessions.length)];
-    person.innerHTML = " "+profession;
-    History.push(capitalize(id)+", a(n) "+prof+" got caught! Now he is a "+profession);
+    var profession = professions[Math.floor(Math.random()*professions.length)];
     document.getElementById(id+"-got-caught").style.display = "none";
+    if(profession === "Criminal") {
+        profession += "("+criminals[Math.floor(Math.random()*criminals.length)]+")"
+        document.getElementById(id+"-got-caught").style.display = "block";
+    }
+    while(profession === document.getElementById(id+"-profession").innerHTML) {
+        profession = professions[Math.floor(Math.random()*professions.length)];
+        document.getElementById(id+"-got-caught").style.display = "none";
+        if(profession === "Criminal") {
+            profession += "("+criminals[Math.floor(Math.random()*criminals.length)]+")"
+            document.getElementById(id+"-got-caught").style.display = "block";
+        }
+    }
+    person.innerHTML = " "+profession;
+    History.push(capitalize(id)+", a(n) "+prof+" got caught! Now (s)he is a "+profession);
     return profession;
 }
 function buyProduct(person) {
