@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>New webpage</title>
+        <style>
+            *{
+                margin: 0;
+                padding: 0;
+                font-family: sans-serif;
+            }
+            body {
+                text-align: center;
+                display: flex;
+                justify-content: center;   /* Horizontal centering */
+                align-items: center;       /* Vertical centering */
+                min-height: 100vh;         /* Ensure it takes up full viewport height */
+                margin: 0;                 /* Remove default margin from the body */
+              }
+            button {
+                padding: 2px 10px;
+                border-radius: 5px;
+                color: white;
+                background: #092999;
+                border: none;
+                margin: 1px;
+                cursor: pointer;
+            }
+            input, textarea {
+                padding: 2px 5px;
+                color: white;
+                background: #092999;
+                outline: none;
+                border: none;
+                border-radius: 5px;
+                margin: 1px;
+                transition: 0.3s;
+            }
+            input:focus, textarea:focus{
+                background: #001585;
+            }
+            textarea {
+                resize: none;
+                width: 300px;
+                height: 150px;
+            }
+            ::placeholder{
+                color: #AAA;
+            }
+            .centered {
+                display: flex;
+                justify-content: center;
+            }
+            .logout-btn{
+                position: absolute;
+                top: 25px;
+                left: 25px;
+                width: 50px;
+                height: 50px;
+                font-size: 40px;
+                padding: 0;
+            }
+            .logout-btn span {
+                position: relative;
+                top: -3px;
+            }
+            #people-container{
+                padding: 5px 10px;
+                line-height: 50px;
+                width: calc(100vw - 75px);
+                background: #092999;
+                color: white;
+                border-radius: 10px;
+                box-shadow: 0 0 20px #092999;
+            }
+            #people-container div{
+                margin: 5px 0;
+                border: 2px dashed;
+                border-radius: 50px 10px;
+                padding: 0 25px;
+                transition: 0.3s;
+                filter: drop-shadow(0 0 2.5px white);
+                text-align: left;
+            }
+            #people-container div:hover{
+                border-radius: 10px 50px;
+            }
+        </style>
+    </head>
+    <body>
+<div id="login" class="page">
+<input id="password" type="password" placeholder="Password:">
+    <button onclick="login();">Login</button><br>
+    <button onclick="goToStoreRecords();">Store Records</button><button onclick="endGame();">End Game</button><br><br>
+    <div id="people-container"></div>
+</div>
+<div id="end-page" class="page">
+    
+</div>
+<div id="store-records" class="page">
+</div>
+<script>
+var History = [];
+var storeRecords = [];
+
+function goToPage(curPage){
+    var pages = document.getElementsByClassName("page");
+    Array.from(pages).forEach(function(p){
+        if(p.id === curPage) {
+            p.style.display = "block"
+        }else {
+            p.style.display = "none"
+        }
+    })
+}
+var passwords = [
+    /*"bWFyaWFubmU=",// Marianne's
+    "amVkZWRpYWg=",// Jedediah's
+    "amFzb24=" // Jason's*/
+];
+
+var decodeBase64 = function(base64Text) {
+    return atob(base64Text);
+};
+document.getElementById("password").addEventListener("keyup", function(event){
+    if(event.key === "Enter") {
+        login();
+    }
+});
+function login() {
+    var pass = document.getElementById("password").value;
+    
+    var goto = "";
+    for(var i = 0; i < passwords.length; i ++) {
+        var convert = decodeBase64(passwords[i].password);
+        if(convert === pass) {
+            goto = passwords[i].person
+        }
+    }
+    if(goto !== "") {
+        goToPage(goto);
+    }else{
+        alert("Invalid Password");
+    }
+    document.getElementById("password").value = ""
+}
+
+var professions = [
+    "Cop",
+    "Soldier",
+    "Criminal",
+    "Cop",
+    "Soldier",
+    "Criminal",
+    "Citizen",
+    "Citizen"
+];
+var criminals = [
+    "Druggy, if caught jail time is 3 minutes",
+    "Drunk, Driver if caught jail time is 2 1/2 minutes",
+    "Robber, if caught jail time is 1 1/2 minutes",
+    "Idiot(e.g. Jazz, Show Off), if caught jail time is 1 minute",
+    "Drug Dealer, if caught jail time is 4 minutes",
+    "Illeagal Cop, if caught jail time is 3 minutes"
+];
+function generateProfession(id) {
+    var person = document.getElementById(id+"-profession");
+    var profession = professions[Math.floor(Math.random()*professions.length)];
+    if(profession === "Criminal") {
+        profession += "("+criminals[Math.floor(Math.random()*criminals.length)]+")"
+    }
+    person.innerHTML = " "+profession;
+    
+}
+function capitalize(inputString) {
+    return inputString.charAt(0).toUpperCase() + inputString.slice(1);
+}
+function changeProfession(id) {
+    var prof = document.getElementById(id+"-profession").innerHTML.split("(")[0].trim();
+    if(prof === "Soldier") {
+        document.getElementById(id+"-info").innerHTML = capitalize(id)+" <span style='font-size:9px;'>Veteran</span>";
+    }
+    var newProfessions = professions.filter(function(item) {
+        return item !== prof;
+    });
+    var person = document.getElementById(id+"-profession");
+    var profession = newProfessions[Math.floor(Math.random()*newProfessions.length)];
+    var returnProfession = profession;
+    document.getElementById(id+"-got-caught").style.display = "none";
+    if(profession === "Criminal") {
+        profession += "("+criminals[Math.floor(Math.random()*criminals.length)]+")"
+        document.getElementById(id+"-got-caught").style.display = "block";
+    }
+    person.innerHTML = " "+profession;
+    History.push(capitalize(id)+" resined as a "+prof+" and turned into a "+returnProfession);
+    return returnProfession;
+}
+function gotCaught(id) {
+    var prof = document.getElementById(id+"-profession").innerHTML.split("(")[1].trim();
+    prof = prof.split(",")[0];
+    var newProfessions = professions.filter(function(item) {
+        return item !== "Criminal";
+    });
+    var person = document.getElementById(id+"-profession");
+    var profession = newProfessions[Math.floor(Math.random()*newProfessions.length)];
+    person.innerHTML = " "+profession;
+    History.push(capitalize(id)+", a(n) "+prof+" got caught! Now he is a "+profession);
+    document.getElementById(id+"-got-caught").style.display = "none";
+    return profession;
+}
+function buyProduct(person) {
+    if(document.getElementById(person+"-buy-input").value !== "") {
+        var num = document.getElementById(person+"-buy-num").value === "" ? 1 : document.getElementById(person+"-buy-num").value;
+        document.getElementById(person+"-bought").value += num+" "+document.getElementById(person+"-buy-input").value+"\n"
+        var addTo = capitalize(person)+" bought "+num+" "+document.getElementById(person+"-buy-input").value+"!";
+        History.push(addTo);
+        storeRecords.push(addTo);
+    }
+}
+function keepGreaterThan(id, num) {
+    if(Number(document.getElementById(id).value) < num) {
+        document.getElementById(id).value = num;
+    }
+}
+function generatePerson(person, password){
+    passwords.push({person:person, password:password});
+    var personContainer = document.createElement("div");
+    personContainer.classList.add("page");
+    personContainer.id = person;
+    personContainer.innerHTML = 
+    '<button class="logout-btn" onclick="goToPage(\'login\')"><span>&larr;</span></button>'+
+    capitalize(person)+":<span id='"+person+"-profession'></span>";
+    document.body.appendChild(personContainer)
+    
+    document.getElementById("people-container").innerHTML += 
+    "<div class='person' id='"+person+"-info'>"+capitalize(person);
+    generateProfession(person);
+    document.getElementById(person).innerHTML += " <button onclick=\"changeProfession('"+person+"')\">Resign</button><div class='centered'><button id='"+person+"-got-caught' style='display: none;' onclick='gotCaught(\""+person+"\");'>Got Caught</button></div><br><textarea  id='"+person+"-bought' disabled></textarea><br><input id='"+person+"-buy-num' type='number' placeholder='Number of Item' oninput='keepGreaterThan(\""+person+"-buy-num\", 1)' value='1' min='1' style='width:120px;'><input style='width: 150px;' placeholder='Item Name' id='"+person+"-buy-input'><button onclick=\"buyProduct('"+person+"');\">Buy</button>"
+    keepGreaterThan(person+"-buy-num", 1);
+    if(document.getElementById(person).innerHTML.includes("Criminal")) {
+        document.getElementById(person+"-got-caught").style.display = "block"
+    }
+};
+
+generatePerson("marianne", "aG9yc2U=");
+generatePerson("jedediah", "aTh1");
+generatePerson("jason", "dGhpZWY=");
+goToPage("login");
+function endGame(){
+    var conf = confirm("Are you sure you want to end game?");
+    if(conf) {
+        for(var i = 0; i < History.length; i ++) {
+            document.getElementById("end-page").innerHTML += History[i]+"<br>"
+        }
+        goToPage("end-page")
+    }
+}
+function goToStoreRecords(){
+    document.getElementById("store-records").innerHTML = '<button class="logout-btn" onclick="goToPage(\'login\')"><span>&larr;</span></button>';
+    for(var i = 0; i < storeRecords.length; i ++) {
+        document.getElementById("store-records").innerHTML += storeRecords[i]+"<br>"
+    }
+    goToPage("store-records")
+}
+/*generateProfession("marianne")
+generateProfession("jedediah")
+generateProfession("jason")*/
+</script>
+<!--<script>
+    document.body.innerHTML = ""
+</script>
+-->
+    </body>
+</html>
