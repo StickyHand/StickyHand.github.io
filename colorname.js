@@ -41,4 +41,5 @@ function colorName(e) {
         };
         n.init(),
         e.exports = n
+        return n.name(e);   // <- finally return the name result
     }
