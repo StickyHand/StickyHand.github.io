@@ -1,0 +1,85 @@
+<head>
+  <title>Live Code Editor</title>
+  <style>
+      body {
+  height: 100vh;
+  margin: 0;
+  font-family: sans-serif;
+  background: #121212;
+  color: #eee;
+}
+
+#editor {
+  display: grid;
+  height: calc(100vh - 10px);
+  gap: 10px;
+  padding: 10px;
+  background: #1e1e1e;
+  width: 25vw;
+}
+
+textarea {
+  background: #2d2d2d;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  font-family: monospace;
+  resize: none;
+}
+
+iframe {
+  width: 75vW;
+  height: calc(100% - 20px);
+  border: 1px solid black;
+  background: white;
+  position: absolute;
+  top: 10px;
+  left: calc(25vw + 30px);
+}
+
+  </style>
+</head>
+<body>
+  <div id="editor">
+    <textarea id="html" placeholder="HTML"></textarea>
+    <textarea id="css" placeholder="CSS"></textarea>
+    <textarea id="js" placeholder="JavaScript"></textarea>
+  </div>
+  <iframe id="preview"></iframe>
+
+  <script>
+
+      var html = document.getElementById("html");
+var css = document.getElementById("css");
+var js = document.getElementById("js");
+var preview = document.getElementById("preview");
+var params = new URLSearchParams(window.location.search);
+if(params.get("width")) {
+  preview.style.width = params.get("width")+"px"
+}
+if(params.get("height")) {
+  preview.style.height = params.get("height")+"px"
+}
+function updatePreview() {
+  var doc = `
+    <html>
+      <head><style>${css.value}</style></head>
+      <body>
+        ${html.value}
+        <script>${js.value}<\/script>
+      </body>
+    </html>
+  `;
+
+  preview.srcdoc = doc;
+}
+
+html.addEventListener("input", updatePreview);
+css.addEventListener("input", updatePreview);
+js.addEventListener("input", updatePreview);
+
+updatePreview(); // initial render
+
+  </script>
+</body>
+</html>
