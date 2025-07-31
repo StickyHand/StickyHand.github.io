@@ -75,7 +75,9 @@ var generateFamily = function () {
       fatherMiddle = randomChoice(bnames);
     }
   }
-  var fatherFull = fatherFirst + (fatherMiddle ? " " + fatherMiddle : "") + " " + lastName;
+
+  var baseFatherName = fatherFirst + (fatherMiddle ? " " + fatherMiddle : "") + " " + lastName;
+  var fatherFull = baseFatherName; // we may add " Sr." later
 
   var motherFirst = randomChoice(gnames);
   var motherMiddle = "";
@@ -97,13 +99,10 @@ var generateFamily = function () {
   var children = [];
   var usedNames = new Set();
 
-  // Start birth year for children:
-  // Make sure it's NOT in the future compared to current year
   var earliestBirthYear = motherBirthYear + 20;
   var latestBirthYear = Math.min(motherBirthYear + 42, currentYear);
 
-  var childBirthYear = Math.max(earliestBirthYear, currentYear - (numChildren * 2)); // start earlier if needed to fit all kids
-
+  var childBirthYear = Math.max(earliestBirthYear, currentYear - (numChildren * 2));
   let remaining = numChildren;
 
   while (remaining > 0 && childBirthYear <= latestBirthYear) {
@@ -152,8 +151,7 @@ var generateFamily = function () {
     }
 
     if (remaining > 0) {
-      let nextGap = randomInt(2) + 1; // 1 or 2 years gap
-      // Stop if next birth year would exceed mother's max age or current year
+      let nextGap = randomInt(2) + 1;
       if (childBirthYear + nextGap > latestBirthYear) break;
       childBirthYear += nextGap;
     }
@@ -164,13 +162,26 @@ var generateFamily = function () {
     return;
   }
 
-  // Junior logic
-  if (Math.random() < 0.05) {
-    let options = children.filter(c => c.gender === "Boy" && !c.name.includes("Jr."));
-    if (options.length > 0) {
-      let chosen = randomChoice(options);
-      chosen.name = fatherFirst + " " + lastName + " Jr.";
+  // Junior & Senior logic
+  let addJunior = Math.random() < 0.1; // 10% chance
+  let juniorAssigned = false;
+
+  if (addJunior) {
+    let eligible = children.filter(c => c.gender === "Boy" && !c.name.includes("Jr."));
+    if (eligible.length > 0) {
+      let chosen = randomChoice(eligible);
+      let juniorFullName = baseFatherName + " Jr.";
+
+      let nameTaken = children.some(c => c.name === juniorFullName);
+      if (!nameTaken) {
+        chosen.name = juniorFullName;
+        juniorAssigned = true;
+      }
     }
+  }
+
+  if (juniorAssigned) {
+    fatherFull = baseFatherName + " Sr.";
   }
 
   let result = `👨 Father: ${fatherFull} (age ${fatherAge})\n👩 Mother: ${motherFull} (age ${motherAge})\n👶 Children (${children.length}):\n`;
@@ -182,8 +193,8 @@ var generateFamily = function () {
 };
 
 function getMaxChildren(motherAge) {
-  const maxYears = Math.min(motherAge - 20 + 1, 23); // age 20–42
-  return maxYears * 4; // quads max per year
+  const maxYears = Math.min(motherAge - 20 + 1, 23);
+  return maxYears * 4;
 }
 </script>
 
