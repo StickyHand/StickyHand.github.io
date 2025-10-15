@@ -58,27 +58,33 @@
           tempCanvas.height = 400;
           var tempCtx = tempCanvas.getContext("2d");
 
-tempCtx.fillStyle = "white";
-tempCtx.fillRect(0, 0, 400, 400);
+          tempCtx.fillStyle = "white";
+          tempCtx.fillRect(0, 0, 400, 400);
 
           tempCtx.drawImage(img, 0, 0, 400, 400);
           var imageData = tempCtx.getImageData(0, 0, 400, 400).data;
 
           function pixelate(ctx, resolution) {
             ctx.clearRect(0, 0, 400, 400);
-ctx.fillStyle = "white";
-ctx.fillRect(0, 0, 400, 400);
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, 400, 400);
+
             var pixelSize = 400 / resolution;
+            var radius = pixelSize / 2;
+
             for (var y = 0; y < resolution; y++) {
               for (var x = 0; x < resolution; x++) {
-                var sampleX = Math.floor(x * pixelSize + pixelSize / 2);
-                var sampleY = Math.floor(y * pixelSize + pixelSize / 2);
+                var sampleX = Math.floor(x * pixelSize + radius);
+                var sampleY = Math.floor(y * pixelSize + radius);
                 var idx = (sampleY * 400 + sampleX) * 4;
                 var r = imageData[idx];
                 var g = imageData[idx + 1];
                 var b = imageData[idx + 2];
                 ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
-                ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+
+                ctx.beginPath();
+                ctx.arc(x * pixelSize + radius, y * pixelSize + radius, radius, 0, Math.PI * 2);
+                ctx.fill();
               }
             }
           }
