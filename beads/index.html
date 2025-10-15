@@ -81,11 +81,9 @@
                 var g = imageData[idx + 1];
                 var b = imageData[idx + 2];
                 ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
-                ctx.strokeStyle = "black";
                 ctx.beginPath();
                 ctx.arc(x * pixelSize + radius, y * pixelSize + radius, radius, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.stroke();
               }
             }
           }
