@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Manual Pixelator: 28×28 and 14×14</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      background: #f8f8f8;
+    }
+    .canvas-container {
+      display: flex;
+      gap: 20px;
+    }
+    canvas {
+      border: 1px solid #aaa;
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body>
+  <h2>Manual Pixelator: 28×28 and 14×14</h2>
+  <input id="fileInput" type="file" accept="image/*"><br>
+  <div class="canvas-container">
+    <div>
+      <h3>28×28</h3>
+      <canvas id="canvas28" width="400" height="400"></canvas>
+    </div>
+    <div>
+      <h3>14×14</h3>
+      <canvas id="canvas14" width="400" height="400"></canvas>
+    </div>
+  </div>
+
+  <script>
+    var fileInput = document.getElementById("fileInput");
+    var canvas28 = document.getElementById("canvas28");
+    var canvas14 = document.getElementById("canvas14");
+    var ctx28 = canvas28.getContext("2d");
+    var ctx14 = canvas14.getContext("2d");
+
+    fileInput.addEventListener("change", function () {
+      var file = fileInput.files[0];
+      if (!file) return;
+
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var img = new Image();
+        img.onload = function () {
+          // Draw image to temporary canvas
+          var tempCanvas = document.createElement("canvas");
+          tempCanvas.width = 400;
+          tempCanvas.height = 400;
+          var tempCtx = tempCanvas.getContext("2d");
+
+          tempCtx.fillStyle = "white";
+          tempCtx.fillRect(0, 0, 400, 400);
+
+          tempCtx.drawImage(img, 0, 0, 400, 400);
+          var imageData = tempCtx.getImageData(0, 0, 400, 400).data;
+
+          function pixelate(ctx, resolution) {
+            ctx.clearRect(0, 0, 400, 400);
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, 400, 400);
+
+            var pixelSize = 400 / resolution;
+            var radius = pixelSize / 2;
+
+            for (var y = 0; y < resolution; y++) {
+              for (var x = 0; x < resolution; x++) {
+                var sampleX = Math.floor(x * pixelSize + radius);
+                var sampleY = Math.floor(y * pixelSize + radius);
+                var idx = (sampleY * 400 + sampleX) * 4;
+                var r = imageData[idx];
+                var g = imageData[idx + 1];
+                var b = imageData[idx + 2];
+                ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+                ctx.strokeStyle = "black";
+                ctx.beginPath();
+                ctx.arc(x * pixelSize + radius, y * pixelSize + radius, radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+              }
+            }
+          }
+
+          pixelate(ctx28, 28);
+          pixelate(ctx14, 14);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
