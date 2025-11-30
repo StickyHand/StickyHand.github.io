@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mafia Game</title>
+    <style>
+        /* General page styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            text-align: center;
+            padding: 40px;
+            margin: 0;
+        }
+
+        h1, h3 {
+            margin-bottom: 20px;
+            color: #ffeb3b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Input fields */
+        input{
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            margin: 8px 0;
+            width: 220px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            box-shadow: 0 0 10px #ffeb3b;
+        }
+        
+        input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            accent-color: white;
+        }
+        
+        /* Select dropdowns */
+        select {
+            width: 220px;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            margin: 10px 0;
+            background: #fff;
+            color: #333;
+        }
+
+        /* Buttons */
+        button, input[type="button"]{
+            background: #ff5722;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s ease;
+            margin: 1px;
+        }
+
+        button:hover, input[type="button"]:hover {
+            background: #e64a19;
+        }
+
+        /* Containers */
+        #name-div, #submit-div {
+            margin-top: 20px;
+        }
+
+        /* Game messages */
+        h3 {
+            font-weight: normal;
+            color: #ffc107;
+        }
+
+        /* End screen */
+        .winner {
+            font-size: 2.5em;
+            color: #4caf50;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.6);
+        }
+        
+        ::-webkit-scrollbar{
+            background: linear-gradient(135deg, #2a5298, #254989);
+            border-left: 1px solid #fff5;
+            width: 10px;
+        }
+        ::-webkit-scrollbar-thumb{
+            background: #fff3;
+        }
+        
+        .hidden{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="game">
+    <h1>Mafia Game</h1>
+    <p>Number Of Players:</p>
+    <input type="number" id="num" value="1" min="1" onchange="runNum()">
+    <p>Number Of Detectives:</p>
+    <input type="number" id="num-d" value="1" min="1" onchange="runNum()">
+    <p>Number Of Mafia Agents:</p>
+    <input type="number" id="num-m" value="1" min="1" onchange="runNum()">
+    <div id="da" class="hidden"><p>Number Of Double Agents:</p>
+    <input type="number" id="num-da" value="0" min="0" onchange="runNum()"></div>
+    <p>Player Names:</p>
+    <div id="name-div"></div>
+    <div id="submit-div"></div><br>
+    <input type="checkbox" onchange="doubleAgent();"> Double Agent
+</div>
+</body>
+<script>
+var names = [];
+var curPerson = 0;
+var roles = {};
+var allRoles = [];
+
+var voted = null;
+var leftUs = null;
+var foundA = null;
+var whoWon = null;
+var isAD = null;
+
+
+function capFirst(input) {
+    var words = input.split(" ");
+    for (var i = 0; i < words.length; i++) {
+        if (words[i].length > 0) {
+            words[i] = words[i][0].toUpperCase() + words[i].substring(1).toLowerCase();
+        }
+    }
+    return words.join(" ");
+}
+
+function submitNames() {
+    if (names[curPerson]) {
+        var n = Math.floor(Math.random() * allRoles.length);
+        var r = allRoles[n];
+        allRoles.splice(n, 1);
+
+        document.getElementById("game").innerHTML =
+        "<h1>" + names[curPerson] + ":</h1><br>" +
+        "<input type='button' id='button-reveal' value='Reveal Role'>" +
+        "<br><br><button id='submit-role'>Submit</button>";
+
+        document.getElementById("button-reveal").onclick = function() {
+            this.value = r;
+            this.disabled = true;
+        };
+
+        document.getElementById("submit-role").onclick = function() {
+            var val = document.getElementById("button-reveal").value;
+            if (val === "Reveal Role") return;
+            roles[names[curPerson]] = val;
+            curPerson++;
+            submitNames();
+        };
+    } else {
+        detectivesTurn();
+    }
+}
+
+function detectivesTurn() {
+    for(var i = 0; i < names.length; i ++) {
+        if (roles[names[i]] === "Detective" || roles[names[i]] === "Double Agent") {
+            isAD = true;
+        }
+    }
+    if(isAD) {
+        checkWin();
+        var opts = buildOptionsExcluding("Detective");
+    
+        document.getElementById("game").innerHTML =
+        "<h1>Who Did The Detective(s) Choose</h1><br>" +
+        "<select id='select-to-find'>" + opts + "</select>" +
+        "<button id='btn-find-submit'>Submit</button>";
+    
+        document.getElementById("btn-find-submit").onclick = chooseDetectiveFind;
+    }
+    else {
+        day();
+    }
+
+    checkWin();
+}
+
+function chooseDetectiveFind() {
+    var val = safeSelectValue("select-to-find");
+    if (!val) return;
+    foundA = val;
+    day();
+}
+
+function mafiaAgentsTurn() {
+    document.getElementById("game").innerHTML =
+    "<h3>" + voted + " was voted out. " + voted + " was a " + roles[voted] + ".</h3>";
+
+    setTimeout(function() {
+        checkWin();
+        var opts = buildOptionsExcluding("Mafia Agent");
+
+        document.getElementById("game").innerHTML =
+        "<h1>Who Did The Mafia Agent(s) Choose</h1><br>" +
+        "<select id='select-to-leave'>" + opts + "</select>" +
+        "<button id='btn-mafia-submit'>Submit</button>";
+
+        document.getElementById("btn-mafia-submit").onclick = chooseMafiaKill;
+
+        checkWin();
+    }, 5000);
+}
+
+function chooseMafiaKill() {
+    var val = safeSelectValue("select-to-leave");
+    if (!val) return;
+    leftUs = val;
+    detectivesTurn();
+}
+
+function day() {
+    checkWin();
+    var msg = "";
+    
+    if (leftUs) {
+        var idx = names.indexOf(leftUs);
+        if (idx !== -1) names.splice(idx, 1);
+        msg += "<h3>Sadly " + leftUs + " left us during the night. " +
+               leftUs + " was a " + roles[leftUs] + ".</h3>";
+    }
+    var opts = buildAllOptions();
+    if(foundA) {
+        msg += "<h3>The Detective(s) investigated a " + roles[foundA] + " during the night.</h3>";
+    } else {
+        msg += "<h3>Sadly there are no detectives so they could not investigate anyone</h3>";
+    }
+
+    document.getElementById("game").innerHTML =
+    msg +
+    "<br><br><h1>Who got voted out?</h1>" +
+    "<select id='select-vote'>" + opts + "</select>" +
+    "<button id='btn-vote-submit'>Submit</button>";
+
+    document.getElementById("btn-vote-submit").onclick = chooseVote;
+
+    checkWin();
+    resetRoundVars();
+}
+
+function chooseVote() {
+    var val = safeSelectValue("select-vote");
+    if (!val) return;
+
+    voted = val;
+
+    var idx = names.indexOf(val);
+    if (idx !== -1) names.splice(idx, 1);
+
+    mafiaAgentsTurn();
+}
+
+function end() {
+    document.getElementById("game").innerHTML =
+    "<h1 class='winner'>🎉 " + whoWon.toUpperCase() + " WON! 🎊</h1>";
+}
+
+function safeSelectValue(id) {
+    var el = document.getElementById(id);
+    if (!el) return null;
+
+    var value = el.value;
+    if (!value || value === "null") return null;
+
+    return value;
+}
+
+function buildOptionsExcluding(role) {
+    var out = "<option disabled selected value='null'>Select…</option>";
+    for (var i = 0; i < names.length; i++) {
+        if (roles[names[i]] !== role && roles[names[i]] !== "Double Agent") {
+            out += "<option>" + names[i] + "</option>";
+        }
+    }
+    return out;
+}
+
+function buildAllOptions() {
+    var out = "<option disabled selected value='null'>Select…</option>";
+    for (var i = 0; i < names.length; i++) {
+        out += "<option>" + names[i] + "</option>";
+    }
+    return out;
+}
+
+function checkWin() {
+    var rolesLeft = [];
+    for (var i = 0; i < names.length; i++) {
+        rolesLeft.push(roles[names[i]]);
+    }
+
+    if (!rolesLeft.includes("Mafia Agent")) {
+        whoWon = "Detectives & Citizens";
+        end();
+    }
+    if (!rolesLeft.includes("Detective") && !rolesLeft.includes("Citizen")) {
+        whoWon = "Mafia Agents";
+        end();
+    }
+}
+
+function resetRoundVars() {
+    voted = null;
+    leftUs = null;
+    foundA = null;
+    isAD = null;
+}
+
+function runName() {
+    var inputs = Array.from(document.getElementsByClassName("name-inputs"));
+    var num = Number(document.getElementById("num").value);
+    var dr = Number(document.getElementById("num-d").value);
+    var mr = Number(document.getElementById("num-m").value);
+    var da = Number(document.getElementById("num-da").value);
+
+    allRoles = [];
+    for (var i = 0; i < dr; i++) {allRoles.push("Detective");}
+    for (var i = 0; i < mr; i++) {allRoles.push("Mafia Agent");}
+    for (var i = 0; i < da; i++) {allRoles.push("Double Agent");}
+    while (allRoles.length < num) {allRoles.push("Citizen");}
+
+    var unique = true;
+    var seen = [];
+
+    for (var i = 0; i < inputs.length; i++) {
+        var val = inputs[i].value.trim().toLowerCase();
+        if (val.length === 0 || seen.includes(val)) unique = false;
+        seen.push(val);
+    }
+
+    if (unique) {
+        names = [];
+        for (var i = 0; i < inputs.length; i++) {
+            names.push(capFirst(inputs[i].value));
+        }
+        document.getElementById("submit-div").innerHTML =
+        "<button onclick='submitNames()'>Submit</button>";
+    } else {
+        document.getElementById("submit-div").innerHTML = "";
+    }
+}
+
+function runNum() {
+    var num = Number(document.getElementById("num").value);
+    var nameDiv = document.getElementById("name-div");
+    nameDiv.innerHTML = "";
+    for (var i = 0; i < num; i++) {
+        var name = document.createElement("input");
+        name.type = "text";
+        name.placeholder = "Enter player " + (i + 1) + " name";
+        name.id = "name" + (i + 1);
+        name.classList.add("name-inputs");
+        name.oninput = runName;
+        nameDiv.appendChild(name);
+        nameDiv.appendChild(document.createElement("br"));
+    }
+}
+
+runNum();
+
+function doubleAgent() {
+    document.getElementById("da").classList.toggle("hidden");
+}
+
+</script>
+
+</html>
