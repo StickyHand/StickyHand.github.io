@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <title>New webpage</title>
+  <style>
+            #ta{
+                display: none;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+            button {
+                padding: 15px 40px;
+                font-size: 18px;
+                font-weight: bold;
+                border: none;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                color: white;
+            }
+            button:first-of-type {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+            button:last-of-type {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+            button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            }
+            button:active {
+                transform: translateY(0px);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            }
+        </style>
+ </head>
+ <body><textarea id="ta"></textarea> <button onclick="reload()">Roll Again</button> <button onclick="copy()">Copy</button>
+  <script>
+    var ta = document.getElementById("ta");
+    function reload() {
+        var n = Math.floor(Math.random()*6)+1;
+        var n1 = Math.floor(Math.random()*6)+1;
+        var text = n === 6 ? "Ⓜ️" : n === 5 ? "🎥" : "👁️";
+        ta.value = n1+text;
+    }
+    reload();
+    function copy() {
+        ta.style.display = "block"
+        ta.select();
+        document.execCommand("copy");
+        ta.style.display = "none";
+    }
+</script>
+</html>
