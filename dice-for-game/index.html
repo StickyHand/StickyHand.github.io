@@ -11,6 +11,7 @@
         .dice {
             font-size: 80px;
             margin: 20px;
+            dipslay: none;
         }
         button {
             font-size: 20px;
@@ -29,6 +30,7 @@
 
     <button onclick="rollDice()">Roll Dice</button>
     <button onclick="copyDice()" id="copy">Copy Dice</button>
+    <div id="copy-txt"></div>
 
     <script>
         var diceChars = ["⚀","⚁","⚂","⚃","⚄","⚅"];
@@ -61,7 +63,10 @@
             var text = d1 + " " + d2;
 
             navigator.clipboard.writeText(text);
-            alert("Copied: " + text);
+            document.getElementById("copy-txt").value = "✓ Dice Coppied Succesfully!";
+            setTimeout(function(){
+            document.getElementById("copy-txt").value = "";
+            }, 5000);
         }
     </script>
 
