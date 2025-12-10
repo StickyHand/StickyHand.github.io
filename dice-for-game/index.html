@@ -29,7 +29,6 @@
     </div>
 
     <button onclick="rollDice()">Roll Dice</button>
-    <button onclick="copyDice()" id="copy">Copy Dice</button>
     <div id="copy-txt"></div>
 
     <script>
@@ -43,7 +42,6 @@
     
             document.getElementById("die1").innerHTML = diceChars[roll1];
             document.getElementById("die2").innerHTML = diceChars[roll2];
-            document.getElementById("copy").disabled = true;
             for(var  i = 0; i < n; i ++) {
                 setTimeout(function(){var roll1 = Math.floor(Math.random() * 6);
                 var roll2 = Math.floor(Math.random() * 6);
@@ -52,8 +50,9 @@
                 document.getElementById("die2").innerHTML = diceChars[roll2];}, t*i)
             }
             setTimeout(function(){
-            document.getElementById("copy").disabled = false;
+            copyDice()
             },n*t)
+            
         }
         rollDice();
 
