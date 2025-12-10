@@ -1,230 +1,56 @@
-<!doctype html>
-<html lang="en" class="h-full">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dice Roller</title>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      box-sizing: border-box;
-    }
-    
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-    
-    .app-container {
-      width: 100%;
-      height: 100%;
-      overflow-auto;
-    }
-    
-    @keyframes rollAnimation {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1) rotate(5deg); }
-    }
-    
-    .rolling {
-      animation: rollAnimation 0.3s ease-in-out;
-    }
-    
-    @keyframes successPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    
-    .success-animation {
-      animation: successPulse 0.3s ease-in-out;
-    }
-  </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body class="h-full">
-  <div class="app-container flex flex-col items-center justify-center gap-8 p-8">
-   <h1 id="title" class="text-5xl font-bold text-white text-center mb-4">Dice Roller</h1>
-   <div id="resultDisplay" class="bg-white rounded-3xl shadow-2xl p-12 min-w-[200px] flex items-center justify-center">
-    <div id="resultText" class="text-6xl font-bold text-center">
-     🎲
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dice Roller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 60px;
+        }
+        .dice {
+            font-size: 80px;
+            margin: 20px;
+        }
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <span id="die1" class="dice">⚀</span>
+        <span id="die2" class="dice">⚀</span>
     </div>
-   </div>
-   <div class="flex gap-4 flex-wrap justify-center"><button id="rollButton" class="px-8 py-4 text-lg font-bold rounded-xl text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0"> Roll Again </button> <button id="copyButton" class="px-8 py-4 text-lg font-bold rounded-xl text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0"> Copy </button>
-   </div>
-   <div id="copyFeedback" class="text-white text-lg font-semibold opacity-0 transition-opacity duration-300">
-    Copied to clipboard! ✓
-   </div><textarea id="hiddenTextarea" style="position: absolute; left: -9999px; opacity: 0;" aria-hidden="true"></textarea>
-  </div>
-  <script>
-    const defaultConfig = {
-      background_color: "#667eea",
-      secondary_color: "#764ba2",
-      surface_color: "#ffffff",
-      text_color: "#1f2937",
-      primary_button_color: "#f093fb",
-      secondary_button_color: "#f5576c",
-      copy_button_color: "#4facfe",
-      copy_button_secondary: "#00f2fe",
-      title_text: "Dice Roller",
-      button_roll_text: "Roll Again",
-      button_copy_text: "Copy",
-      font_family: "Segoe UI, Tahoma, Geneva, Verdana, sans-serif",
-      font_size: 16
-    };
-    
-    let currentResult = "";
-    
-    function rollDice() {
-      const n = Math.floor(Math.random() * 6) + 1;
-      const n1 = Math.floor(Math.random() * 6) + 1;
-      currentResult = n1 + " " + n;
-      
-      const resultText = document.getElementById('resultText');
-      resultText.classList.add('rolling');
-      
-      setTimeout(() => {
-        resultText.textContent = currentResult;
-        resultText.classList.remove('rolling');
-      }, 150);
-    }
-    
-    function copyToClipboard() {
-      const textarea = document.getElementById('hiddenTextarea');
-      const feedback = document.getElementById('copyFeedback');
-      const copyButton = document.getElementById('copyButton');
-      
-      textarea.value = currentResult;
-      textarea.select();
-      textarea.setSelectionRange(0, 99999);
-      
-      try {
-        document.execCommand('copy');
-        copyButton.classList.add('success-animation');
-        feedback.style.opacity = '1';
-        
-        setTimeout(() => {
-          feedback.style.opacity = '0';
-          copyButton.classList.remove('success-animation');
-        }, 2000);
-      } catch (err) {
-        console.error('Copy failed');
-      }
-    }
-    
-    async function onConfigChange(config) {
-      const bgGradient = `linear-gradient(135deg, ${config.background_color || defaultConfig.background_color} 0%, ${config.secondary_color || defaultConfig.secondary_color} 100%)`;
-      document.querySelector('.app-container').style.background = bgGradient;
-      
-      const resultDisplay = document.getElementById('resultDisplay');
-      resultDisplay.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
-      
-      const resultText = document.getElementById('resultText');
-      resultText.style.color = config.text_color || defaultConfig.text_color;
-      
-      const customFont = config.font_family || defaultConfig.font_family;
-      const baseSize = config.font_size || defaultConfig.font_size;
-      const baseFontStack = 'system-ui, -apple-system, sans-serif';
-      
-      document.getElementById('title').style.fontFamily = `${customFont}, ${baseFontStack}`;
-      document.getElementById('title').style.fontSize = `${baseSize * 3.125}px`;
-      document.getElementById('title').textContent = config.title_text || defaultConfig.title_text;
-      
-      resultText.style.fontFamily = `${customFont}, ${baseFontStack}`;
-      resultText.style.fontSize = `${baseSize * 3.75}px`;
-      
-      const rollButton = document.getElementById('rollButton');
-      const rollGradient = `linear-gradient(135deg, ${config.primary_button_color || defaultConfig.primary_button_color} 0%, ${config.secondary_button_color || defaultConfig.secondary_button_color} 100%)`;
-      rollButton.style.background = rollGradient;
-      rollButton.style.fontFamily = `${customFont}, ${baseFontStack}`;
-      rollButton.style.fontSize = `${baseSize * 1.125}px`;
-      rollButton.textContent = config.button_roll_text || defaultConfig.button_roll_text;
-      
-      const copyButton = document.getElementById('copyButton');
-      const copyGradient = `linear-gradient(135deg, ${config.copy_button_color || defaultConfig.copy_button_color} 0%, ${config.copy_button_secondary || defaultConfig.copy_button_secondary} 100%)`;
-      copyButton.style.background = copyGradient;
-      copyButton.style.fontFamily = `${customFont}, ${baseFontStack}`;
-      copyButton.style.fontSize = `${baseSize * 1.125}px`;
-      copyButton.textContent = config.button_copy_text || defaultConfig.button_copy_text;
-      
-      const feedback = document.getElementById('copyFeedback');
-      feedback.style.fontFamily = `${customFont}, ${baseFontStack}`;
-      feedback.style.fontSize = `${baseSize * 1.125}px`;
-    }
-    
-    document.getElementById('rollButton').addEventListener('click', rollDice);
-    document.getElementById('copyButton').addEventListener('click', copyToClipboard);
-    
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities: (config) => ({
-          recolorables: [
-            {
-              get: () => config.background_color || defaultConfig.background_color,
-              set: (value) => {
-                config.background_color = value;
-                window.elementSdk.setConfig({ background_color: value });
-              }
-            },
-            {
-              get: () => config.surface_color || defaultConfig.surface_color,
-              set: (value) => {
-                config.surface_color = value;
-                window.elementSdk.setConfig({ surface_color: value });
-              }
-            },
-            {
-              get: () => config.text_color || defaultConfig.text_color,
-              set: (value) => {
-                config.text_color = value;
-                window.elementSdk.setConfig({ text_color: value });
-              }
-            },
-            {
-              get: () => config.primary_button_color || defaultConfig.primary_button_color,
-              set: (value) => {
-                config.primary_button_color = value;
-                window.elementSdk.setConfig({ primary_button_color: value });
-              }
-            },
-            {
-              get: () => config.copy_button_color || defaultConfig.copy_button_color,
-              set: (value) => {
-                config.copy_button_color = value;
-                window.elementSdk.setConfig({ copy_button_color: value });
-              }
-            }
-          ],
-          borderables: [],
-          fontEditable: {
-            get: () => config.font_family || defaultConfig.font_family,
-            set: (value) => {
-              config.font_family = value;
-              window.elementSdk.setConfig({ font_family: value });
-            }
-          },
-          fontSizeable: {
-            get: () => config.font_size || defaultConfig.font_size,
-            set: (value) => {
-              config.font_size = value;
-              window.elementSdk.setConfig({ font_size: value });
-            }
-          }
-        }),
-        mapToEditPanelValues: (config) => new Map([
-          ["title_text", config.title_text || defaultConfig.title_text],
-          ["button_roll_text", config.button_roll_text || defaultConfig.button_roll_text],
-          ["button_copy_text", config.button_copy_text || defaultConfig.button_copy_text]
-        ])
-      });
-    }
-    
-    rollDice();
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9abd24aa37f261b4',t:'MTc2NTM3MzkxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+    <button onclick="rollDice()">Roll Dice</button>
+    <button onclick="copyDice()">Copy Dice</button>
+
+    <script>
+        var diceChars = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+
+        function rollDice() {
+            var roll1 = Math.floor(Math.random() * 6);
+            var roll2 = Math.floor(Math.random() * 6);
+
+            document.getElementById("die1").innerHTML = diceChars[roll1];
+            document.getElementById("die2").innerHTML = diceChars[roll2];
+        }
+        rollDice();
+
+        function copyDice() {
+            var d1 = document.getElementById("die1").innerHTML;
+            var d2 = document.getElementById("die2").innerHTML;
+            var text = d1 + " " + d2;
+
+            navigator.clipboard.writeText(text);
+            alert("Copied: " + text);
+        }
+    </script>
+
+</body>
 </html>
