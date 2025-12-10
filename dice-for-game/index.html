@@ -11,7 +11,7 @@
         .dice {
             font-size: 80px;
             margin: 20px;
-            dipslay: none;
+            display: none;
         }
         button {
             font-size: 20px;
@@ -63,9 +63,9 @@
             var text = d1 + " " + d2;
 
             navigator.clipboard.writeText(text);
-            document.getElementById("copy-txt").value = "✓ Dice Coppied Succesfully!";
+            document.getElementById("copy-txt").innerHTML = "✓ Dice Coppied Succesfully!";
             setTimeout(function(){
-            document.getElementById("copy-txt").value = "";
+            document.getElementById("copy-txt").innerHTML = "";
             }, 5000);
         }
     </script>
