@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>New webpage</title>
+        <style>
+            *{
+                padding: 0;
+                margin: 0;
+                text-align: center;
+            }
+            button{
+                margin-top: 20px;
+                padding: 10px 20px;
+                font: 35px cursive;
+                cursor: pointer;
+                transition: 0.25s;
+            }
+            button:hover{
+                color: white;
+            }
+            button:active{
+                transform: scale(1.075);
+            }
+            
+        </style>
+    </head>
+    <body>
+<button onclick="javascript:rollDice();">ROLL DICE</button>
+<div id="copy-txt"></div>
+<script>
+    function rollDice(){
+        var dice = [
+            "Move 1 forward OR move a pawn out of Start.",
+            "Move 2 forward OR move out of Start.\nRoll again after playing.",
+            "Move 3 forward.",
+            "Move 4 BACKWARDS",
+            "Move 5 forward.",
+            "",
+            "Move one pawn 7 forward, OR split the move between two pawns (any split that totals 7, like 3 + 4).",
+            "Move 8 forward",
+            "",
+            "Move 10 forward OR move 1 backward.",
+            "Move 11 forward OR swap places with an opponent’s pawn (not in Start or Home or Safety Zone).",
+            "Move 12 forward.",
+            "Take a pawn from Start and replace an opponent’s pawn (not in Start or Home or Safety Zone), sending theirs back to Start OR move forward 4.",
+        ];
+        var num = Math.floor(Math.random()*13)+1;
+        while(num === 9 || num === 6) {
+            num = Math.floor(Math.random()*13)+1;
+        }
+        
+        var msg =  (num === 13 ? "Sorry!" : num) + ": " + dice[num-1];
+        
+        try{
+            var ta = document.createElement("textarea");
+            ta.value = msg;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            ta.remove();
+        }catch(e1){
+            try{
+                navigator.clipboard.writeText(msg);
+            }catch(e2) {
+                try {
+                    var item = new ClipboardItem({
+                        "text/plain": new Blob([msg], { type: "text/plain" }),
+                    });
+                    
+                    navigator.clipboard.write([item]);
+                }catch(e3){
+                    document.getElementById("copy-txt").innerHTML = "<div style='color:red;'>ERROR:"+e1+", "+e2+", and "+e3+"</div>";
+                    return;
+                }
+            }
+        }
+        
+            document.getElementById("copy-txt").innerHTML = "✓ Dice Coppied Succesfully!";
+            setTimeout(function(){
+            document.getElementById("copy-txt").innerHTML = "";
+            }, 5000);
+        
+    };
+</script>
+    </body>
+</html>
