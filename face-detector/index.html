@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Better Face Detection (Thumbnails in Result)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/human/dist/human.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+      padding: 20px;
+    }
+    canvas {
+      border: 1px solid #888;
+      background-color: #fff;
+      margin: 10px;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 14px;
+      font-family: sans-serif;
+      white-space: normal;
+      text-align: left;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    .result-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+    .thumb {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+    .face-details {
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🔍 Better Face Detector</h1>
+<p>Select one or more photos with faces (even with hats)</p>
+<input type="file" id="upload" accept="image/*" multiple />
+
+<div id="gallery"></div>
+<div id="result"></div>
+
+<script>
+  const gallery = document.getElementById('gallery');
+  const resultBox = document.getElementById('result');
+
+  const human = new Human.Human({
+    modelBasePath: 'https://cdn.jsdelivr.net/npm/@vladmandic/human/models',
+    cacheSensitivity: 0,
+    async: true,
+    warmup: 'full',
+    face: {
+      enabled: true,
+      detector: {
+        enabled: true,
+        maxDetected: 15,
+        minConfidence: 0.45,
+        returnTensors: false,
+        rotation: true,
+        overlap: 0.3
+      },
+      mesh: true,
+      iris: true,
+      headpose: true,
+      description: { enabled: true },
+      embedding: true,
+      details: true
+    },
+  });
+
+  async function initHuman() {
+    await human.load();
+    await human.warmup();
+    console.log('Human.js ready');
+  }
+
+  initHuman();
+
+  function drawImageScaled(img, ctx, canvas) {
+    const hRatio = canvas.width / img.width;
+    const vRatio = canvas.height / img.height;
+    const ratio = Math.min(hRatio, vRatio);
+    const newWidth = img.width * ratio;
+    const newHeight = img.height * ratio;
+    const xOffset = (canvas.width - newWidth) / 2;
+    const yOffset = (canvas.height - newHeight) / 2;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, xOffset, yOffset, newWidth, newHeight);
+    return { xOffset, yOffset, ratio };
+  }
+
+  function drawFaceBox(ctx, face, scale) {
+    const { box } = face;
+    const x = scale.xOffset + box[0] * scale.ratio;
+    const y = scale.yOffset + box[1] * scale.ratio;
+    const w = box[2] * scale.ratio;
+    const h = box[3] * scale.ratio;
+
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'white';
+    ctx.strokeRect(x, y, w, h);
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'red';
+    ctx.strokeRect(x, y, w, h);
+
+    const age = face.age?.toFixed(1) || "?";
+    const gender = face.gender && face.gender !== "unknown" ? `${face.gender} (${(face.genderScore * 100).toFixed(0)}%)` : "";
+    const label = gender ? `${age} yrs, ${gender}` : `${age} yrs`;
+
+    ctx.font = '14px sans-serif';
+    const textWidth = ctx.measureText(label).width;
+    const labelX = x;
+    const labelY = y > 20 ? y - 8 : y + 20;
+
+    ctx.fillStyle = 'white';
+    ctx.fillRect(labelX - 2, labelY - 14, textWidth + 4, 16);
+
+    ctx.fillStyle = 'rgba(255,0,0,0.7)';
+    ctx.fillText(label, labelX, labelY - 2);
+  }
+
+  document.getElementById('upload').addEventListener('change', async (event) => {
+    const files = event.target.files;
+    if (!files.length) return;
+
+    gallery.innerHTML = '';
+    resultBox.innerHTML = '';
+
+    for (const file of files) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 400;
+      canvas.height = 400;
+      const ctx = canvas.getContext('2d');
+      gallery.appendChild(canvas);
+
+      await new Promise((resolve) => {
+        img.onload = () => resolve();
+        img.src = URL.createObjectURL(file);
+      });
+
+      const scale = drawImageScaled(img, ctx, canvas);
+      const result = await human.detect(img);
+
+      const thumb = document.createElement('img');
+      thumb.src = img.src;
+      thumb.className = 'thumb';
+
+      const entry = document.createElement('div');
+      entry.className = 'result-entry';
+
+      const detail = document.createElement('div');
+      detail.className = 'face-details';
+
+      if (!result.face.length) {
+        detail.innerText = "😕 No faces detected.";
+      } else {
+        result.face.forEach((face, index) => {
+          drawFaceBox(ctx, face, scale);
+          const age = face.age.toFixed(1);
+          const gender = face.gender;
+          const score = (face.genderScore * 100).toFixed(1);
+          const Gender = face.gender !== "unknown" ? `, Gender ${gender} (${score}%)` : "";
+          detail.innerText += `Face ${index + 1}: Age ${age}${Gender}\n`;
+        });
+      }
+
+      entry.appendChild(thumb);
+      entry.appendChild(detail);
+      resultBox.appendChild(entry);
+    }
+  });
+</script>
+
+</body>
+</html>
