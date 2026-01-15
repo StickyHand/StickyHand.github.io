@@ -182,7 +182,7 @@
       } else {
         result.face.forEach((face, index) => {
           drawFaceBox(ctx, face, scale);
-          const age = face.age.toFixed(1);
+          const age = face.age ? face.age.toFixed(1) : "?";
           const gender = face.gender;
           const score = (face.genderScore * 100).toFixed(1);
           const Gender = face.gender !== "unknown" ? `, Gender ${gender} (${score}%)` : "";
