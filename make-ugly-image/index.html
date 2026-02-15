@@ -105,19 +105,6 @@ encryptInput.addEventListener("change", function() {
     });
 });
 
-/* ---------- decrypt ---------- */
-var decryptInput = document.getElementById("decryptInput");
-var decryptCanvas = document.getElementById("decryptCanvas");
-
-decryptInput.addEventListener("change", function() {
-    var file = decryptInput.files[0];
-    if (!file) { return; }
-
-    loadImageToCanvas(file, decryptCanvas, function(ctx) {
-        xorImage(ctx, decryptCanvas.width, decryptCanvas.height);
-        console.log("Image decrypted");
-    });
-});
 
 /* ---------- downloads ---------- */
 function downloadCanvas(canvas, filename) {
@@ -129,10 +116,6 @@ function downloadCanvas(canvas, filename) {
 
 document.getElementById("downloadEncrypted").onclick = function() {
     downloadCanvas(encryptCanvas, "uglyimage.png");
-};
-
-document.getElementById("downloadDecrypted").onclick = function() {
-    downloadCanvas(decryptCanvas, "decrypted.png");
 };
 </script>
 
