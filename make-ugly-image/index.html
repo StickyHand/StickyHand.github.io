@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Image Encrypt / Decrypt (XOR)</title>
+<style>
+    body {
+        font-family: sans-serif;
+        background: #111;
+        color: #eee;
+    }
+    canvas {
+        border: 1px solid #555;
+        margin-top: 8px;
+    }
+    section {
+        margin-bottom: 30px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Make Ugly Image</h1>
+
+<section>
+    <h2>Encrypt Image</h2>
+    <input type="file" accept="image/*" id="encryptInput">
+    <br>
+    <canvas id="encryptCanvas" width="200" height="200" style="display:none;"></canvas>
+    <br>
+    <button id="downloadEncrypted">Make Ugly Random Image</button>
+</section>
+
+<section style="display:none;">
+    <h2>Decrypt Image</h2>
+    <input accept="image/*" type="file" id="decryptInput">
+    <br>
+    <canvas id="decryptCanvas" width="200" height="200"></canvas>
+    <br>
+    <button id="downloadDecrypted">Download Decrypted</button>
+</section>
+
+<script>
+var SEED_VALUE = 12345;
+
+/* ---------- seeded random ---------- */
+function makeRand(seedObj) {
+    return function() {
+        seedObj.value = (seedObj.value * 1664525 + 1013904223) % 4294967296;
+        return seedObj.value & 255;
+    };
+}
+
+/* ---------- core xor function ---------- */
+function xorImage(ctx, width, height) {
+    var seedObj = { value: SEED_VALUE };
+    var rand = makeRand(seedObj);
+
+    var imgData = ctx.getImageData(0, 0, width, height);
+    var d = imgData.data;
+
+    for (var i = 0; i < d.length; i += 4) {
+        d[i]   = d[i]   ^ rand(); // R
+        d[i+1] = d[i+1] ^ rand(); // G
+        d[i+2] = d[i+2] ^ rand(); // B
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+}
+
+/* ---------- load & draw ---------- */
+function loadImageToCanvas(file, canvas, callback) {
+    var img = new Image();
+    var ctx = canvas.getContext("2d");
+
+    img.onload = function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        var s = Math.min(
+            canvas.width / img.width,
+            canvas.height / img.height
+        );
+
+        var w = img.width * s;
+        var h = img.height * s;
+
+        ctx.drawImage(img, 0, 0, w, h);
+        callback(ctx);
+    };
+
+    img.src = URL.createObjectURL(file);
+}
+
+/* ---------- encrypt ---------- */
+var encryptInput = document.getElementById("encryptInput");
+var encryptCanvas = document.getElementById("encryptCanvas");
+
+encryptInput.addEventListener("change", function() {
+    var file = encryptInput.files[0];
+    if (!file) { return; }
+
+    loadImageToCanvas(file, encryptCanvas, function(ctx) {
+        xorImage(ctx, encryptCanvas.width, encryptCanvas.height);
+        console.log("Image encrypted");
+    });
+});
+
+/* ---------- decrypt ---------- */
+var decryptInput = document.getElementById("decryptInput");
+var decryptCanvas = document.getElementById("decryptCanvas");
+
+decryptInput.addEventListener("change", function() {
+    var file = decryptInput.files[0];
+    if (!file) { return; }
+
+    loadImageToCanvas(file, decryptCanvas, function(ctx) {
+        xorImage(ctx, decryptCanvas.width, decryptCanvas.height);
+        console.log("Image decrypted");
+    });
+});
+
+/* ---------- downloads ---------- */
+function downloadCanvas(canvas, filename) {
+    var link = document.createElement("a");
+    link.download = filename;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+}
+
+document.getElementById("downloadEncrypted").onclick = function() {
+    downloadCanvas(encryptCanvas, "encrypted.png");
+};
+
+document.getElementById("downloadDecrypted").onclick = function() {
+    downloadCanvas(decryptCanvas, "decrypted.png");
+};
+</script>
+
+</body>
+</html>
