@@ -220,8 +220,8 @@
         const zip = new JSZip();
 
         for (let i = 0; i < pieces.length; i++) {
-          const blob = await canvasToBlob(pieces[i], 'image/png');
-          const name = `Image-${String(i).padStart(3, '0')}.png`;
+          const blob = await canvasToBlob(pieces[i], 'image/jpeg');
+          const name = `Image-${String(i).padStart(3, '0')}.jpg`;
           zip.file(name, blob);
         }
 
