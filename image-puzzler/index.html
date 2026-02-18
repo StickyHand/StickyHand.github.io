@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Grid Scrambler</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1fZFJ4M2z5QwDFi1Cdm42Hcps225y7sY9qsK0R12gHgdGXNqBJ38qRAjPR9U1FVLtZLkNVr7DiIP9NQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    :root { font-family: Arial, Helvetica, sans-serif; }
+    body { margin: 0; background: #f5f5f5; color: #222; }
+    .container { max-width: 900px; margin: 24px auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 18px rgba(0,0,0,0.1); }
+    h1 { margin-top: 0; font-size: 1.5rem; }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .control { background: #fafafa; border: 1px solid #e2e2e2; border-radius: 10px; padding: 12px; }
+    label { display: block; font-weight: 600; margin-bottom: 8px; }
+    input[type="range"] { width: 100%; }
+    .slider-value { font-weight: 700; color: #1b58b8; }
+    #processBtn { border: none; background: #1b58b8; color: white; padding: 12px 16px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+    #processBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+    #status { margin-top: 12px; min-height: 1.2em; }
+    #previewWrapper { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    canvas, img { width: 100%; max-height: 360px; object-fit: contain; border: 1px solid #ddd; border-radius: 8px; background: #fff; }
+    .card-title { margin: 0 0 8px 0; font-size: 1rem; }
+    @media (max-width: 720px) {
+      .controls, #previewWrapper { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Image Grid Scrambler & Exporter</h1>
+    <p>Upload an image, choose grid size (2–20), scramble each cell, then download all pieces zipped.</p>
+
+    <div class="controls">
+      <div class="control" style="grid-column: 1 / -1;">
+        <label for="imageInput">Image Upload</label>
+        <input id="imageInput" type="file" accept="image/*" />
+      </div>
+      <div class="control">
+        <label for="widthSlider">Grid Width: <span class="slider-value" id="widthValue">4</span></label>
+        <input id="widthSlider" type="range" min="2" max="20" value="4" />
+      </div>
+      <div class="control">
+        <label for="heightSlider">Grid Height: <span class="slider-value" id="heightValue">4</span></label>
+        <input id="heightSlider" type="range" min="2" max="20" value="4" />
+      </div>
+    </div>
+
+    <button id="processBtn" disabled>Process & Download ZIP</button>
+    <div id="status"></div>
+
+    <div id="previewWrapper">
+      <div>
+        <h2 class="card-title">Original</h2>
+        <img id="originalPreview" alt="Original preview" />
+      </div>
+      <div>
+        <h2 class="card-title">Scrambled Preview</h2>
+        <canvas id="scrambledPreview"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const widthSlider = document.getElementById('widthSlider');
+    const heightSlider = document.getElementById('heightSlider');
+    const widthValue = document.getElementById('widthValue');
+    const heightValue = document.getElementById('heightValue');
+    const processBtn = document.getElementById('processBtn');
+    const statusEl = document.getElementById('status');
+    const originalPreview = document.getElementById('originalPreview');
+    const previewCanvas = document.getElementById('scrambledPreview');
+
+    let loadedImage = null;
+
+    function updateSliderLabels() {
+      widthValue.textContent = widthSlider.value;
+      heightValue.textContent = heightSlider.value;
+    }
+
+    function setStatus(message, isError = false) {
+      statusEl.textContent = message;
+      statusEl.style.color = isError ? '#b42318' : '#116329';
+    }
+
+    function randomAngle() {
+      const options = [90, 180, 270, 360];
+      return options[Math.floor(Math.random() * options.length)];
+    }
+
+    function randomFlipType() {
+      const roll = Math.random();
+      if (roll < 1 / 3) return 'vertical';
+      if (roll < 2 / 3) return 'horizontal';
+      return 'none';
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function createPieceCanvas(baseImage, sx, sy, sw, sh) {
+      const pieceCanvas = document.createElement('canvas');
+      pieceCanvas.width = sw;
+      pieceCanvas.height = sh;
+      const ctx = pieceCanvas.getContext('2d');
+
+      ctx.save();
+      ctx.translate(sw / 2, sh / 2);
+      ctx.rotate((randomAngle() * Math.PI) / 180);
+
+      const flipType = randomFlipType();
+      if (flipType === 'vertical') {
+        ctx.scale(1, -1);
+      } else if (flipType === 'horizontal') {
+        ctx.scale(-1, 1);
+      }
+
+      ctx.drawImage(baseImage, sx, sy, sw, sh, -sw / 2, -sh / 2, sw, sh);
+      ctx.restore();
+
+      return pieceCanvas;
+    }
+
+    function canvasToBlob(canvas, type = 'image/png', quality) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => {
+          if (!blob) {
+            reject(new Error('Failed converting canvas to blob.'));
+            return;
+          }
+          resolve(blob);
+        }, type, quality);
+      });
+    }
+
+    imageInput.addEventListener('change', event => {
+      const [file] = event.target.files;
+      if (!file) {
+        loadedImage = null;
+        processBtn.disabled = true;
+        originalPreview.removeAttribute('src');
+        setStatus('No image selected.', true);
+        return;
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        loadedImage = img;
+        originalPreview.src = img.src;
+        processBtn.disabled = false;
+        setStatus('Image loaded. Ready to process.');
+      };
+      img.onerror = () => {
+        loadedImage = null;
+        processBtn.disabled = true;
+        setStatus('Could not read this image file.', true);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    widthSlider.addEventListener('input', updateSliderLabels);
+    heightSlider.addEventListener('input', updateSliderLabels);
+
+    processBtn.addEventListener('click', async () => {
+      if (!loadedImage) {
+        setStatus('Please upload an image first.', true);
+        return;
+      }
+
+      if (typeof JSZip === 'undefined') {
+        setStatus('JSZip failed to load. Check internet access and try again.', true);
+        return;
+      }
+
+      processBtn.disabled = true;
+      setStatus('Processing image pieces...');
+
+      try {
+        const gridW = Number(widthSlider.value);
+        const gridH = Number(heightSlider.value);
+
+        const pieceW = Math.floor(loadedImage.width / gridW);
+        const pieceH = Math.floor(loadedImage.height / gridH);
+
+        if (pieceW < 1 || pieceH < 1) {
+          throw new Error('Grid settings produce empty pieces. Use smaller grid values.');
+        }
+
+        const pieces = [];
+        for (let row = 0; row < gridH; row++) {
+          for (let col = 0; col < gridW; col++) {
+            const sx = col * pieceW;
+            const sy = row * pieceH;
+            const canvas = createPieceCanvas(loadedImage, sx, sy, pieceW, pieceH);
+            pieces.push(canvas);
+          }
+        }
+
+        shuffleArray(pieces);
+
+        const previewCols = gridW;
+        const previewRows = gridH;
+        previewCanvas.width = previewCols * pieceW;
+        previewCanvas.height = previewRows * pieceH;
+        const pctx = previewCanvas.getContext('2d');
+        pctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        pieces.forEach((piece, index) => {
+          const x = (index % previewCols) * pieceW;
+          const y = Math.floor(index / previewCols) * pieceH;
+          pctx.drawImage(piece, x, y);
+        });
+
+        setStatus('Creating ZIP...');
+        const zip = new JSZip();
+
+        for (let i = 0; i < pieces.length; i++) {
+          const blob = await canvasToBlob(pieces[i], 'image/png');
+          const name = `Image-${String(i).padStart(3, '0')}.png`;
+          zip.file(name, blob);
+        }
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipBlob);
+        link.download = 'scrambled-images.zip';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setStatus(`Done! Downloaded ${pieces.length} canvases as scrambled-images.zip.`);
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || 'Something went wrong during processing.', true);
+      } finally {
+        processBtn.disabled = false;
+      }
+    });
+
+    updateSliderLabels();
+  </script>
+</body>
+</html>
