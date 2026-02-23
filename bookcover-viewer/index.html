@@ -63,7 +63,13 @@
     ];
 
     // Geometry
-    var geometry = new THREE.BoxGeometry(0.2, 2.748, 1.7);
+   var geometry = new THREE.RoundedBoxGeometry(
+    0.2,    // width
+    2.748,  // height
+    1.7,    // depth
+    8,      // segments (higher = smoother)
+    0.03    // radius (fillet amount)
+);
     var cube = new THREE.Mesh(geometry, materials);
     scene.add(cube);
 
