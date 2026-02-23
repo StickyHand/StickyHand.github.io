@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bookcover Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+        #upload {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+<input id="upload" type="file" accept="image/*">
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+    // Scene
+    var scene = new THREE.Scene();
+
+    // Camera
+    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 3;
+
+    // Renderer
+    var renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Controls
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    // Light
+    var light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(2, 2, 5);
+    scene.add(light);
+
+    // Load sides.png
+    var textureLoader = new THREE.TextureLoader();
+    var sideTexture = textureLoader.load("https://stickyhand.github.io/bookcover-viewer/sides.png");
+    var textureLoader1 = new THREE.TextureLoader();
+    var edgeTexture = textureLoader1.load("https://stickyhand.github.io/bookcover-viewer/edges.png");
+
+    // Placeholder materials
+    var materials = [
+        new THREE.MeshBasicMaterial({ color: 0xffffff }), // RIGHT
+        new THREE.MeshBasicMaterial({ color: 0xffffff }), // LEFT
+        new THREE.MeshBasicMaterial({ map: edgeTexture }), // TOP
+        new THREE.MeshBasicMaterial({ map: edgeTexture }), // BOTTOM
+        new THREE.MeshBasicMaterial({ color: 0xffffff }), // FRONT
+        new THREE.MeshBasicMaterial({ map: sideTexture })  // BACK
+    ];
+
+    // Geometry
+    var geometry = new THREE.BoxGeometry(0.2, 2.748, 1.7);
+    var cube = new THREE.Mesh(geometry, materials);
+    scene.add(cube);
+
+    // Canvas for slicing
+    var canvas = document.createElement("canvas");
+    canvas.width = 900;
+    canvas.height = 687;
+    var ctx = canvas.getContext("2d");
+
+    function makeTexture(x, y, w, h) {
+        var c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        var cctx = c.getContext("2d");
+        cctx.drawImage(canvas, x, y, w, h, 0, 0, w, h);
+
+        var tex = new THREE.CanvasTexture(c);
+        tex.needsUpdate = true;
+        return tex;
+    }
+
+    // Upload handling
+    var upload = document.getElementById("upload");
+
+    upload.addEventListener("change", function () {
+        var file = upload.files[0];
+        if (!file) {
+            return;
+        }
+
+        var img = new Image();
+        img.onload = function () {
+            // Stretch image to 900x687
+            ctx.clearRect(0, 0, 900, 687);
+            ctx.drawImage(img, 0, 0, 900, 687);
+
+            // Slice textures
+            var leftTex  = makeTexture(0,   0, 425, 687);
+            var frontTex = makeTexture(425, 0, 50, 687);
+            var rightTex = makeTexture(475, 0, 425, 687);
+
+            // Apply textures
+            materials[1].map = leftTex;   // LEFT
+            materials[4].map = frontTex;  // FRONT
+            materials[0].map = rightTex;  // RIGHT
+
+            materials[1].needsUpdate = true;
+            materials[4].needsUpdate = true;
+            materials[0].needsUpdate = true;
+        };
+
+        img.src = URL.createObjectURL(file);
+    });
+
+    // Resize
+    window.addEventListener("resize", function () {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Animate
+    function animate() {
+        requestAnimationFrame(animate);
+	
+	cube.rotation.y += 0.0075;
+	
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    animate();
+</script>
+
+</body>
+</html>
