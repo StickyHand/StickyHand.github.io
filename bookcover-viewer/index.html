@@ -23,7 +23,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/RoundedBoxGeometry.js"></script>
 <script>
     // Scene
     var scene = new THREE.Scene();
@@ -46,11 +46,26 @@
     light.position.set(2, 2, 5);
     scene.add(light);
 
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(50, 50, 100);
+    scene.add(dirLight);
+
+    const hemiLight = new THREE.HemisphereLight(0xaaaaaa, 0x444444, 0.6);
+    hemiLight.position.set(0, 50, 0);
+    scene.add(hemiLight);
+
+    const cameraLight = new THREE.PointLight(0xffffff, 0.6);
+    camera.add(cameraLight);
+    scene.add(camera);
+
     // Load sides.png
     var textureLoader = new THREE.TextureLoader();
     var sideTexture = textureLoader.load("https://stickyhand.github.io/bookcover-viewer/sides.png");
     var textureLoader1 = new THREE.TextureLoader();
-    var edgeTexture = textureLoader1.load("https://stickyhand.github.io/bookcover-viewer/edges.png");
+    var edgeTexture = textureLoader1.load("https://stickyhand.github.io/bookcover-viewer/sides.png");
 
     // Placeholder materials
     var materials = [
