@@ -101,8 +101,8 @@
 
     // Canvas for slicing
     var canvas = document.createElement("canvas");
-    canvas.width = 9000;
-    canvas.height = 6870;
+    canvas.width = 3000;
+    canvas.height = 2290;
     var ctx = canvas.getContext("2d");
 
     function makeTexture(x, y, w, h) {
@@ -128,14 +128,14 @@
 
         var img = new Image();
         img.onload = function () {
-            // Stretch image to 9000x6870
-            ctx.clearRect(0, 0, 9000, 6870);
-            ctx.drawImage(img, 0, 0, 9000, 6870);
+            // Stretch image to 3000x2290
+            ctx.clearRect(0, 0, 3000, 2290);
+            ctx.drawImage(img, 0, 0, 3000, 2290);
 
             // Slice textures
-            var leftTex  = makeTexture(0,   0, 4250, 6870);
-            var frontTex = makeTexture(4250, 0, 500, 6870);
-            var rightTex = makeTexture(4750, 0, 4250, 6870);
+            var leftTex  = makeTexture(0,   0, 4250/3, 6870/3);
+            var frontTex = makeTexture(4250/3, 0, 500/3, 6870/3);
+            var rightTex = makeTexture(4750/3, 0, 4250/3, 6870/3);
 
             // Apply textures
             materials[1].map = leftTex;   // LEFT
