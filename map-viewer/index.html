@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Looping Image Drag + Zoom</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            overflow: hidden;
+        }
+        input {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<input type="file" id="fileInput" accept="image/*">
+<canvas id="c"></canvas>
+
+<script>
+var canvas = document.getElementById("c");
+var ctx = canvas.getContext("2d");
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    if (imgLoaded) {
+        var minScale = getMinScale();
+        if (scale < minScale) {
+            scale = minScale;
+        }
+    }
+}
+window.addEventListener("resize", resize);
+resize();
+
+var img = new Image();
+var imgLoaded = false;
+
+var scale = 1;
+var maxScale = 4;
+
+var x = 0;
+var y = 0;
+
+var dragging = false;
+var smx = 0;
+var smy = 0;
+var sx = 0;
+var sy = 0;
+
+function getMinScale() {
+    return Math.max(
+        canvas.width / img.width,
+        canvas.height / img.height
+    );
+}
+
+document.getElementById("fileInput").addEventListener("change", function(e) {
+    var file = e.target.files[0];
+    if (!file) { return; }
+
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+        img.onload = function() {
+            imgLoaded = true;
+            scale = getMinScale();
+            x = 0;
+            y = 0;
+        };
+        img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+});
+
+canvas.addEventListener("mousedown", function(e) {
+    dragging = true;
+    smx = e.clientX;
+    smy = e.clientY;
+    sx = x;
+    sy = y;
+});
+
+canvas.addEventListener("mouseup", function() {
+    dragging = false;
+});
+canvas.addEventListener("mouseleave", function() {
+    dragging = false;
+});
+
+canvas.addEventListener("mousemove", function(e) {
+    if (!dragging) { return; }
+    x = sx + (e.clientX - smx);
+    y = sy + (e.clientY - smy);
+});
+
+canvas.addEventListener("wheel", function(e) {
+    e.preventDefault();
+    if (!imgLoaded) { return; }
+
+    var zoom = e.deltaY < 0 ? 1.1 : 0.9;
+    var newScale = scale * zoom;
+
+    var minScale = getMinScale();
+
+    if (newScale < minScale) {
+        newScale = minScale;
+    }
+    if (newScale > maxScale) {
+        newScale = maxScale;
+    }
+
+    var mx = e.clientX;
+    var my = e.clientY;
+
+    var factor = newScale / scale;
+
+    x = mx - (mx - x) * factor;
+    y = my - (my - y) * factor;
+
+    scale = newScale;
+}, { passive: false });
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (imgLoaded) {
+        var w = img.width * scale;
+        var h = img.height * scale;
+
+        // clamp Y
+        y = Math.min(0, Math.max(canvas.height - h, y));
+
+        // loop X
+        x = ((x % w) + w) % w;
+
+        ctx.drawImage(img, x, y, w, h);
+        ctx.drawImage(img, x - w + 1, y, w, h);
+        ctx.drawImage(img, x + w - 1, y, w, h);
+    }
+
+    requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+
+</body>
+</html>
