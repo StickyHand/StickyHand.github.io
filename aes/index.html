@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AES Encrypt / Decrypt</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            width: 520px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        input, textarea {
+            width: 100%;
+            margin-top: 6px;
+            margin-bottom: 14px;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            background: rgba(255,255,255,0.08);
+            color: white;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: none;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .encrypt {
+            background: #22c55e;
+            color: black;
+        }
+
+        .decrypt {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .copy {
+            background: #f59e0b;
+            color: black;
+        }
+
+        button:hover {
+            transform: scale(1.03);
+            opacity: 0.9;
+        }
+
+        .output {
+            height: 120px;
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <div class="title">🔐 AES Encryption Tool</div>
+
+    <label>Key (password)</label>
+    <input type="text" id="key">
+
+    <label>Message</label>
+    <textarea id="message" rows="4"></textarea>
+
+    <div class="buttons">
+        <button class="encrypt" onclick="encryptMessage()">Encrypt</button>
+        <button class="decrypt" onclick="decryptMessage()">Decrypt</button>
+        <button class="copy" onclick="copyOutput()">Copy</button>
+    </div>
+
+    <label>Output</label>
+    <textarea id="output" class="output"></textarea>
+
+</div>
+
+<script>
+
+function strToBuf(str) {
+    return new TextEncoder().encode(str);
+}
+
+function bufToStr(buf) {
+    return new TextDecoder().decode(buf);
+}
+
+function bufToBase64(buffer) {
+    var binary = '';
+    var bytes = new Uint8Array(buffer);
+    for (var i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
+function base64ToBuf(base64) {
+    var binary = atob(base64);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+}
+
+async function getKey(password, salt) {
+    var baseKey = await crypto.subtle.importKey(
+        "raw",
+        strToBuf(password),
+        { name: "PBKDF2" },
+        false,
+        ["deriveKey"]
+    );
+
+    return crypto.subtle.deriveKey(
+        {
+            name: "PBKDF2",
+            salt: salt,
+            iterations: 100000,
+            hash: "SHA-256"
+        },
+        baseKey,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+    );
+}
+
+async function encryptMessage() {
+    var keyText = document.getElementById("key").value;
+    var message = document.getElementById("message").value;
+
+    var salt = crypto.getRandomValues(new Uint8Array(16));
+    var iv = crypto.getRandomValues(new Uint8Array(12));
+
+    var key = await getKey(keyText, salt);
+
+    var encrypted = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        key,
+        strToBuf(message)
+    );
+
+    var result = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+    result.set(salt, 0);
+    result.set(iv, salt.length);
+    result.set(new Uint8Array(encrypted), salt.length + iv.length);
+
+    document.getElementById("output").value = bufToBase64(result);
+}
+
+async function decryptMessage() {
+    var keyText = document.getElementById("key").value;
+    var data = document.getElementById("message").value;
+
+    var bytes = base64ToBuf(data);
+
+    var salt = bytes.slice(0, 16);
+    var iv = bytes.slice(16, 28);
+    var ciphertext = bytes.slice(28);
+
+    var key = await getKey(keyText, salt);
+
+    try {
+        var decrypted = await crypto.subtle.decrypt(
+            { name: "AES-GCM", iv: iv },
+            key,
+            ciphertext
+        );
+
+        document.getElementById("output").value = bufToStr(decrypted);
+    } catch (e) {
+        document.getElementById("output").value =
+            "Decryption failed (wrong key or corrupted data)";
+    }
+}
+
+function copyOutput() {
+    var output = document.getElementById("output");
+    output.select();
+    output.setSelectionRange(0, output.value.length);
+    document.execCommand("copy");
+}
+
+</script>
+
+</body>
+</html>
